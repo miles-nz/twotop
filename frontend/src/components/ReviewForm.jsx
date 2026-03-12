@@ -62,25 +62,30 @@ function ReviewForm({ onReviewSubmitted }) {
             const token = await getAccessTokenSilently();
             console.log("user:", user);
             console.log("reviewer_name:", user?.name);
-            const response = await fetch("http://localhost:3000/reviews", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
+            const response = await fetch(
+                `${import.meta.env.VITE_API_URL}/reviews`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        restaurant_name: restaurantName,
+                        review_text: reviewText,
+                        food_rating: foodRating ? parseFloat(foodRating) : null,
+                        drink_rating: drinkRating
+                            ? parseFloat(drinkRating)
+                            : null,
+                        ambience_rating: ambienceRating
+                            ? parseFloat(ambienceRating)
+                            : null,
+                        visit_date: visitDate || getLocalDate(),
+                        reviewer_name: user?.name || null,
+                        reviewer_picture: user?.picture || null,
+                    }),
                 },
-                body: JSON.stringify({
-                    restaurant_name: restaurantName,
-                    review_text: reviewText,
-                    food_rating: foodRating ? parseFloat(foodRating) : null,
-                    drink_rating: drinkRating ? parseFloat(drinkRating) : null,
-                    ambience_rating: ambienceRating
-                        ? parseFloat(ambienceRating)
-                        : null,
-                    visit_date: visitDate || getLocalDate(),
-                    reviewer_name: user?.name || null,
-                    reviewer_picture: user?.picture || null,
-                }),
-            });
+            );
 
             const data = await response.json();
 

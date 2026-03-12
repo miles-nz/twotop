@@ -19,11 +19,14 @@ function ReviewList({ refreshTrigger, onReviewsLoaded }) {
 
             try {
                 const token = await getAccessTokenSilently();
-                const response = await fetch("http://localhost:3000/reviews", {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
+                const response = await fetch(
+                    `${import.meta.env.VITE_API_URL}/reviews`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
                     },
-                });
+                );
 
                 const data = await response.json();
 
