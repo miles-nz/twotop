@@ -60,8 +60,6 @@ function ReviewForm({ onReviewSubmitted }) {
 
         try {
             const token = await getAccessTokenSilently();
-            console.log("user:", user);
-            console.log("reviewer_name:", user?.name);
             const response = await fetch(
                 `${import.meta.env.VITE_API_URL}/reviews`,
                 {

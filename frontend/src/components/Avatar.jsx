@@ -8,14 +8,6 @@ function Avatar({ name, picture, size = "md" }) {
     const getInitials = (name) => {
         if (!name) return "?";
         const parts = name.split(" ").filter((part) => part.length > 0);
-        console.log(
-            "name:",
-            name,
-            "parts:",
-            parts,
-            "parts.length:",
-            parts.length,
-        );
         if (parts.length === 1) return parts[0][0].toUpperCase();
         return parts
             .map((part) => part[0])
