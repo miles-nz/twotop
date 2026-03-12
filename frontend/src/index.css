@@ -34,7 +34,7 @@
 
   --text-2xs: 0.625rem;
 
-  --font-sans: 'DM Sans', sans-serif;
+  --font-sans: 'DM Sans', system-ui, -apple-system, sans-serif;
   --font-title: 'Monoton', cursive;
 }
 
