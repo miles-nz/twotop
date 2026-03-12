@@ -87,7 +87,7 @@ function ReviewList({ refreshTrigger }) {
                                 <div className="flex items-center gap-2 ml-4 flex-shrink-0">
                                     <span className="text-sm text-text-light ml-4 mt-1 whitespace-nowrap">
                                         {new Date(
-                                            review.created_at,
+                                            review.visit_date,
                                         ).toLocaleDateString()}
                                     </span>
                                     <Avatar

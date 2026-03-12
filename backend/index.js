@@ -23,6 +23,7 @@ const validateReview = (body) => {
         ambience_rating,
         reviewer_name,
         reviewer_picture,
+        visit_date,
     } = body;
     const errors = [];
 
@@ -107,6 +108,7 @@ app.post("/reviews", checkJwt, async (req, res) => {
         ambience_rating,
         reviewer_name,
         reviewer_picture,
+        visit_date,
     } = req.body;
     const user_id = req.auth.payload.sub;
 
@@ -122,6 +124,8 @@ app.post("/reviews", checkJwt, async (req, res) => {
                 ambience_rating: ambience_rating || null,
                 reviewer_name: reviewer_name || null,
                 reviewer_picture: reviewer_picture || null,
+                visit_date:
+                    visit_date || new Date().toISOString().split("T")[0],
             },
         ])
         .select();

@@ -12,8 +12,14 @@ function ReviewForm({ onReviewSubmitted }) {
     const [foodRating, setFoodRating] = useState(null);
     const [drinkRating, setDrinkRating] = useState(null);
     const [ambienceRating, setAmbienceRating] = useState(null);
+    const [visitDate, setvisitDate] = useState("");
     const [error, setError] = useState(null);
     const [submitting, setSubmitting] = useState(false);
+
+    const getLocalDate = () => {
+        const today = new Date();
+        return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    };
 
     const handleSubmit = async () => {
         setError(null);
@@ -37,6 +43,7 @@ function ReviewForm({ onReviewSubmitted }) {
                     ambience_rating: ambienceRating
                         ? parseFloat(ambienceRating)
                         : null,
+                    visit_date: visitDate || getLocalDate(),
                     reviewer_name: user?.name || null,
                     reviewer_picture: user?.picture || null,
                 }),
@@ -56,6 +63,7 @@ function ReviewForm({ onReviewSubmitted }) {
             setFoodRating("");
             setDrinkRating("");
             setAmbienceRating("");
+            setvisitDate("");
             onReviewSubmitted();
         } catch (err) {
             setError(err.message || "Something went wrong, please try again.");
@@ -84,6 +92,19 @@ function ReviewForm({ onReviewSubmitted }) {
                     onChange={(e) => setRestaurantName(e.target.value)}
                     className="w-full border border-surface-200 rounded-lg px-3 py-2 text-text-dark focus:outline-none focus:ring-2 focus:ring-primary-500 placeholder:text-text-light"
                     placeholder="e.g. McCafé"
+                />
+            </div>
+
+            <div className="mb-4">
+                <label className="block text-sm font-medium text-text-mid mb-1">
+                    Date Visited
+                </label>
+                <input
+                    type="date"
+                    value={visitDate}
+                    onChange={(e) => setvisitDate(e.target.value)}
+                    className="w-full border border-surface-200 rounded-lg px-3 py-2 text-text-dark focus:outline-none focus:ring-2 focus:ring-primary-500 placeholder:text-text-light"
+                    placeholder="optional"
                 />
             </div>
 
