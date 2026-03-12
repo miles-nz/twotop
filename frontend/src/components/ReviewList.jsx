@@ -106,7 +106,7 @@ function ReviewList({ refreshTrigger, onReviewsLoaded }) {
                         {(review.food_rating ||
                             review.drink_rating ||
                             review.ambience_rating) && (
-                            <div className="grid grid-cols-3 gap-2 mb-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
                                 {review.food_rating && (
                                     <RatingField
                                         label="Food"
