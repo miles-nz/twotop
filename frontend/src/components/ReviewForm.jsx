@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
+import { motion } from "framer-motion";
 import RatingField from "./RatingField";
 import Button from "./Button";
 
 function ReviewForm({ onReviewSubmitted }) {
-    const { getAccessTokenSilently } = useAuth0();
+    const { getAccessTokenSilently, user } = useAuth0();
 
     const [restaurantName, setRestaurantName] = useState("");
     const [reviewText, setReviewText] = useState("");
@@ -20,6 +21,8 @@ function ReviewForm({ onReviewSubmitted }) {
 
         try {
             const token = await getAccessTokenSilently();
+            console.log("user:", user);
+            console.log("reviewer_name:", user?.name);
             const response = await fetch("http://localhost:3000/reviews", {
                 method: "POST",
                 headers: {
@@ -29,11 +32,13 @@ function ReviewForm({ onReviewSubmitted }) {
                 body: JSON.stringify({
                     restaurant_name: restaurantName,
                     review_text: reviewText,
-                    food_rating: foodRating ? parseInt(foodRating) : null,
-                    drink_rating: drinkRating ? parseInt(drinkRating) : null,
+                    food_rating: foodRating ? parseFloat(foodRating) : null,
+                    drink_rating: drinkRating ? parseFloat(drinkRating) : null,
                     ambience_rating: ambienceRating
-                        ? parseInt(ambienceRating)
+                        ? parseFloat(ambienceRating)
                         : null,
+                    reviewer_name: user?.name || null,
+                    reviewer_picture: user?.picture || null,
                 }),
             });
 
@@ -60,7 +65,12 @@ function ReviewForm({ onReviewSubmitted }) {
     };
 
     return (
-        <div className="bg-surface-50 rounded-2xl shadow-md p-6 mb-6">
+        <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="bg-surface-50 rounded-2xl shadow-md p-6 mb-6"
+        >
             <h2 className="text-xl font-bold text-secondary-600 mb-4">
                 Write a Review
             </h2>
@@ -129,7 +139,7 @@ function ReviewForm({ onReviewSubmitted }) {
             <Button onClick={handleSubmit} disabled={submitting}>
                 {submitting ? "Submitting..." : "Submit Review"}
             </Button>
-        </div>
+        </motion.div>
     );
 }
 

@@ -1,18 +1,9 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import Button from "./Button";
+import Avatar from "./Avatar";
 
 function Navbar() {
     const { user, logout } = useAuth0();
-
-    const getInitials = (name) => {
-        if (!name) return "?";
-        return name
-            .split(" ")
-            .map((part) => part[0])
-            .join("")
-            .toUpperCase()
-            .slice(0, 2);
-    };
 
     return (
         <nav className="bg-surface-50 border-b border-surface-200 shadow-sm sticky top-0 z-10">
@@ -22,17 +13,11 @@ function Navbar() {
                 </h1>
                 <div className="flex items-center gap-3">
                     <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-primary-400 text-white flex items-center justify-center text-sm font-semibold">
-                            {user?.picture ? (
-                                <img
-                                    src={user.picture}
-                                    alt={user.name}
-                                    className="w-8 h-8 rounded-full object-cover"
-                                />
-                            ) : (
-                                getInitials(user?.name)
-                            )}
-                        </div>
+                        <Avatar
+                            picture={user?.picture}
+                            name={user?.name}
+                            size="sm"
+                        />
                         <span className="text-sm text-text-mid hidden sm:block">
                             {user?.name}
                         </span>

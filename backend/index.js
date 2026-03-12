@@ -21,6 +21,8 @@ const validateReview = (body) => {
         food_rating,
         drink_rating,
         ambience_rating,
+        reviewer_name,
+        reviewer_picture,
     } = body;
     const errors = [];
 
@@ -42,23 +44,26 @@ const validateReview = (body) => {
     const ratings = { food_rating, drink_rating, ambience_rating };
     for (const [name, value] of Object.entries(ratings)) {
         if (value !== null && value !== undefined && value !== "") {
-            if (
-                typeof value !== "number" ||
-                value % 0.5 !== 0 ||
-                value < 1 ||
-                value > 5
-            ) {
-                errors.push(`${name} must be a number between 1 and 5.`);
+            if (typeof value !== "number" || value < 0.5 || value > 5) {
+                errors.push(`${name} must be a number between 0.5 and 5.`);
             }
         }
     }
 
-    const missingName = !restaurant_name;
+    const missingRestaurantName = !restaurant_name;
     const missingText = !review_text;
     const missingRatings = !food_rating && !drink_rating && !ambience_rating;
-    if (missingName || (missingText && missingRatings)) {
+    if (missingRestaurantName || (missingText && missingRatings)) {
         errors.push(
             "Restaurant name and either a review text or all three ratings are required.",
+        );
+    }
+
+    const missingReviewerName = !reviewer_name;
+    const missingReviewerPicture = !reviewer_picture;
+    if (missingReviewerName || missingReviewerPicture) {
+        errors.push(
+            "Reviewer name and picture are required for authenticated reviews.",
         );
     }
 
@@ -100,6 +105,8 @@ app.post("/reviews", checkJwt, async (req, res) => {
         food_rating,
         drink_rating,
         ambience_rating,
+        reviewer_name,
+        reviewer_picture,
     } = req.body;
     const user_id = req.auth.payload.sub;
 
@@ -108,11 +115,13 @@ app.post("/reviews", checkJwt, async (req, res) => {
         .insert([
             {
                 user_id,
-                restaurant_name,
-                review_text,
-                food_rating,
-                drink_rating,
-                ambience_rating,
+                restaurant_name: restaurant_name.trim(),
+                review_text: review_text ? review_text.trim() : null,
+                food_rating: food_rating || null,
+                drink_rating: drink_rating || null,
+                ambience_rating: ambience_rating || null,
+                reviewer_name: reviewer_name || null,
+                reviewer_picture: reviewer_picture || null,
             },
         ])
         .select();

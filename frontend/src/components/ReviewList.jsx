@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect } from "react";
-import StarRating from "./StarRating";
+import { motion, AnimatePresence } from "framer-motion";
 import RatingField from "./RatingField";
+import Avatar from "./Avatar";
 
 function ReviewList({ refreshTrigger }) {
     const { getAccessTokenSilently } = useAuth0();
@@ -68,24 +69,34 @@ function ReviewList({ refreshTrigger }) {
 
     return (
         <div>
-            <h2 className="text-xl font-bold text-secondary-600 mb-4">
-                Reviews
-            </h2>
             <div className="flex flex-col gap-4">
                 {reviews.map((review) => (
-                    <div
+                    <motion.div
                         key={review.id}
-                        className="bg-surface-50 rounded-2xl shadow-md p-6 border border-surface-200 border-1-4 border-1-secondary-400"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="bg-surface-50 rounded-2xl shadow-md p-6 border border-surface-200 border-1-4 border-1-secondary-400 overflow-hidden transition-transform duration-200 hover:translate-y-1 hover:shadow-lg"
                     >
-                        <div className="flex items-start justify-between mb-3">
-                            <h3 className="text-lg font-semibold text-text-dark">
-                                {review.restaurant_name}
-                            </h3>
-                            <span className="text-sm text-text-light">
-                                {new Date(
-                                    review.created_at,
-                                ).toLocaleDateString()}
-                            </span>
+                        <div className="p-6 pb-4">
+                            <div className="flex items-start justify-between">
+                                <h3 className="text-2xl font-bold text-text-dark">
+                                    {review.restaurant_name}
+                                </h3>
+                                <div className="flex items-center gap-2 ml-4 flex-shrink-0">
+                                    <span className="text-sm text-text-light ml-4 mt-1 whitespace-nowrap">
+                                        {new Date(
+                                            review.created_at,
+                                        ).toLocaleDateString()}
+                                    </span>
+                                    <Avatar
+                                        name={review.reviewer_name}
+                                        picture={review.reviewer_picture}
+                                        size="sm"
+                                    />
+                                </div>
+                            </div>
                         </div>
 
                         {(review.food_rating ||
@@ -117,11 +128,16 @@ function ReviewList({ refreshTrigger }) {
                         )}
 
                         {review.review_text && (
-                            <p className="text-text-mid text-sm leading-relaxed">
-                                {review.review_text}
-                            </p>
+                            <>
+                                <div className="border-t border-surface-200 mx-6" />
+                                <div className="px-6 py-4">
+                                    <p className="text-text-mid text-sm leading-relaxed">
+                                        {review.review_text}
+                                    </p>
+                                </div>
+                            </>
                         )}
-                    </div>
+                    </motion.div>
                 ))}
             </div>
         </div>
