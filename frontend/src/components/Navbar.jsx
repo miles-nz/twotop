@@ -8,8 +8,11 @@ function Navbar() {
     return (
         <nav className="bg-surface-50 border-b border-surface-200 shadow-sm sticky top-0 z-10">
             <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-                <h1 className="text-xl font-bold text-text-dark tracking-tight">
-                    Brunch Reviews
+                <h1
+                    style={{ fontFamily: "var(--font-title)" }}
+                    className="text-5xl text-text-dark tracking-tight"
+                >
+                    TBC
                 </h1>
                 <div className="flex items-center gap-3">
                     <div className="flex items-center gap-2">

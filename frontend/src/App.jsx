@@ -16,6 +16,10 @@ function App() {
         setRefreshTrigger((prev) => prev + 1);
     };
 
+    const handleReviewsLoaded = (count) => {
+        if (count === 0) setFormOpen(true);
+    };
+
     if (isLoading) {
         return (
             <div className="min-h-screen w-full bg-surface-100 flex items-center justify-center">
@@ -34,15 +38,22 @@ function App() {
             >
                 <div className="min-h-screen bg-surface-100 flex items-center justify-center">
                     <div className="bg-surface-50 rounded-2xl shadow-md p-8 w-full max-w-md text-center border border-surface-200">
-                        <h1 className="text-3xl font-bold text-text-dark mb-2">
-                            Brunch Reviews
+                        <h1
+                            style={{ fontFamily: "var(--font-title)" }}
+                            className="text-9xl text-text-dark mb-2"
+                        >
+                            TBC
                         </h1>
-                        <p className="text-text-light mb-6">
-                            Log in to view and write reviews
-                        </p>
-                        <Button onClick={() => loginWithRedirect()}>
-                            Log in
-                        </Button>
+                        <div className="mb-6 text-text-light">
+                            <p className="text-3xl">the brunch club</p>
+                            <p className="text-2xs">(to be confirmed)</p>
+                        </div>
+
+                        <div className="flex justify-center">
+                            <Button onClick={() => loginWithRedirect()}>
+                                Log in
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </motion.div>
@@ -60,7 +71,16 @@ function App() {
             <div className="max-w-2xl mx-auto py-10 px-4">
                 <div className="mb-6 flex justify-center">
                     <Button onClick={() => setFormOpen((prev) => !prev)}>
-                        {formOpen ? "x Cancel" : "Write a Review"}
+                        <span className="flex items-center gap-2">
+                            <motion.span
+                                animate={{ rotate: formOpen ? 45 : 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="inline-block text-lg leading-none"
+                            >
+                                +
+                            </motion.span>
+                            {formOpen ? "Close" : "Write a Review"}
+                        </span>
                     </Button>
                 </div>
                 <AnimatePresence>
@@ -78,7 +98,10 @@ function App() {
                         </motion.div>
                     )}
                 </AnimatePresence>
-                <ReviewList refreshTrigger={refreshTrigger} />
+                <ReviewList
+                    refreshTrigger={refreshTrigger}
+                    onReviewsLoaded={handleReviewsLoaded}
+                />
             </div>
         </motion.div>
     );

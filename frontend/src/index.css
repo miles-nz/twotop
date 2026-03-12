@@ -32,7 +32,10 @@
   --color-text-mid: #4a5560;
   --color-text-dark: #242c34;
 
+  --text-2xs: 0.625rem;
+
   --font-sans: 'DM Sans', sans-serif;
+  --font-title: 'Monoton', cursive;
 }
 
 body {

@@ -4,6 +4,38 @@ import { motion } from "framer-motion";
 import RatingField from "./RatingField";
 import Button from "./Button";
 
+const RESTAURANT_PLACEHOLDERS = [
+    "Blend Café",
+    "Boston Café",
+    "Browne St",
+    "Daily Bread",
+    "Elixir Café",
+    "Flying Burrito Brothers",
+    "Honey Café",
+    "Humbug",
+    "Jam Organic Café",
+    "Kokodak",
+    "Lola",
+    "Major Tom",
+    "McCafé",
+    "Mission Bay Café",
+    "Rosebank Café & Kitchen",
+    "Rude Boy",
+    "Starbucks",
+    "The Candy Shop",
+    "The Federal Store",
+    "The Garden Shed",
+    "Tobi",
+    "Twisted Tomato",
+    "Winona Forever",
+];
+
+const getRandomPlaceholder = () => {
+    return RESTAURANT_PLACEHOLDERS[
+        Math.floor(Math.random() * RESTAURANT_PLACEHOLDERS.length)
+    ];
+};
+
 function ReviewForm({ onReviewSubmitted }) {
     const { getAccessTokenSilently, user } = useAuth0();
 
@@ -15,6 +47,7 @@ function ReviewForm({ onReviewSubmitted }) {
     const [visitDate, setvisitDate] = useState("");
     const [error, setError] = useState(null);
     const [submitting, setSubmitting] = useState(false);
+    const [placeholder] = useState(getRandomPlaceholder());
 
     const getLocalDate = () => {
         const today = new Date();
@@ -91,7 +124,7 @@ function ReviewForm({ onReviewSubmitted }) {
                     value={restaurantName}
                     onChange={(e) => setRestaurantName(e.target.value)}
                     className="w-full border border-surface-200 rounded-lg px-3 py-2 text-text-dark focus:outline-none focus:ring-2 focus:ring-primary-500 placeholder:text-text-light"
-                    placeholder="e.g. McCafé"
+                    placeholder={`e.g. ${placeholder}`}
                 />
             </div>
 
@@ -104,7 +137,6 @@ function ReviewForm({ onReviewSubmitted }) {
                     value={visitDate}
                     onChange={(e) => setvisitDate(e.target.value)}
                     className="w-full border border-surface-200 rounded-lg px-3 py-2 text-text-dark focus:outline-none focus:ring-2 focus:ring-primary-500 placeholder:text-text-light"
-                    placeholder="optional"
                 />
             </div>
 
@@ -133,7 +165,7 @@ function ReviewForm({ onReviewSubmitted }) {
 
             <div className="mb-4">
                 <label className="block text-sm font-medium text-text-mid mb-1">
-                    Review
+                    Review notes
                 </label>
                 <textarea
                     value={reviewText}

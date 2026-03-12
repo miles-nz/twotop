@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import RatingField from "./RatingField";
 import Avatar from "./Avatar";
 
-function ReviewList({ refreshTrigger }) {
+function ReviewList({ refreshTrigger, onReviewsLoaded }) {
     const { getAccessTokenSilently } = useAuth0();
 
     const [reviews, setReviews] = useState([]);
@@ -33,6 +33,7 @@ function ReviewList({ refreshTrigger }) {
                 }
 
                 setReviews(data);
+                if (onReviewsLoaded) onReviewsLoaded(data.length);
             } catch (err) {
                 setError(
                     err.message || "Something went wrong, please try again.",
