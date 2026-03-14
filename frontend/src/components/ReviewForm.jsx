@@ -5,6 +5,9 @@ import RatingField from "./RatingField";
 import Button from "./Button";
 import { text, placeholders } from "../resources";
 
+const inputClass =
+    "w-full border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400";
+
 const getRandomPlaceholder = () => {
     return placeholders[Math.floor(Math.random() * placeholders.length)];
 };
@@ -73,7 +76,7 @@ function ReviewForm({ onReviewSubmitted }) {
             setDrinkRating("");
             setAmbienceRating("");
             setvisitDate("");
-            onReviewSubmitted(data.data[0].id);
+            onReviewSubmitted(data.id);
             setIsPublic(false);
         } catch (err) {
             setError(err.message || text.errorGeneric);
@@ -100,7 +103,7 @@ function ReviewForm({ onReviewSubmitted }) {
                     type="text"
                     value={restaurantName}
                     onChange={(e) => setRestaurantName(e.target.value)}
-                    className="w-full border border-surface-300 rounded-lg px-3 py-2 text-text-dark bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 placeholder-text-light"
+                    className={`${inputClass} placeholder-text-light`}
                     placeholder={text.restaurantNamePlaceholder(placeholder)}
                 />
             </div>
@@ -113,9 +116,7 @@ function ReviewForm({ onReviewSubmitted }) {
                     type="date"
                     value={visitDate}
                     onChange={(e) => setvisitDate(e.target.value)}
-                    className={`w-full max-w-full box-border border border-surface-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary-400 bg-surface-50 ${
-                        visitDate ? "text-text-dark" : "text-text-light"
-                    }`}
+                    className={inputClass}
                     style={{
                         color: visitDate
                             ? "var(--color-text-dark)"
@@ -155,7 +156,7 @@ function ReviewForm({ onReviewSubmitted }) {
                 <textarea
                     value={reviewText}
                     onChange={(e) => setReviewText(e.target.value)}
-                    className="w-full border border-surface-300 rounded-lg px-3 py-2 text-text-dark bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 h-28 resize-none placeholder-text-light"
+                    className={`${inputClass} h-28 resize-none placeholder-text-light`}
                     placeholder={text.reviewNotesPlaceholder}
                 />
             </div>

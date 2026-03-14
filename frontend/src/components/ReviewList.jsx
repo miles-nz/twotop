@@ -4,12 +4,14 @@ import { useEffect } from "react";
 import ReviewCard from "./ReviewCard";
 import { text } from "../resources";
 
+const statusCardClass =
+    "bg-surface-50 rounded-2xl shadow-md p-6 text-center border border-surface-200";
+
 function ReviewList({
     refreshTrigger,
     onReviewsLoaded,
     isPublic = false,
     scrollToId,
-    onScrollDone,
 }) {
     const { getAccessTokenSilently } = useAuth0();
 
@@ -70,38 +72,36 @@ function ReviewList({
 
     if (loading) {
         return (
-            <div className="bg-surface-50 rounded-2xl shadow-md p-6 text-center border border-surface-200">
+            <div className={statusCardClass}>
                 <p className="text-text-light">{text.loadingReviews}</p>
             </div>
         );
     }
     if (error) {
         return (
-            <div className="bg-surface-50 rounded-2xl shadow-md p-6 text-center border border-surface-200">
+            <div className={statusCardClass}>
                 <p className="text-primary-600">{text.errorFormatted(error)}</p>
             </div>
         );
     }
     if (reviews.length === 0) {
         return (
-            <div className="bg-surface-50 rounded-2xl shadow-md p-6 text-center border border-surface-200">
+            <div className={statusCardClass}>
                 <p className="text-text-mid">{text.noReviews}</p>
             </div>
         );
     }
 
     return (
-        <div>
-            <div className="flex flex-col gap-4">
-                {reviews.map((review) => (
-                    <ReviewCard
-                        key={review.id}
-                        review={review}
-                        size="sm"
-                        isNew={review.id === scrollToId}
-                    />
-                ))}
-            </div>
+        <div className="flex flex-col gap-4">
+            {reviews.map((review) => (
+                <ReviewCard
+                    key={review.id}
+                    review={review}
+                    size="sm"
+                    isNew={review.id === scrollToId}
+                />
+            ))}
         </div>
     );
 }

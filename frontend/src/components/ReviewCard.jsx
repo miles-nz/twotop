@@ -15,7 +15,6 @@ function ReviewCard({ review, size = "md", isNew }) {
     return (
         <motion.div
             id={`review-${review.id}`}
-            key={review.id}
             initial={{ opacity: 0 }}
             animate={
                 isNew

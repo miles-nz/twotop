@@ -9,8 +9,7 @@ import { themes } from "./themes";
 import { text } from "./resources";
 
 function App() {
-    const { isLoading, isAuthenticated, user, loginWithRedirect, logout } =
-        useAuth0();
+    const { isLoading, isAuthenticated, user } = useAuth0();
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [formOpen, setFormOpen] = useState(false);
     const [justSubmitted, setJustSubmitted] = useState(false);
@@ -107,7 +106,6 @@ function App() {
                     refreshTrigger={refreshTrigger}
                     onReviewsLoaded={handleReviewsLoaded}
                     scrollToId={scrollToId}
-                    onScrollDone={() => setScrollToId(null)}
                 />
             </div>
         </motion.div>

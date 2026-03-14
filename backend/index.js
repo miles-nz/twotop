@@ -25,8 +25,6 @@ const validateReview = (body) => {
         food_rating,
         drink_rating,
         ambience_rating,
-        reviewer_name,
-        reviewer_picture,
     } = body;
     const errors = [];
 
@@ -63,37 +61,11 @@ const validateReview = (body) => {
         );
     }
 
-    const missingReviewerName = !reviewer_name;
-    const missingReviewerPicture = !reviewer_picture;
-    if (missingReviewerName || missingReviewerPicture) {
-        errors.push(
-            "Reviewer name and picture are required for authenticated reviews.",
-        );
-    }
-
     return errors;
 };
 
-app.get("/public", (req, res) => {
-    res.json({ message: "This is a public endpoint accessible to everyone." });
-});
-
-app.get("/private", checkJwt, (req, res) => {
-    res.json({ message: "You are authorised!" });
-});
-
 app.listen(3000, () => {
     console.log("Server running on http://localhost:3000");
-});
-
-app.get("/test-db", checkJwt, async (req, res) => {
-    const { data, error } = await supabase.from("reviews").select("*");
-
-    if (error) {
-        return res.status(500).json({ error: error.message });
-    }
-
-    res.json({ data });
 });
 
 app.post("/reviews", checkJwt, async (req, res) => {
@@ -139,7 +111,7 @@ app.post("/reviews", checkJwt, async (req, res) => {
         return res.status(500).json({ error: error.message });
     }
 
-    res.status(201).json({ data });
+    res.status(201).json(data[0]);
 });
 
 app.get("/reviews", checkJwt, async (req, res) => {
