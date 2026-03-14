@@ -48,7 +48,6 @@ export const text = {
     loadingReviews: "Loading reviews...",
 
     noReviews: "No reviews yet.",
-    noPublicReviews: "No public reviews yet",
     errorFormatted: (error) => `Error: ${error}`,
     errorGeneric: "Something went wrong, please try again",
     errorFailedSubmit: "Failed to submit review.",
