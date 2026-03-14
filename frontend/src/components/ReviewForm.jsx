@@ -73,7 +73,7 @@ function ReviewForm({ onReviewSubmitted }) {
             setDrinkRating("");
             setAmbienceRating("");
             setvisitDate("");
-            onReviewSubmitted();
+            onReviewSubmitted(data.data[0].id);
             setIsPublic(false);
         } catch (err) {
             setError(err.message || text.errorGeneric);

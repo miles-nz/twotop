@@ -4,7 +4,13 @@ import { useEffect } from "react";
 import ReviewCard from "./ReviewCard";
 import { text } from "../resources";
 
-function ReviewList({ refreshTrigger, onReviewsLoaded, isPublic = false }) {
+function ReviewList({
+    refreshTrigger,
+    onReviewsLoaded,
+    isPublic = false,
+    scrollToId,
+    onScrollDone,
+}) {
     const { getAccessTokenSilently } = useAuth0();
 
     const [reviews, setReviews] = useState([]);
@@ -52,6 +58,16 @@ function ReviewList({ refreshTrigger, onReviewsLoaded, isPublic = false }) {
         fetchReviews();
     }, [refreshTrigger, isPublic]);
 
+    useEffect(() => {
+        if (!scrollToId) return;
+        const el = document.getElementById(`review-${scrollToId}`);
+        if (el) {
+            setTimeout(() => {
+                el.scrollIntoView({ behavior: "smooth", block: "center" });
+            }, 300);
+        }
+    }, [scrollToId, reviews]);
+
     if (loading) {
         return (
             <div className="bg-surface-50 rounded-2xl shadow-md p-6 text-center border border-surface-200">
@@ -78,7 +94,12 @@ function ReviewList({ refreshTrigger, onReviewsLoaded, isPublic = false }) {
         <div>
             <div className="flex flex-col gap-4">
                 {reviews.map((review) => (
-                    <ReviewCard key={review.id} review={review} size="sm" />
+                    <ReviewCard
+                        key={review.id}
+                        review={review}
+                        size="sm"
+                        isNew={review.id === scrollToId}
+                    />
                 ))}
             </div>
         </div>

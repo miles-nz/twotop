@@ -4,7 +4,9 @@ import Avatar from "./Avatar";
 import { themes } from "../themes";
 import { text } from "../resources";
 
-function ReviewCard({ review, size = "md" }) {
+const glowShadow = "0 0 10px var(--color-primary-500)";
+
+function ReviewCard({ review, size = "md", isNew }) {
     const theme = themes[review.user_id] || {};
     const themeStyle = Object.fromEntries(
         Object.entries(theme).map(([key, value]) => [key, value]),
@@ -12,11 +14,22 @@ function ReviewCard({ review, size = "md" }) {
 
     return (
         <motion.div
+            id={`review-${review.id}`}
             key={review.id}
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            animate={
+                isNew
+                    ? {
+                          opacity: 1,
+                          scale: 1.05,
+                          boxShadow: glowShadow,
+                      }
+                    : {
+                          opacity: 1,
+                      }
+            }
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.8 }}
             style={themeStyle}
             className="bg-surface-50 rounded-2xl shadow-md border border-surface-200 border-l-4 border-l-secondary-400 overflow-hidden transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg"
         >

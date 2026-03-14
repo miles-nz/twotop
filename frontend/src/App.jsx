@@ -13,13 +13,21 @@ function App() {
         useAuth0();
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [formOpen, setFormOpen] = useState(false);
+    const [justSubmitted, setJustSubmitted] = useState(false);
+    const [scrollToId, setScrollToId] = useState(null);
 
-    const handleReviewSubmitted = () => {
+    const handleReviewSubmitted = (newId) => {
+        setJustSubmitted(true);
+        setScrollToId(newId);
         setRefreshTrigger((prev) => prev + 1);
     };
 
     const handleReviewsLoaded = (count) => {
         if (count === 0) setFormOpen(true);
+        if (justSubmitted) {
+            setFormOpen(false);
+            setJustSubmitted(false);
+        }
     };
 
     useEffect(() => {
@@ -98,6 +106,8 @@ function App() {
                 <ReviewList
                     refreshTrigger={refreshTrigger}
                     onReviewsLoaded={handleReviewsLoaded}
+                    scrollToId={scrollToId}
+                    onScrollDone={() => setScrollToId(null)}
                 />
             </div>
         </motion.div>
