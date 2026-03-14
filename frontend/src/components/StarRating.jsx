@@ -1,6 +1,10 @@
 import { useState } from "react";
 
-function StarRating({ value, onChange, readOnly = false }) {
+function StarRating({ value, onChange, readOnly = false, size = "md" }) {
+    const sizes = {
+        sm: "w-7 h-7",
+        md: "w-8 h-8",
+    };
     const [hoverValue, setHoverValue] = useState(null);
 
     const getStarFill = (starIndex) => {
@@ -38,20 +42,17 @@ function StarRating({ value, onChange, readOnly = false }) {
                 return (
                     <div
                         key={starIndex}
-                        className={`relative ${readOnly ? "cursor-default" : "cursor-pointer"} w-8 h-8`}
+                        className={`relative ${readOnly ? "cursor-default" : "cursor-pointer"} ${sizes[size]}`}
                         onMouseMove={(e) => handleMouseMove(e, starIndex)}
                         onClick={(e) => handleClick(e, starIndex)}
                     >
-                        {/* Empty star background */}
                         <svg
                             viewBox="0 0 24 24"
-                            className="absolute inset-0 w-full h-full text-surface-300"
+                            className={`absolute inset-0 w-full h-full text-surface-300`}
                             fill="currentColor"
                         >
                             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                         </svg>
-
-                        {/* Filled star overlay */}
                         {fill !== "empty" && (
                             <div
                                 className="absolute inset-0 overflow-hidden"
@@ -61,7 +62,7 @@ function StarRating({ value, onChange, readOnly = false }) {
                             >
                                 <svg
                                     viewBox="0 0 24 24"
-                                    className="absolute inset-0 w-8 h-8 text-primary-400"
+                                    className={`absolute inset-0 ${sizes[size]} text-secondary-400`}
                                     fill="currentColor"
                                 >
                                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />

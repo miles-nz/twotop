@@ -1,10 +1,13 @@
 import { useAuth0 } from "@auth0/auth0-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReviewForm from "./components/ReviewForm";
 import ReviewList from "./components/ReviewList";
+import PublicReviewList from "./components/PublicReviewList";
 import Navbar from "./components/Navbar";
 import Button from "./components/Button";
+import { themes } from "./themes";
+import { text } from "./resources";
 
 function App() {
     const { isLoading, isAuthenticated, user, loginWithRedirect, logout } =
@@ -20,10 +23,18 @@ function App() {
         if (count === 0) setFormOpen(true);
     };
 
+    useEffect(() => {
+        if (!user) return;
+        const theme = themes[user.sub] || {};
+        Object.entries(theme).forEach(([key, value]) => {
+            document.documentElement.style.setProperty(key, value);
+        });
+    }, [user]);
+
     if (isLoading) {
         return (
             <div className="min-h-screen w-full bg-surface-100 flex items-center justify-center">
-                <p className="text-text-light">Loading...</p>
+                <p className="text-text-light">{text.loading}</p>
             </div>
         );
     }
@@ -34,27 +45,11 @@ function App() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.4 }}
-                className="min-h-screen w-full bg-surface-100 flex items-center justify-center"
+                className="min-h-screen w-full bg-surface-100"
             >
-                <div className="min-h-screen bg-surface-100 flex items-center justify-center">
-                    <div className="bg-surface-50 rounded-2xl shadow-md p-8 w-full max-w-md text-center border border-surface-200">
-                        <h1
-                            style={{ fontFamily: "var(--font-title)" }}
-                            className="text-9xl text-text-dark mb-2"
-                        >
-                            TBC
-                        </h1>
-                        <div className="mb-6 text-text-light">
-                            <p className="text-3xl">the brunch club</p>
-                            <p className="text-2xs">(to be confirmed)</p>
-                        </div>
-
-                        <div className="flex justify-center">
-                            <Button onClick={() => loginWithRedirect()}>
-                                Log in
-                            </Button>
-                        </div>
-                    </div>
+                <Navbar />
+                <div className="max-w-2xl mx-auto py-8 px-4">
+                    <PublicReviewList />
                 </div>
             </motion.div>
         );
@@ -70,7 +65,10 @@ function App() {
             <Navbar />
             <div className="max-w-2xl mx-auto py-10 px-4">
                 <div className="mb-6 flex justify-center">
-                    <Button onClick={() => setFormOpen((prev) => !prev)}>
+                    <Button
+                        onClick={() => setFormOpen((prev) => !prev)}
+                        variant="secondary"
+                    >
                         <span className="flex items-center gap-2">
                             <motion.span
                                 animate={{ rotate: formOpen ? 45 : 0 }}
@@ -79,7 +77,7 @@ function App() {
                             >
                                 +
                             </motion.span>
-                            {formOpen ? "Close" : "Write a Review"}
+                            {formOpen ? text.close : text.writeReview}
                         </span>
                     </Button>
                 </div>

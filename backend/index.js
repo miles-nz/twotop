@@ -25,7 +25,6 @@ const validateReview = (body) => {
         ambience_rating,
         reviewer_name,
         reviewer_picture,
-        visit_date,
     } = body;
     const errors = [];
 
@@ -111,6 +110,7 @@ app.post("/reviews", checkJwt, async (req, res) => {
         reviewer_name,
         reviewer_picture,
         visit_date,
+        is_public,
     } = req.body;
     const user_id = req.auth.payload.sub;
 
@@ -128,6 +128,7 @@ app.post("/reviews", checkJwt, async (req, res) => {
                 reviewer_picture: reviewer_picture || null,
                 visit_date:
                     visit_date || new Date().toISOString().split("T")[0],
+                is_public: is_public === true,
             },
         ])
         .select();
@@ -140,17 +141,24 @@ app.post("/reviews", checkJwt, async (req, res) => {
 });
 
 app.get("/reviews", checkJwt, async (req, res) => {
-    const user_id = req.auth.payload.sub;
-
     const { data, error } = await supabase
         .from("reviews")
         .select("*")
-        .eq("user_id", user_id)
         .order("created_at", { ascending: false });
 
-    if (error) {
-        return res.status(500).json({ error: error.message });
-    }
+    if (error) return res.status(500).json({ error: error.message });
+
+    res.status(200).json(data);
+});
+
+app.get("/reviews/public", async (req, res) => {
+    const { data, error } = await supabase
+        .from("reviews")
+        .select("*")
+        .eq("is_public", true)
+        .order("created_at", { ascending: false });
+
+    if (error) return res.status(500).json({ error: error.message });
 
     res.status(200).json(data);
 });

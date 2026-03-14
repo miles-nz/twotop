@@ -3,37 +3,10 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { motion } from "framer-motion";
 import RatingField from "./RatingField";
 import Button from "./Button";
-
-const RESTAURANT_PLACEHOLDERS = [
-    "Blend Café",
-    "Boston Café",
-    "Browne St",
-    "Daily Bread",
-    "Elixir Café",
-    "Flying Burrito Brothers",
-    "Honey Café",
-    "Humbug",
-    "Jam Organic Café",
-    "Kokodak",
-    "Lola",
-    "Major Tom",
-    "McCafé",
-    "Mission Bay Café",
-    "Rosebank Café & Kitchen",
-    "Rude Boy",
-    "Starbucks",
-    "The Candy Shop",
-    "The Federal Store",
-    "The Garden Shed",
-    "Tobi",
-    "Twisted Tomato",
-    "Winona Forever",
-];
+import { text, placeholders } from "../resources";
 
 const getRandomPlaceholder = () => {
-    return RESTAURANT_PLACEHOLDERS[
-        Math.floor(Math.random() * RESTAURANT_PLACEHOLDERS.length)
-    ];
+    return placeholders[Math.floor(Math.random() * placeholders.length)];
 };
 
 function ReviewForm({ onReviewSubmitted }) {
@@ -48,6 +21,7 @@ function ReviewForm({ onReviewSubmitted }) {
     const [error, setError] = useState(null);
     const [submitting, setSubmitting] = useState(false);
     const [placeholder] = useState(getRandomPlaceholder());
+    const [isPublic, setIsPublic] = useState(false);
 
     const getLocalDate = () => {
         const today = new Date();
@@ -81,6 +55,7 @@ function ReviewForm({ onReviewSubmitted }) {
                         visit_date: visitDate || getLocalDate(),
                         reviewer_name: user?.name || null,
                         reviewer_picture: user?.picture || null,
+                        is_public: isPublic,
                     }),
                 },
             );
@@ -88,9 +63,7 @@ function ReviewForm({ onReviewSubmitted }) {
             const data = await response.json();
 
             if (!response.ok) {
-                setError(
-                    data.errors || data.error || "Failed to submit review.",
-                );
+                setError(data.errors || data.error || text.errorFailedSubmit);
                 return;
             }
 
@@ -101,8 +74,9 @@ function ReviewForm({ onReviewSubmitted }) {
             setAmbienceRating("");
             setvisitDate("");
             onReviewSubmitted();
+            setIsPublic(false);
         } catch (err) {
-            setError(err.message || "Something went wrong, please try again.");
+            setError(err.message || text.errorGeneric);
         } finally {
             setSubmitting(false);
         }
@@ -113,53 +87,61 @@ function ReviewForm({ onReviewSubmitted }) {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="bg-surface-50 rounded-2xl shadow-md p-6 mb-6"
+            className="bg-primary-200 rounded-2xl shadow-md p-6 mb-6 border border-surface-200"
         >
             <h2 className="text-xl font-bold text-secondary-600 mb-4">
-                Write a Review
+                {text.writeReview}
             </h2>
             <div className="mb-4">
                 <label className="block text-sm font-medium text-text-mid mb-1">
-                    Restaurant Name
+                    {text.restaurantNameLabel}
                 </label>
                 <input
                     type="text"
                     value={restaurantName}
                     onChange={(e) => setRestaurantName(e.target.value)}
-                    className="w-full border border-surface-200 rounded-lg px-3 py-2 text-text-dark focus:outline-none focus:ring-2 focus:ring-primary-500 placeholder:text-text-light"
-                    placeholder={`e.g. ${placeholder}`}
+                    className="w-full border border-surface-300 rounded-lg px-3 py-2 text-text-dark bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 placeholder-text-light"
+                    placeholder={text.restaurantNamePlaceholder(placeholder)}
                 />
             </div>
 
             <div className="mb-4">
                 <label className="block text-sm font-medium text-text-mid mb-1">
-                    Date Visited
+                    {text.dateVisitedLabel}
                 </label>
                 <input
                     type="date"
                     value={visitDate}
                     onChange={(e) => setvisitDate(e.target.value)}
-                    className="w-full border border-surface-200 rounded-lg px-3 py-2 text-text-dark focus:outline-none focus:ring-2 focus:ring-primary-500 placeholder:text-text-light"
+                    className={`w-full border border-surface-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary-400 bg-surface-50 ${
+                        visitDate ? "text-text-dark" : "text-text-light"
+                    }`}
+                    style={{
+                        color: visitDate
+                            ? "var(--color-text-dark)"
+                            : "var(--color-text-mid)",
+                        opacity: 1,
+                    }}
                 />
             </div>
 
             <div className="mb-4">
                 <label className="block text-sm font-medium text-text-mid mb-2">
-                    Ratings
+                    {text.ratingsLabel}
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <RatingField
-                        label="Food"
+                        label={text.foodLabel}
                         value={foodRating}
                         onChange={setFoodRating}
                     />
                     <RatingField
-                        label="Drinks"
+                        label={text.drinksLabel}
                         value={drinkRating}
                         onChange={setDrinkRating}
                     />
                     <RatingField
-                        label="Ambience"
+                        label={text.ambienceLabel}
                         value={ambienceRating}
                         onChange={setAmbienceRating}
                     />
@@ -168,18 +150,38 @@ function ReviewForm({ onReviewSubmitted }) {
 
             <div className="mb-4">
                 <label className="block text-sm font-medium text-text-mid mb-1">
-                    Review notes
+                    {text.reviewNotesLabel}
                 </label>
                 <textarea
                     value={reviewText}
                     onChange={(e) => setReviewText(e.target.value)}
-                    className="w-full border border-surface-200 rounded-lg px-3 py-2 text-text-dark focus:outline-none focus:ring-2 focus:ring-primary-500 h-28 resize-none"
-                    placeholder="Write your review here..."
+                    className="w-full border border-surface-300 rounded-lg px-3 py-2 text-text-dark bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 h-28 resize-none placeholder-text-light"
+                    placeholder={text.reviewNotesPlaceholder}
                 />
             </div>
 
+            <div className="mb-4 flex items-center justify-between bg-surface-100 rounded-lg px-4 py-3 border border-surface-200">
+                <div>
+                    <p className="text-sm font-medium text-text-dark">
+                        {text.markAsPublic}
+                    </p>
+                </div>
+                <button
+                    onClick={() => setIsPublic((prev) => !prev)}
+                    className={`relative w-11 h-6 rounded-full transition-colors duration-200 cursor-pointer focus:outline-none ${
+                        isPublic ? "bg-secondary-500" : "bg-surface-300"
+                    }`}
+                >
+                    <span
+                        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${
+                            isPublic ? "translate-x-5" : "translate-x-0"
+                        }`}
+                    />
+                </button>
+            </div>
+
             {error && (
-                <div className="mb-4 bg-primary-50 border border-primary-200 rounded-lg p-3">
+                <div className="bg-surface-50 rounded-2xl shadow-md p-6 mb-6 border border-surface-200">
                     {Array.isArray(error) ? (
                         error.map((err, index) => (
                             <p key={index} className="text-primary-600 text-sm">
@@ -192,8 +194,12 @@ function ReviewForm({ onReviewSubmitted }) {
                 </div>
             )}
 
-            <Button onClick={handleSubmit} disabled={submitting}>
-                {submitting ? "Submitting..." : "Submit Review"}
+            <Button
+                onClick={handleSubmit}
+                disabled={submitting}
+                variant="secondary"
+            >
+                {submitting ? text.submitting : text.submitReview}
             </Button>
         </motion.div>
     );

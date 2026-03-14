@@ -1,82 +1,72 @@
-import { useState } from "react";
-import { useAuth0 } from "@auth0/auth0-react";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import ReviewCard from "./ReviewCard";
 import { text } from "../resources";
 
-function ReviewList({ refreshTrigger, onReviewsLoaded }) {
-    const { getAccessTokenSilently } = useAuth0();
-
+function PublicReviewList() {
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchReviews = async () => {
+        const fetchPublicReviews = async () => {
             setLoading(true);
             setError(null);
 
             try {
-                const token = await getAccessTokenSilently();
                 const response = await fetch(
-                    `${import.meta.env.VITE_API_URL}/reviews`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    },
+                    `${import.meta.env.VITE_API_URL}/reviews/public`,
                 );
-
                 const data = await response.json();
 
                 if (!response.ok) {
-                    setError(data.error || text.errorFailedFetch);
+                    setError(data.error);
                     return;
                 }
 
                 setReviews(data);
-                if (onReviewsLoaded) onReviewsLoaded(data.length);
             } catch (err) {
-                setError(err.message || text.errorGeneric);
+                setError();
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchReviews();
-    }, [refreshTrigger]);
+        fetchPublicReviews();
+    }, []);
 
-    if (loading) {
+    if (loading)
         return (
             <div className="bg-surface-50 rounded-2xl shadow-md p-6 text-center border border-surface-200">
                 <p className="text-text-light">{text.loadingReviews}</p>
             </div>
         );
-    }
-    if (error) {
+
+    if (error)
         return (
             <div className="bg-surface-50 rounded-2xl shadow-md p-6 text-center border border-surface-200">
                 <p className="text-primary-600">{text.errorFormatted(error)}</p>
             </div>
         );
-    }
-    if (reviews.length === 0) {
+
+    if (reviews.length === 0)
         return (
             <div className="bg-primary-200 rounded-2xl shadow-md p-6 text-center border border-surface-200">
-                <p className="text-text-mid">{text.noReviews}</p>
+                <p className="text-text-light">{text.noPublicReviews}</p>
             </div>
         );
-    }
 
     return (
         <div>
-            <div className="flex flex-col gap-4">
-                {reviews.map((review) => (
-                    <ReviewCard key={review.id} review={review} size="sm" />
-                ))}
-            </div>
+            <AnimatePresence>
+                <div className="flex flex-col gap-4">
+                    {reviews.map((review) => (
+                        <ReviewCard key={review.id} review={review} size="sm" />
+                    ))}
+                </div>
+            </AnimatePresence>
         </div>
     );
 }
 
-export default ReviewList;
+export default PublicReviewList;
