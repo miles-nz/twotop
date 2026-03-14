@@ -105,7 +105,7 @@ function ReviewForm({ onReviewSubmitted }) {
                 />
             </div>
 
-            <div className="mb-4 pr-6">
+            <div className="mb-4 pr-8">
                 <label className="block text-sm font-medium text-text-mid mb-1">
                     {text.dateVisitedLabel}
                 </label>
