@@ -7,7 +7,9 @@ const supabase = require("./supabase");
 const app = express();
 
 app.use(
-    cors({ origin: ["http://localhost:5173", "https://tbc-six.vercel.app"] }),
+    cors({
+        origin: ["http://localhost:5173", "https://mimu-reviews.vercel.app"],
+    }),
 );
 app.use(express.json());
 
