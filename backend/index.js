@@ -146,7 +146,7 @@ app.get("/reviews", checkJwt, async (req, res) => {
     const { data, error } = await supabase
         .from("reviews")
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("visit_date", { ascending: false });
 
     if (error) return res.status(500).json({ error: error.message });
 
@@ -158,7 +158,7 @@ app.get("/reviews/public", async (req, res) => {
         .from("reviews")
         .select("*")
         .eq("is_public", true)
-        .order("created_at", { ascending: false });
+        .order("visit_date", { ascending: false });
 
     if (error) return res.status(500).json({ error: error.message });
 
