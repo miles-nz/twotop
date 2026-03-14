@@ -105,7 +105,7 @@ function ReviewForm({ onReviewSubmitted }) {
                 />
             </div>
 
-            <div className="mb-4 overflow-hidden">
+            <div className="mb-4 overflow-hidden rounded-lg">
                 <label className="block text-sm font-medium text-text-mid mb-1">
                     {text.dateVisitedLabel}
                 </label>
@@ -121,8 +121,6 @@ function ReviewForm({ onReviewSubmitted }) {
                             ? "var(--color-text-dark)"
                             : "var(--color-text-mid)",
                         opacity: 1,
-                        position: "relative",
-                        left: 0,
                     }}
                 />
             </div>
