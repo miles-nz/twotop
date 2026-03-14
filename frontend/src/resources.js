@@ -25,7 +25,7 @@ export const placeholders = [
 ];
 
 export const text = {
-    appName: "TBC",
+    appName: "MIMU",
     tagline: "Log in to view and write reviews",
     logIn: "Admin",
     logOut: "Log Out",
