@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import ReviewCard from "./ReviewCard";
 import { text } from "../resources";
 
-function ReviewList({ refreshTrigger, onReviewsLoaded }) {
+function ReviewList({ refreshTrigger, onReviewsLoaded, isPublic = false }) {
     const { getAccessTokenSilently } = useAuth0();
 
     const [reviews, setReviews] = useState([]);
@@ -17,34 +17,40 @@ function ReviewList({ refreshTrigger, onReviewsLoaded }) {
             setError(null);
 
             try {
-                const token = await getAccessTokenSilently();
-                const response = await fetch(
-                    `${import.meta.env.VITE_API_URL}/reviews`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
+                let response;
+
+                if (isPublic) {
+                    response = await fetch(
+                        `${import.meta.env.VITE_API_URL}/reviews/public`,
+                    );
+                } else {
+                    const token = await getAccessTokenSilently();
+                    response = await fetch(
+                        `${import.meta.env.VITE_API_URL}/reviews`,
+                        {
+                            headers: { Authorization: `Bearer ${token}` },
                         },
-                    },
-                );
+                    );
+                }
 
                 const data = await response.json();
 
                 if (!response.ok) {
-                    setError(data.error || text.errorFailedFetch);
+                    setError(text.errorFailedFetch);
                     return;
                 }
 
                 setReviews(data);
                 if (onReviewsLoaded) onReviewsLoaded(data.length);
             } catch (err) {
-                setError(err.message || text.errorGeneric);
+                setError(text.errorGeneric);
             } finally {
                 setLoading(false);
             }
         };
 
         fetchReviews();
-    }, [refreshTrigger]);
+    }, [refreshTrigger, isPublic]);
 
     if (loading) {
         return (
@@ -62,7 +68,7 @@ function ReviewList({ refreshTrigger, onReviewsLoaded }) {
     }
     if (reviews.length === 0) {
         return (
-            <div className="bg-primary-200 rounded-2xl shadow-md p-6 text-center border border-surface-200">
+            <div className="bg-surface-50 rounded-2xl shadow-md p-6 text-center border border-surface-200">
                 <p className="text-text-mid">{text.noReviews}</p>
             </div>
         );

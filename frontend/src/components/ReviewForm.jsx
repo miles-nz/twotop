@@ -113,7 +113,7 @@ function ReviewForm({ onReviewSubmitted }) {
                     type="date"
                     value={visitDate}
                     onChange={(e) => setvisitDate(e.target.value)}
-                    className={`w-full border border-surface-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary-400 bg-surface-50 ${
+                    className={`w-full max-w-full box-border border border-surface-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary-400 bg-surface-50 ${
                         visitDate ? "text-text-dark" : "text-text-light"
                     }`}
                     style={{

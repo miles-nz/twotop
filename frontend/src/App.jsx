@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReviewForm from "./components/ReviewForm";
 import ReviewList from "./components/ReviewList";
-import PublicReviewList from "./components/PublicReviewList";
 import Navbar from "./components/Navbar";
 import Button from "./components/Button";
 import { themes } from "./themes";
@@ -49,7 +48,7 @@ function App() {
             >
                 <Navbar />
                 <div className="max-w-2xl mx-auto py-8 px-4">
-                    <PublicReviewList />
+                    <ReviewList isPublic />
                 </div>
             </motion.div>
         );
