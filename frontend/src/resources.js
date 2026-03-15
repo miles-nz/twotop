@@ -25,14 +25,19 @@ export const placeholders = [
 ];
 
 export const text = {
+    // App
     appName: "MIMU",
     tagline: "Log in to view and write reviews",
+
+    // Auth
     logIn: "Admin",
     logOut: "Log Out",
+
+    // Navigation
     writeReview: "Write a Review",
     close: "Close",
-    submitReview: "Submit Review",
-    submitting: "Submitting...",
+
+    // Review form
     restaurantNameLabel: "Restaurant Name",
     restaurantNamePlaceholder: (name) => `e.g. ${name}`,
     dateVisitedLabel: "Date Visited",
@@ -43,25 +48,32 @@ export const text = {
     reviewNotesLabel: "Review notes",
     reviewNotesPlaceholder: "Write your review here...",
     markAsPublic: "Mark as Public",
-    imagesLabel: "Photos",
-    uploadImages: "Upload Photos",
+    submitReview: "Submit Review",
+    submitting: "Submitting...",
+
+    // Photos
+    addPhotos: "Add Photos",
+    editPhotos: "Edit Photos",
     reviewPhoto: "Review photo",
     reviewPhotoIndex: (index) => `Review photo ${index + 1}`,
     photoCount: (count) =>
         `${count} ${count === 1 ? "photo" : "photos"} - tap to view`,
 
-    loading: "Loading...",
-    cancel: "Cancel",
-    delete: "Delete",
-    deleting: "Deleting...",
-    confirmDeleteReview: "Are you sure you want to delete this review?",
+    // Review card menu
+    updateRestaurant: "Update Restaurant",
+    editReview: "Edit Review",
     makePublic: "Make Public",
     makePrivate: "Make Private",
-    editPhotos: "Edit Photos",
-    editReview: "Edit Review",
-    updateRestaurant: "Update Restaurant",
+    delete: "Delete",
+    deleting: "Deleting...",
+    cancel: "Cancel",
+    confirmDeleteReview: "Are you sure you want to delete this review?",
 
+    // Review list
     noReviews: "No reviews yet.",
+    loading: "Loading...",
+
+    // Errors
     errorFormatted: (error) => `Error: ${error}`,
     errorGeneric: "Something went wrong, please try again",
     errorFailedSubmit: "Failed to submit review.",

@@ -127,7 +127,9 @@ function ReviewCardMenu({
                             className="flex items-center gap-2 w-full px-4 py-2 text-sm text-text-dark hover:bg-surface-100 cursor-pointer"
                         >
                             <ImagePlus size={14} />
-                            {text.editPhotos}
+                            {review.image_urls && review.image_urls.length > 0
+                                ? text.editPhotos
+                                : text.addPhotos}
                         </button>
                         <button
                             onClick={() => {
