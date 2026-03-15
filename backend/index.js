@@ -178,10 +178,8 @@ app.get("/reviews", checkJwt, async (req, res) => {
         .select("*")
         .order("visit_date", { ascending: false });
 
-    console.log("data:", data);
-    console.log("error:", error);
-
     if (error) return res.status(500).json({ error: error.message });
+
     res.status(200).json(data);
 });
 
