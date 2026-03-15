@@ -7,6 +7,7 @@ function EditNameUI({ editedName, setEditedName, handleSaveName, onClose }) {
                 type="text"
                 value={editedName}
                 onChange={(e) => setEditedName(e.target.value)}
+                maxLength={100}
                 className="text-2xl font-bold text-text-dark bg-transparent border-b border-secondary-400 focus:outline-none w-full"
             />
             <button

@@ -54,6 +54,7 @@ function EditReviewUI({
                 <textarea
                     value={editedReviewText}
                     onChange={(e) => setEditedReviewText(e.target.value)}
+                    maxLength={2000}
                     className="w-full border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 h-28 resize-none text-text-dark"
                 />
                 <div className="flex justify-end gap-2 mt-2">

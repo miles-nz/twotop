@@ -138,6 +138,7 @@ function ReviewForm({ onReviewSubmitted }) {
                     type="text"
                     value={restaurantName}
                     onChange={(e) => setRestaurantName(e.target.value)}
+                    maxLength={100}
                     className={`${inputClass} placeholder-text-light`}
                     placeholder={text.restaurantNamePlaceholder(placeholder)}
                 />
@@ -192,6 +193,7 @@ function ReviewForm({ onReviewSubmitted }) {
                     <textarea
                         value={reviewText}
                         onChange={(e) => setReviewText(e.target.value)}
+                        maxLength={2000}
                         className="w-full resize-none placeholder-text-light bg-transparent focus:outline-none pb-10"
                         placeholder={text.reviewNotesPlaceholder}
                         rows={4}

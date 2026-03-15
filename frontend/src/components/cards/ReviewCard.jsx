@@ -91,13 +91,15 @@ function ReviewCard({
         >
             <div className="p-6 pb-4">
                 <div className="flex items-center justify-between">
-                    <h3 className="text-2xl font-bold text-text-dark">
+                    <h3 className="text-2xl font-bold text-text-dark hyphens-auto break-words">
                         {editingName ? (
                             <EditNameUI
                                 editedName={editedName}
                                 setEditedName={setEditedName}
                                 handleSaveName={handleSaveName}
-                                onClose={() => setEditingName(false)}
+                                onClose={() => {
+                                    setEditingName(false);
+                                }}
                             />
                         ) : (
                             review.restaurant_name
@@ -238,7 +240,7 @@ function ReviewCard({
                             <>
                                 <div className="border-t border-surface-200 mx-6" />
                                 <div className="px-6 py-4">
-                                    <p className="text-text-mid text-sm leading-relaxed">
+                                    <p className="text-text-mid text-sm leading-relaxed hyphens-auto break-words">
                                         {review.review_text}
                                     </p>
                                 </div>
