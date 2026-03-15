@@ -14,8 +14,8 @@ function EditPhotosUI({
     return (
         <div className="px-6 pb-4">
             <div className="border border-surface-200 rounded-xl p-4 bg-surface-50">
-                <div className="flex items-start justify-between">
-                    <div className="flex flex-wrap gap-2">
+                <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap gap-2 flex-1">
                         {review.image_urls &&
                             review.image_urls
                                 .filter(
@@ -81,12 +81,12 @@ function EditPhotosUI({
                             </>
                         )}
                     </div>
-                    <div className="flex gap-2 ml-2 flex-shrink-0">
+                    <div className="flex items-center gap-2 ml-2 flex-shrink-0">
                         <button
                             onClick={onClose}
                             className="text-text-light hover:text-text-mid cursor-pointer transition-colors"
                         >
-                            <X size={18} />
+                            <X size={24} />
                         </button>
                         <button
                             onClick={async () => {
@@ -95,7 +95,7 @@ function EditPhotosUI({
                             }}
                             className="text-secondary-500 hover:text-secondary-600 cursor-pointer transition-colors"
                         >
-                            <Check size={18} />
+                            <Check size={24} />
                         </button>
                     </div>
                 </div>
