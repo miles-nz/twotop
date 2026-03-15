@@ -4,14 +4,63 @@ import Avatar from "./Avatar";
 import { themes } from "../themes";
 import { text } from "../resources";
 import ImageCarousel from "./ImageCarousel";
+import { useState, useEffect } from "react";
+import { MoreHorizontal, Trash2 } from "lucide-react";
+import { useAuth0 } from "@auth0/auth0-react";
+import ConfirmModal from "./ConfirmModal";
+import { useReviewList } from "../contexts/ReviewListContext";
 
 const glowShadow = "0 0 10px var(--color-primary-500)";
 
-function ReviewCard({ review, size = "md", isNew, isExpanded, onExpand }) {
+function ReviewCard({
+    review,
+    size = "md",
+    isNew,
+    currentUserId,
+    onReviewDeleted,
+}) {
     const theme = themes[review.user_id] || {};
     const themeStyle = Object.fromEntries(
         Object.entries(theme).map(([key, value]) => [key, value]),
     );
+
+    const {
+        expandedId,
+        handleExpand,
+        openMenuId,
+        handleMenuOpen,
+        handleMenuClose,
+    } = useReviewList();
+    const isExpanded = expandedId === review.id;
+    const menuOpen = openMenuId === review.id;
+
+    const { getAccessTokenSilently } = useAuth0();
+    const [confirmOpen, setConfirmOpen] = useState(false);
+
+    useEffect(() => {
+        if (!menuOpen) return;
+        const handleClickOutside = () => handleMenuClose();
+        document.addEventListener("click", handleClickOutside);
+        return () => document.removeEventListener("click", handleClickOutside);
+    }, [menuOpen]);
+
+    const handleDelete = async () => {
+        try {
+            const token = await getAccessTokenSilently();
+            const response = await fetch(
+                `${import.meta.env.VITE_API_URL}/reviews/${review.id}`,
+                {
+                    method: "DELETE",
+                    headers: { Authorization: `Bearer ${token}` },
+                },
+            );
+            if (!response.ok) throw new Error("Failed to delete");
+            onReviewDeleted();
+        } catch (err) {
+            console.error(err);
+        }
+        setConfirmOpen(false);
+    };
 
     return (
         <motion.div
@@ -47,6 +96,35 @@ function ReviewCard({ review, size = "md", isNew, isExpanded, onExpand }) {
                             picture={review.reviewer_picture}
                             size="sm"
                         />
+                        {currentUserId === review.user_id && (
+                            <div className="relative">
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        menuOpen
+                                            ? handleMenuClose()
+                                            : handleMenuOpen(review.id);
+                                    }}
+                                    className="flex items-center text-text-light hover:text-text-mid cursor-pointer transition-colors"
+                                >
+                                    <MoreHorizontal size={18} />
+                                </button>
+                                {menuOpen && (
+                                    <div className="absolute right-0 top-6 bg-surface-50 border border-surface-200 rounded-lg shadow-lg z-20 w-36">
+                                        <button
+                                            onClick={() => {
+                                                handleMenuClose();
+                                                setConfirmOpen(true);
+                                            }}
+                                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-primary-600 hover:bg-surface-100 rounded-lg cursor-pointer"
+                                        >
+                                            <Trash2 size={14} />
+                                            {text.delete}
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -55,7 +133,7 @@ function ReviewCard({ review, size = "md", isNew, isExpanded, onExpand }) {
                 <div className="px-6 pb-4">
                     <div
                         className="rounded-xl overflow-hidden cursor-pointer"
-                        onClick={onExpand}
+                        onClick={() => handleExpand(review.id)}
                     >
                         {isExpanded ? (
                             <ImageCarousel images={review.image_urls} />
@@ -118,6 +196,12 @@ function ReviewCard({ review, size = "md", isNew, isExpanded, onExpand }) {
                     </div>
                 </>
             )}
+            <ConfirmModal
+                isOpen={confirmOpen}
+                onConfirm={handleDelete}
+                onCancel={() => setConfirmOpen(false)}
+                message={text.confirmDeleteReview}
+            />
         </motion.div>
     );
 }

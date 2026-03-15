@@ -256,15 +256,15 @@ function ReviewForm({ onReviewSubmitted }) {
             </div>
 
             {error && (
-                <div className="bg-surface-50 rounded-2xl shadow-md p-6 mb-4 border border-surface-200">
+                <div className="bg-error-50 border border-error-200 rounded-2xl shadow-md p-6 mb-4 border">
                     {Array.isArray(error) ? (
                         error.map((err, index) => (
-                            <p key={index} className="text-primary-600 text-sm">
+                            <p key={index} className="text-error-600 text-sm">
                                 {err}
                             </p>
                         ))
                     ) : (
-                        <p className="text-primary-600 text-sm">{error}</p>
+                        <p className="text-error-600 text-sm">{error}</p>
                     )}
                 </div>
             )}

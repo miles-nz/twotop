@@ -38,6 +38,16 @@
     --color-text-mid: #585858;
     --color-text-dark: #1a1a1a;
 
+    /* Error/danger colours */
+    --color-error-50: #fef2f2;
+    --color-error-100: #fee2e2;
+    --color-error-200: #fecaca;
+    --color-error-300: #fca5a5;
+    --color-error-400: #f87171;
+    --color-error-500: #ef4444;
+    --color-error-600: #dc2626;
+    --color-error-700: #b91c1c;
+
     --font-sans: "DM Sans", system-ui, -apple-system, sans-serif;
     --font-title: "Monoton", cursive;
 }

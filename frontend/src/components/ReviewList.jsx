@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import { useEffect } from "react";
 import ReviewCard from "./ReviewCard";
 import { text } from "../resources";
+import { ReviewListProvider } from "../contexts/ReviewListContext";
 
 const statusCardClass =
     "bg-surface-50 rounded-2xl shadow-md p-6 text-center border border-surface-200";
@@ -12,13 +12,14 @@ function ReviewList({
     onReviewsLoaded,
     isPublic = false,
     scrollToId,
+    currentUserId,
+    onReviewDeleted,
 }) {
     const { getAccessTokenSilently } = useAuth0();
 
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [expandedId, setExpandedId] = useState(null);
 
     useEffect(() => {
         const fetchReviews = async () => {
@@ -71,10 +72,6 @@ function ReviewList({
         }
     }, [scrollToId, reviews]);
 
-    const handleExpand = (id) => {
-        setExpandedId((prev) => (prev === id ? null : id));
-    };
-
     if (loading) {
         return (
             <div className={statusCardClass}>
@@ -98,18 +95,20 @@ function ReviewList({
     }
 
     return (
-        <div className="flex flex-col gap-4">
-            {reviews.map((review) => (
-                <ReviewCard
-                    key={review.id}
-                    review={review}
-                    size="sm"
-                    isNew={review.id === scrollToId}
-                    isExpanded={review.id === expandedId}
-                    onExpand={() => handleExpand(review.id)}
-                />
-            ))}
-        </div>
+        <ReviewListProvider>
+            <div className="flex flex-col gap-4">
+                {reviews.map((review) => (
+                    <ReviewCard
+                        key={review.id}
+                        review={review}
+                        size="sm"
+                        isNew={review.id === scrollToId}
+                        currentUserId={currentUserId}
+                        onReviewDeleted={onReviewDeleted}
+                    />
+                ))}
+            </div>
+        </ReviewListProvider>
     );
 }
 

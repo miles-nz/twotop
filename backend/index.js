@@ -121,7 +121,11 @@ app.post(
         if (req.files && req.files.length > 0) {
             for (const file of req.files) {
                 const sanitizedUserId = user_id.replace("|", "-");
-                const filename = `${sanitizedUserId}/${Date.now()}-${file.originalname}`;
+                const sanitizedFilename = file.originalname.replace(
+                    /[^a-zA-Z0-9._-]/g,
+                    "_",
+                );
+                const filename = `${sanitizedUserId}/${Date.now()}-${sanitizedFilename}`;
                 const { data, error } = await supabase.storage
                     .from("review-images")
                     .upload(filename, file.buffer, {
@@ -174,8 +178,10 @@ app.get("/reviews", checkJwt, async (req, res) => {
         .select("*")
         .order("visit_date", { ascending: false });
 
-    if (error) return res.status(500).json({ error: error.message });
+    console.log("data:", data);
+    console.log("error:", error);
 
+    if (error) return res.status(500).json({ error: error.message });
     res.status(200).json(data);
 });
 
@@ -189,4 +195,53 @@ app.get("/reviews/public", async (req, res) => {
     if (error) return res.status(500).json({ error: error.message });
 
     res.status(200).json(data);
+});
+
+app.delete("/reviews/:id", checkJwt, async (req, res) => {
+    const { id } = req.params;
+    const user_id = req.auth.payload.sub;
+
+    // Fetch the review first to verify ownership and get image URLs
+    const { data: review, error: fetchError } = await supabase
+        .from("reviews")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+    if (fetchError || !review) {
+        return res.status(404).json({ error: "Review not found" });
+    }
+
+    if (review.user_id !== user_id) {
+        return res.status(403).json({ error: "Unauthorised" });
+    }
+
+    // Delete images from Supabase Storage
+    if (review.image_urls && review.image_urls.length > 0) {
+        const sanitizedUserId = user_id.replace("|", "-");
+        const paths = review.image_urls.map((url) => {
+            const filename = decodeURIComponent(url.split("/").pop());
+            return `${sanitizedUserId}/${filename}`;
+        });
+
+        const { error: storageError } = await supabase.storage
+            .from("review-images")
+            .remove(paths);
+
+        if (storageError) {
+            return res.status(500).json({ error: storageError.message });
+        }
+    }
+
+    // Delete the review
+    const { error: deleteError } = await supabase
+        .from("reviews")
+        .delete()
+        .eq("id", id);
+
+    if (deleteError) {
+        return res.status(500).json({ error: deleteError.message });
+    }
+
+    res.status(200).json({ success: true });
 });

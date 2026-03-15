@@ -52,6 +52,9 @@ export const text = {
 
     loading: "Loading...",
     loadingReviews: "Loading reviews...",
+    cancel: "Cancel",
+    delete: "Delete",
+    confirmDeleteReview: "Are you sure you want to delete this review?",
 
     noReviews: "No reviews yet.",
     errorFormatted: (error) => `Error: ${error}`,

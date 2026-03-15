@@ -5,6 +5,7 @@ function Button({ onClick, children, variant = "primary", disabled = false }) {
             "bg-surface-200 text-text-dark px-4 py-2 hover:bg-surface-300 text-sm",
         secondary:
             "bg-secondary-500 text-white px-6 py-2 hover:bg-secondary-600",
+        error: "bg-error-600 text-white px-6 py-2 hover:bg-error-700",
     };
 
     return (

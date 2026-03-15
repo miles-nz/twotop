@@ -106,6 +106,10 @@ function App() {
                     refreshTrigger={refreshTrigger}
                     onReviewsLoaded={handleReviewsLoaded}
                     scrollToId={scrollToId}
+                    currentUserId={user.sub}
+                    onReviewDeleted={() =>
+                        setRefreshTrigger((prev) => prev + 1)
+                    }
                 />
             </div>
         </motion.div>
