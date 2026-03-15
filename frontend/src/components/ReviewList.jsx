@@ -78,13 +78,11 @@ function ReviewList({
 
         for (let i = 1; i < result.length; i++) {
             if (result[i].user_id === result[i - 1].user_id) {
-                // Look ahead for a different reviewer with the same date
-                const sameDate = result[i - 1].visit_date;
                 const swapIndex = result.findIndex(
                     (r, idx) =>
                         idx > i &&
                         r.user_id !== result[i].user_id &&
-                        r.visit_date === sameDate,
+                        r.visit_date === result[i].visit_date,
                 );
                 if (swapIndex !== -1) {
                     [result[i], result[swapIndex]] = [
