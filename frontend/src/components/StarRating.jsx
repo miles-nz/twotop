@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 function StarRating({ value, onChange, readOnly = false, size = "md" }) {
+    const containerRef = useRef(null);
     const sizes = {
         sm: "w-7 h-7",
         md: "w-8 h-8",
@@ -32,16 +33,52 @@ function StarRating({ value, onChange, readOnly = false, size = "md" }) {
         onChange(isLeftHalf ? starIndex - 0.5 : starIndex);
     };
 
+    const handleTouchMove = (e) => {
+        if (readOnly) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        const stars = containerRef.current.querySelectorAll("[data-star]");
+
+        for (const star of stars) {
+            const rect = star.getBoundingClientRect();
+            if (touch.clientX >= rect.left && touch.clientX <= rect.right) {
+                const x = touch.clientX - rect.left;
+                const isLeftHalf = x < rect.width / 2;
+                const starIndex = parseInt(star.dataset.star);
+                setHoverValue(isLeftHalf ? starIndex - 0.5 : starIndex);
+                break;
+            }
+        }
+    };
+
+    const handleTouchEnd = (e) => {
+        if (readOnly) return;
+        if (hoverValue !== null) {
+            onChange(hoverValue);
+            setHoverValue(null);
+        }
+    };
+
+    useEffect(() => {
+        const el = containerRef.current;
+        if (!el) return;
+        el.addEventListener("touchmove", handleTouchMove, { passive: false });
+        return () => el.removeEventListener("touchmove", handleTouchMove);
+    }, [hoverValue]);
+
     return (
         <div
+            ref={containerRef}
             className="flex gap-1"
             onMouseLeave={() => !readOnly && setHoverValue(null)}
+            onTouchEnd={handleTouchEnd}
         >
             {[1, 2, 3, 4, 5].map((starIndex) => {
                 const fill = getStarFill(starIndex);
                 return (
                     <div
                         key={starIndex}
+                        data-star={starIndex}
                         className={`relative ${readOnly ? "cursor-default" : "cursor-pointer"} ${sizes[size]}`}
                         onMouseMove={(e) => handleMouseMove(e, starIndex)}
                         onClick={(e) => handleClick(e, starIndex)}
