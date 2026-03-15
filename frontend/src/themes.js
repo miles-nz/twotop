@@ -2,8 +2,8 @@ export const themes = {
     [import.meta.env.VITE_USER1_ID]: {
         "--color-surface-50": "#fcfcfc",
         "--color-surface-100": "#f0f2f4",
-        "--color-surface-200": "#d8dde4",
-        "--color-surface-300": "#e4e8ec",
+        "--color-surface-200": "#c8d4dc",
+        "--color-surface-300": "#b0c0cc",
         "--color-primary-500": "#1a5870",
         "--color-primary-600": "#144458",
         "--color-primary-400": "#2a7090",
