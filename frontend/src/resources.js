@@ -55,6 +55,11 @@ export const text = {
     delete: "Delete",
     deleting: "Deleting...",
     confirmDeleteReview: "Are you sure you want to delete this review?",
+    makePublic: "Make Public",
+    makePrivate: "Make Private",
+    editPhotos: "Edit Photos",
+    editReview: "Edit Review",
+    updateRestaurant: "Update Restaurant",
 
     noReviews: "No reviews yet.",
     errorFormatted: (error) => `Error: ${error}`,

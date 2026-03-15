@@ -1,6 +1,6 @@
 import useEmblaCarousel from "embla-carousel-react";
 import { useState, useRef, useEffect, useCallback } from "react";
-import { text } from "../resources";
+import { text } from "../../resources";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 

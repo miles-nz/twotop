@@ -1,11 +1,11 @@
 import { useState, useRef } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { motion } from "framer-motion";
-import RatingField from "./RatingField";
-import Button from "./Button";
-import { text, placeholders } from "../resources";
 import { ImagePlus, X } from "lucide-react";
-import LoadingOverlay from "./LoadingOverlay";
+import Button from "../ui/Button";
+import LoadingOverlay from "../ui/LoadingOverlay";
+import RatingField from "../ui/RatingField";
+import { text, placeholders } from "../../resources";
 
 const inputClass =
     "w-full border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400";
@@ -17,19 +17,21 @@ const getRandomPlaceholder = () => {
 function ReviewForm({ onReviewSubmitted }) {
     const { getAccessTokenSilently, user } = useAuth0();
 
+    const [placeholder] = useState(getRandomPlaceholder());
+
     const [restaurantName, setRestaurantName] = useState("");
-    const [reviewText, setReviewText] = useState("");
+    const [visitDate, setvisitDate] = useState("");
     const [foodRating, setFoodRating] = useState(null);
     const [drinkRating, setDrinkRating] = useState(null);
     const [ambienceRating, setAmbienceRating] = useState(null);
-    const [visitDate, setvisitDate] = useState("");
-    const [error, setError] = useState(null);
-    const [submitting, setSubmitting] = useState(false);
-    const [placeholder] = useState(getRandomPlaceholder());
+    const [reviewText, setReviewText] = useState("");
     const [isPublic, setIsPublic] = useState(false);
-    const [images, setImages] = useState([]);
 
+    const [images, setImages] = useState([]);
     const fileInputRef = useRef(null);
+
+    const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState(null);
 
     const getLocalDate = () => {
         const today = new Date();

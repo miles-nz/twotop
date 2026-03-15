@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import ReviewCard from "./ReviewCard";
-import { text } from "../resources";
-import { ReviewListProvider } from "../contexts/ReviewListContext";
 import { motion } from "framer-motion";
+import { ReviewListProvider } from "../../contexts/ReviewListContext";
+import ReviewCard from "../cards/ReviewCard";
+import { text } from "../../resources";
 
 const statusCardClass =
     "bg-surface-50 rounded-2xl shadow-md p-6 text-center border border-surface-200";
@@ -14,13 +14,36 @@ function ReviewList({
     isPublic = false,
     scrollToId,
     currentUserId,
-    onReviewDeleted,
+    onReviewUpdated,
 }) {
     const { getAccessTokenSilently } = useAuth0();
 
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    const alternateReviewers = (reviews) => {
+        const result = [...reviews];
+
+        for (let i = 1; i < result.length; i++) {
+            if (result[i].user_id === result[i - 1].user_id) {
+                const swapIndex = result.findIndex(
+                    (r, idx) =>
+                        idx > i &&
+                        r.user_id !== result[i].user_id &&
+                        r.visit_date === result[i].visit_date,
+                );
+                if (swapIndex !== -1) {
+                    [result[i], result[swapIndex]] = [
+                        result[swapIndex],
+                        result[i],
+                    ];
+                }
+            }
+        }
+
+        return result;
+    };
 
     useEffect(() => {
         const fetchReviews = async () => {
@@ -73,29 +96,6 @@ function ReviewList({
         }
     }, [scrollToId, reviews]);
 
-    const alternateReviewers = (reviews) => {
-        const result = [...reviews];
-
-        for (let i = 1; i < result.length; i++) {
-            if (result[i].user_id === result[i - 1].user_id) {
-                const swapIndex = result.findIndex(
-                    (r, idx) =>
-                        idx > i &&
-                        r.user_id !== result[i].user_id &&
-                        r.visit_date === result[i].visit_date,
-                );
-                if (swapIndex !== -1) {
-                    [result[i], result[swapIndex]] = [
-                        result[swapIndex],
-                        result[i],
-                    ];
-                }
-            }
-        }
-
-        return result;
-    };
-
     if (loading) {
         return (
             <div className={statusCardClass}>
@@ -142,7 +142,7 @@ function ReviewList({
                         size="sm"
                         isNew={review.id === scrollToId}
                         currentUserId={currentUserId}
-                        onReviewDeleted={onReviewDeleted}
+                        onReviewUpdated={onReviewUpdated}
                     />
                 ))}
             </div>

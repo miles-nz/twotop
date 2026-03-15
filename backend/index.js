@@ -3,36 +3,65 @@ const express = require("express");
 const cors = require("cors");
 const { auth } = require("express-oauth2-jwt-bearer");
 const supabase = require("./supabase");
-
 const multer = require("multer");
+
+// Config
+const ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "https://mimu-reviews.vercel.app",
+];
+const MAX_FILE_SIZE = 20 * 1024 * 1024;
+const MAX_IMAGES_PER_REVIEW = 5;
+const ALLOWED_IMAGE_TYPES = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/heic",
+    "image/heif",
+    "image/gif",
+    "image/avif",
+];
+const REVIEW_IMAGE_BUCKET = "review-images";
+const MAX_RESTAURANT_NAME_LENGTH = 100;
+const MAX_REVIEW_TEXT_LENGTH = 10000;
+const RATING_MIN = 0.5;
+const RATING_MAX = 5;
+
+// Errors
+const ERRORS = {
+    reviewNotFound: "Review not found",
+    unauthorised: "Unauthorised",
+    invalidRestaurantName: "Invalid restaurant name",
+    maxPhotos: `Maximum ${MAX_IMAGES_PER_REVIEW} photos per review`,
+    invalidRating: (field) => `Invalid ${field}`,
+    invalidImageType:
+        "Only JPEG, PNG, WebP, HEIC, GIF and AVIF images are allowed",
+    restaurantNameRequired: "Restaurant name is required.",
+    restaurantNameInvalid: "Restaurant name must be a non-empty string.",
+    reviewTextInvalid: "Review text must be a string.",
+    reviewTextTooLong: `Review text must be less than ${MAX_REVIEW_TEXT_LENGTH} characters.`,
+    ratingInvalid: (name) =>
+        `${name} must be a number between ${RATING_MIN} and ${RATING_MAX}.`,
+    missingRequiredFields:
+        "Restaurant name and either a review text or all three ratings are required.",
+};
+
+// Multer setup
 const upload = multer({
     storage: multer.memoryStorage(),
-    limits: { fileSize: 20 * 1024 * 1024 },
+    limits: { fileSize: MAX_FILE_SIZE },
     fileFilter: (req, file, cb) => {
-        const allowedTypes = [
-            "image/jpeg",
-            "image/png",
-            "image/webp",
-            "image/heic",
-            "image/heif",
-            "image/gif",
-            "image/avif",
-        ];
-        if (allowedTypes.includes(file.mimetype)) {
+        if (ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
             cb(null, true);
         } else {
-            cb(new Error("Only JPEG, PNG, WebP and HEIC images are allowed"));
+            cb(new Error(ERRORS.invalidImageType));
         }
     },
 });
 
 const app = express();
 
-app.use(
-    cors({
-        origin: ["http://localhost:5173", "https://mimu-reviews.vercel.app"],
-    }),
-);
+app.use(cors({ origin: ALLOWED_ORIGINS }));
 app.use(express.json());
 
 const checkJwt = auth({
@@ -40,6 +69,44 @@ const checkJwt = auth({
     issuerBaseURL: `https://${process.env.AUTH0_DOMAIN}`,
 });
 
+// Helpers
+const uploadImage = async (file, userId) => {
+    const sanitizedUserId = userId.replace("|", "-");
+    const sanitizedFilename = file.originalname.replace(
+        /[^a-zA-Z0-9._-]/g,
+        "_",
+    );
+    const filename = `${sanitizedUserId}/${Date.now()}-${sanitizedFilename}`;
+
+    const { data, error } = await supabase.storage
+        .from(REVIEW_IMAGE_BUCKET)
+        .upload(filename, file.buffer, { contentType: file.mimetype });
+
+    if (error) throw new Error(error.message);
+
+    const { data: urlData } = supabase.storage
+        .from(REVIEW_IMAGE_BUCKET)
+        .getPublicUrl(data.path);
+
+    return urlData.publicUrl;
+};
+
+const getStoragePath = (url, userId) => {
+    const sanitizedUserId = userId.replace("|", "-");
+    const filename = decodeURIComponent(url.split("/").pop());
+    return `${sanitizedUserId}/${filename}`;
+};
+
+const deleteImages = async (urls, userId) => {
+    if (!urls || urls.length === 0) return;
+    const paths = urls.map((url) => getStoragePath(url, userId));
+    const { error } = await supabase.storage
+        .from(REVIEW_IMAGE_BUCKET)
+        .remove(paths);
+    if (error) throw new Error(error.message);
+};
+
+// Validation
 const validateReview = (body) => {
     const {
         restaurant_name,
@@ -51,26 +118,29 @@ const validateReview = (body) => {
     const errors = [];
 
     if (!restaurant_name) {
-        errors.push("Restaurant name is required.");
+        errors.push(ERRORS.restaurantNameRequired);
     } else if (
         typeof restaurant_name !== "string" ||
         restaurant_name.trim().length === 0
     ) {
-        errors.push("Restaurant name must be a non-empty string.");
+        errors.push(ERRORS.restaurantNameInvalid);
     }
 
     if (review_text && typeof review_text !== "string") {
-        errors.push("Review text must be a string.");
-    } else if (review_text && review_text.trim().length > 10000) {
-        errors.push("Review text must be less than 10,000 characters.");
+        errors.push(ERRORS.reviewTextInvalid);
+    } else if (
+        review_text &&
+        review_text.trim().length > MAX_REVIEW_TEXT_LENGTH
+    ) {
+        errors.push(ERRORS.reviewTextTooLong);
     }
 
     const ratings = { food_rating, drink_rating, ambience_rating };
     for (const [name, value] of Object.entries(ratings)) {
         if (value !== null && value !== undefined && value !== "") {
             const parsed = parseFloat(value);
-            if (isNaN(parsed) || parsed < 0.5 || parsed > 5) {
-                errors.push(`${name} must be a number between 0.5 and 5.`);
+            if (isNaN(parsed) || parsed < RATING_MIN || parsed > RATING_MAX) {
+                errors.push(ERRORS.ratingInvalid(name));
             }
         }
     }
@@ -79,23 +149,39 @@ const validateReview = (body) => {
     const missingText = !review_text;
     const missingRatings = !food_rating && !drink_rating && !ambience_rating;
     if (missingRestaurantName || (missingText && missingRatings)) {
-        errors.push(
-            "Restaurant name and either a review text or all three ratings are required.",
-        );
+        errors.push(ERRORS.missingRequiredFields);
     }
 
     return errors;
 };
 
-app.listen(3000, () => {
-    console.log("Server running on http://localhost:3000");
+// Routes
+app.get("/reviews", checkJwt, async (req, res) => {
+    const { data, error } = await supabase
+        .from("reviews")
+        .select("*")
+        .order("visit_date", { ascending: false });
+
+    if (error) return res.status(500).json({ error: error.message });
+    res.status(200).json(data);
+});
+
+app.get("/reviews/public", async (req, res) => {
+    const { data, error } = await supabase
+        .from("reviews")
+        .select("*")
+        .eq("is_public", true)
+        .order("visit_date", { ascending: false });
+
+    if (error) return res.status(500).json({ error: error.message });
+    res.status(200).json(data);
 });
 
 app.post(
     "/reviews",
     checkJwt,
     (req, res, next) => {
-        upload.array("images", 5)(req, res, (err) => {
+        upload.array("images", MAX_IMAGES_PER_REVIEW)(req, res, (err) => {
             if (err) return res.status(400).json({ errors: [err.message] });
             next();
         });
@@ -117,129 +203,178 @@ app.post(
         } = req.body;
         const user_id = req.auth.payload.sub;
 
-        const image_urls = [];
-        if (req.files && req.files.length > 0) {
-            for (const file of req.files) {
-                const sanitizedUserId = user_id.replace("|", "-");
-                const sanitizedFilename = file.originalname.replace(
-                    /[^a-zA-Z0-9._-]/g,
-                    "_",
-                );
-                const filename = `${sanitizedUserId}/${Date.now()}-${sanitizedFilename}`;
-                const { data, error } = await supabase.storage
-                    .from("review-images")
-                    .upload(filename, file.buffer, {
-                        contentType: file.mimetype,
-                    });
+        try {
+            const image_urls = await Promise.all(
+                (req.files || []).map((file) => uploadImage(file, user_id)),
+            );
 
-                if (error)
-                    return res.status(500).json({ error: error.message });
+            const { data, error } = await supabase
+                .from("reviews")
+                .insert([
+                    {
+                        user_id,
+                        restaurant_name: restaurant_name.trim(),
+                        review_text: review_text ? review_text.trim() : null,
+                        food_rating: food_rating
+                            ? parseFloat(food_rating)
+                            : null,
+                        drink_rating: drink_rating
+                            ? parseFloat(drink_rating)
+                            : null,
+                        ambience_rating: ambience_rating
+                            ? parseFloat(ambience_rating)
+                            : null,
+                        reviewer_name: reviewer_name || null,
+                        reviewer_picture: reviewer_picture || null,
+                        visit_date:
+                            visit_date ||
+                            new Date().toISOString().split("T")[0],
+                        is_public: is_public === "true",
+                        image_urls,
+                    },
+                ])
+                .select();
 
-                const { data: urlData } = supabase.storage
-                    .from("review-images")
-                    .getPublicUrl(data.path);
-
-                image_urls.push(urlData.publicUrl);
-            }
+            if (error) return res.status(500).json({ error: error.message });
+            res.status(201).json(data[0]);
+        } catch (err) {
+            res.status(500).json({ error: err.message });
         }
-
-        const { data, error } = await supabase
-            .from("reviews")
-            .insert([
-                {
-                    user_id,
-                    restaurant_name: restaurant_name.trim(),
-                    review_text: review_text ? review_text.trim() : null,
-                    food_rating: food_rating ? parseFloat(food_rating) : null,
-                    drink_rating: drink_rating
-                        ? parseFloat(drink_rating)
-                        : null,
-                    ambience_rating: ambience_rating
-                        ? parseFloat(ambience_rating)
-                        : null,
-                    reviewer_name: reviewer_name || null,
-                    reviewer_picture: reviewer_picture || null,
-                    visit_date:
-                        visit_date || new Date().toISOString().split("T")[0],
-                    is_public: is_public === "true",
-                    image_urls,
-                },
-            ])
-            .select();
-
-        if (error) return res.status(500).json({ error: error.message });
-        res.status(201).json(data[0]);
     },
 );
 
-app.get("/reviews", checkJwt, async (req, res) => {
-    const { data, error } = await supabase
-        .from("reviews")
-        .select("*")
-        .order("visit_date", { ascending: false });
+app.patch(
+    "/reviews/:id",
+    checkJwt,
+    upload.array("images", MAX_IMAGES_PER_REVIEW),
+    async (req, res) => {
+        const { id } = req.params;
+        const user_id = req.auth.payload.sub;
 
-    if (error) return res.status(500).json({ error: error.message });
+        const { data: review, error: fetchError } = await supabase
+            .from("reviews")
+            .select("*")
+            .eq("id", id)
+            .single();
 
-    res.status(200).json(data);
-});
+        if (fetchError || !review)
+            return res.status(404).json({ error: ERRORS.reviewNotFound });
+        if (review.user_id !== user_id)
+            return res.status(403).json({ error: ERRORS.unauthorised });
 
-app.get("/reviews/public", async (req, res) => {
-    const { data, error } = await supabase
-        .from("reviews")
-        .select("*")
-        .eq("is_public", true)
-        .order("visit_date", { ascending: false });
+        const updates = {};
 
-    if (error) return res.status(500).json({ error: error.message });
+        if (req.body.is_public !== undefined) {
+            updates.is_public =
+                req.body.is_public === "true" || req.body.is_public === true;
+        }
 
-    res.status(200).json(data);
-});
+        if (req.body.restaurant_name !== undefined) {
+            const name = req.body.restaurant_name.trim();
+            if (!name || name.length > MAX_RESTAURANT_NAME_LENGTH) {
+                return res
+                    .status(400)
+                    .json({ error: ERRORS.invalidRestaurantName });
+            }
+            updates.restaurant_name = name;
+        }
+
+        if (req.body.review_text !== undefined) {
+            updates.review_text = req.body.review_text.trim() || null;
+        }
+
+        for (const field of [
+            "food_rating",
+            "drink_rating",
+            "ambience_rating",
+        ]) {
+            if (req.body[field] !== undefined) {
+                const val =
+                    req.body[field] === "" ? null : parseFloat(req.body[field]);
+                if (
+                    val !== null &&
+                    (isNaN(val) || val < RATING_MIN || val > RATING_MAX)
+                ) {
+                    return res
+                        .status(400)
+                        .json({ error: ERRORS.invalidRating(field) });
+                }
+                updates[field] = val;
+            }
+        }
+
+        if (req.body.visit_date !== undefined) {
+            updates.visit_date = req.body.visit_date || null;
+        }
+
+        try {
+            if (req.body.image_urls !== undefined) {
+                const updatedUrls = JSON.parse(req.body.image_urls);
+                const removedUrls = (review.image_urls || []).filter(
+                    (url) => !updatedUrls.includes(url),
+                );
+                await deleteImages(removedUrls, user_id);
+                updates.image_urls = updatedUrls;
+            }
+
+            if (req.files && req.files.length > 0) {
+                const existingUrls =
+                    updates.image_urls || review.image_urls || [];
+                if (
+                    existingUrls.length + req.files.length >
+                    MAX_IMAGES_PER_REVIEW
+                ) {
+                    return res.status(400).json({ error: ERRORS.maxPhotos });
+                }
+                const newUrls = await Promise.all(
+                    req.files.map((file) => uploadImage(file, user_id)),
+                );
+                updates.image_urls = [...existingUrls, ...newUrls];
+            }
+
+            const { data, error } = await supabase
+                .from("reviews")
+                .update(updates)
+                .eq("id", id)
+                .select();
+
+            if (error) return res.status(500).json({ error: error.message });
+            res.status(200).json(data[0]);
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    },
+);
 
 app.delete("/reviews/:id", checkJwt, async (req, res) => {
     const { id } = req.params;
     const user_id = req.auth.payload.sub;
 
-    // Fetch the review first to verify ownership and get image URLs
     const { data: review, error: fetchError } = await supabase
         .from("reviews")
         .select("*")
         .eq("id", id)
         .single();
 
-    if (fetchError || !review) {
-        return res.status(404).json({ error: "Review not found" });
+    if (fetchError || !review)
+        return res.status(404).json({ error: ERRORS.reviewNotFound });
+    if (review.user_id !== user_id)
+        return res.status(403).json({ error: ERRORS.unauthorised });
+
+    try {
+        await deleteImages(review.image_urls, user_id);
+
+        const { error: deleteError } = await supabase
+            .from("reviews")
+            .delete()
+            .eq("id", id);
+
+        if (deleteError)
+            return res.status(500).json({ error: deleteError.message });
+        res.status(200).json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
-
-    if (review.user_id !== user_id) {
-        return res.status(403).json({ error: "Unauthorised" });
-    }
-
-    // Delete images from Supabase Storage
-    if (review.image_urls && review.image_urls.length > 0) {
-        const sanitizedUserId = user_id.replace("|", "-");
-        const paths = review.image_urls.map((url) => {
-            const filename = decodeURIComponent(url.split("/").pop());
-            return `${sanitizedUserId}/${filename}`;
-        });
-
-        const { error: storageError } = await supabase.storage
-            .from("review-images")
-            .remove(paths);
-
-        if (storageError) {
-            return res.status(500).json({ error: storageError.message });
-        }
-    }
-
-    // Delete the review
-    const { error: deleteError } = await supabase
-        .from("reviews")
-        .delete()
-        .eq("id", id);
-
-    if (deleteError) {
-        return res.status(500).json({ error: deleteError.message });
-    }
-
-    res.status(200).json({ success: true });
 });
+
+app.listen(3000, () => console.log("Server running on http://localhost:3000"));

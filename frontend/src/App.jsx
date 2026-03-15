@@ -1,18 +1,20 @@
-import { useAuth0 } from "@auth0/auth0-react";
 import { useState, useEffect } from "react";
+import { useAuth0 } from "@auth0/auth0-react";
 import { motion, AnimatePresence } from "framer-motion";
-import ReviewForm from "./components/ReviewForm";
-import ReviewList from "./components/ReviewList";
-import Navbar from "./components/Navbar";
-import Button from "./components/Button";
+import Button from "./components/ui/Button";
+import Navbar from "./components/layout/Navbar";
+import ReviewForm from "./components/reviews/ReviewForm";
+import ReviewList from "./components/reviews/ReviewList";
 import { themes } from "./themes";
 import { text } from "./resources";
 
 function App() {
     const { isLoading, isAuthenticated, user } = useAuth0();
-    const [refreshTrigger, setRefreshTrigger] = useState(0);
+
     const [formOpen, setFormOpen] = useState(false);
     const [justSubmitted, setJustSubmitted] = useState(false);
+
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [scrollToId, setScrollToId] = useState(null);
 
     const handleReviewSubmitted = (newId) => {
@@ -121,7 +123,7 @@ function App() {
                     onReviewsLoaded={handleReviewsLoaded}
                     scrollToId={scrollToId}
                     currentUserId={user.sub}
-                    onReviewDeleted={() =>
+                    onReviewUpdated={() =>
                         setRefreshTrigger((prev) => prev + 1)
                     }
                 />
