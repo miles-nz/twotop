@@ -48,7 +48,7 @@ export function useReviewCardEditing(review, onReviewUpdated) {
                 },
             );
             if (!response.ok) throw new Error("Failed to update");
-            onReviewUpdated();
+            onReviewUpdated(review.id);
         } finally {
             setSaving(false);
         }

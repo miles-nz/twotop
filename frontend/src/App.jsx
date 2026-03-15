@@ -123,9 +123,10 @@ function App() {
                     onReviewsLoaded={handleReviewsLoaded}
                     scrollToId={scrollToId}
                     currentUserId={user.sub}
-                    onReviewUpdated={() =>
-                        setRefreshTrigger((prev) => prev + 1)
-                    }
+                    onReviewUpdated={(id) => {
+                        if (id) setScrollToId(id);
+                        setRefreshTrigger((prev) => prev + 1);
+                    }}
                 />
             </div>
         </motion.div>
