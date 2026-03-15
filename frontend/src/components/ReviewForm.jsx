@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { motion } from "framer-motion";
 import RatingField from "./RatingField";
 import Button from "./Button";
 import { text, placeholders } from "../resources";
+import { ImagePlus, X } from "lucide-react";
 
 const inputClass =
     "w-full border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400";
@@ -25,6 +26,9 @@ function ReviewForm({ onReviewSubmitted }) {
     const [submitting, setSubmitting] = useState(false);
     const [placeholder] = useState(getRandomPlaceholder());
     const [isPublic, setIsPublic] = useState(false);
+    const [images, setImages] = useState([]);
+
+    const fileInputRef = useRef(null);
 
     const getLocalDate = () => {
         const today = new Date();
@@ -37,29 +41,33 @@ function ReviewForm({ onReviewSubmitted }) {
 
         try {
             const token = await getAccessTokenSilently();
+            const formData = new FormData();
+            formData.append("restaurant_name", restaurantName);
+            formData.append("review_text", reviewText);
+            formData.append(
+                "food_rating",
+                foodRating ? parseFloat(foodRating) : "",
+            );
+            formData.append(
+                "drink_rating",
+                drinkRating ? parseFloat(drinkRating) : "",
+            );
+            formData.append(
+                "ambience_rating",
+                ambienceRating ? parseFloat(ambienceRating) : "",
+            );
+            formData.append("visit_date", visitDate || getLocalDate());
+            formData.append("reviewer_name", user?.name || "");
+            formData.append("reviewer_picture", user?.picture || "");
+            formData.append("is_public", isPublic);
+            images.forEach((image) => formData.append("images", image));
+
             const response = await fetch(
                 `${import.meta.env.VITE_API_URL}/reviews`,
                 {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({
-                        restaurant_name: restaurantName,
-                        review_text: reviewText,
-                        food_rating: foodRating ? parseFloat(foodRating) : null,
-                        drink_rating: drinkRating
-                            ? parseFloat(drinkRating)
-                            : null,
-                        ambience_rating: ambienceRating
-                            ? parseFloat(ambienceRating)
-                            : null,
-                        visit_date: visitDate || getLocalDate(),
-                        reviewer_name: user?.name || null,
-                        reviewer_picture: user?.picture || null,
-                        is_public: isPublic,
-                    }),
+                    headers: { Authorization: `Bearer ${token}` },
+                    body: formData,
                 },
             );
 
@@ -76,6 +84,7 @@ function ReviewForm({ onReviewSubmitted }) {
             setDrinkRating("");
             setAmbienceRating("");
             setvisitDate("");
+            setImages([]);
             onReviewSubmitted(data.id);
             setIsPublic(false);
         } catch (err) {
@@ -83,6 +92,29 @@ function ReviewForm({ onReviewSubmitted }) {
         } finally {
             setSubmitting(false);
         }
+    };
+
+    const handleImageChange = (e) => {
+        const files = Array.from(e.target.files);
+
+        const oversizedFiles = files.filter(
+            (file) => file.size > 20 * 1024 * 1024,
+        );
+        if (oversizedFiles.length > 0) {
+            setError([text.errorImageSize]);
+            return;
+        }
+
+        if (files.length + images.length > 5) {
+            setError([text.errorMaxImages]);
+            return;
+        }
+
+        setImages((prev) => [...prev, ...files].slice(0, 5));
+    };
+
+    const handleImageRemove = (index) => {
+        setImages((prev) => prev.filter((_, i) => i !== index));
     };
 
     return (
@@ -153,13 +185,52 @@ function ReviewForm({ onReviewSubmitted }) {
                 <label className="block text-sm font-medium text-text-mid mb-1">
                     {text.reviewNotesLabel}
                 </label>
-                <textarea
-                    value={reviewText}
-                    onChange={(e) => setReviewText(e.target.value)}
-                    className={`${inputClass} h-28 resize-none placeholder-text-light`}
-                    placeholder={text.reviewNotesPlaceholder}
-                />
+                <div className="relative">
+                    <textarea
+                        value={reviewText}
+                        onChange={(e) => setReviewText(e.target.value)}
+                        className={`${inputClass} h-28 resize-none placeholder-text-light`}
+                        placeholder={text.reviewNotesPlaceholder}
+                    />
+                    <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                        multiple
+                        onChange={handleImageChange}
+                        className="hidden"
+                        ref={fileInputRef}
+                    />
+                    <button
+                        type="button"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            fileInputRef.current.click();
+                        }}
+                        className="absolute bottom-2 right-2 pb-2 text-secondary-400 hover:text-secondary-600 cursor-pointer transition-colors"
+                    >
+                        <ImagePlus size={24} />
+                    </button>
+                </div>
             </div>
+
+            {images.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                    {images.map((image, index) => (
+                        <div key={index} className="relative">
+                            <img
+                                src={URL.createObjectURL(image)}
+                                className="w-16 h-16 object-cover rounded-lg"
+                            />
+                            <button
+                                onClick={() => handleImageRemove(index)}
+                                className="absolute -top-1 -right-1 bg-surface-300 rounded-full w-4 h-4 text-xs flex items-center justify-center cursor-pointer"
+                            >
+                                <X size={10} />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            )}
 
             <div className="mb-4 flex items-center justify-between bg-surface-100 rounded-lg px-4 py-3 border border-surface-200">
                 <div>
@@ -182,7 +253,7 @@ function ReviewForm({ onReviewSubmitted }) {
             </div>
 
             {error && (
-                <div className="bg-surface-50 rounded-2xl shadow-md p-6 mb-6 border border-surface-200">
+                <div className="bg-surface-50 rounded-2xl shadow-md p-6 mb-4 border border-surface-200">
                     {Array.isArray(error) ? (
                         error.map((err, index) => (
                             <p key={index} className="text-primary-600 text-sm">
@@ -195,13 +266,15 @@ function ReviewForm({ onReviewSubmitted }) {
                 </div>
             )}
 
-            <Button
-                onClick={handleSubmit}
-                disabled={submitting}
-                variant="secondary"
-            >
-                {submitting ? text.submitting : text.submitReview}
-            </Button>
+            <div className="flex items-center justify-between">
+                <Button
+                    onClick={handleSubmit}
+                    disabled={submitting}
+                    variant="secondary"
+                >
+                    {submitting ? text.submitting : text.submitReview}
+                </Button>
+            </div>
         </motion.div>
     );
 }

@@ -18,6 +18,7 @@ function ReviewList({
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [expandedId, setExpandedId] = useState(null);
 
     useEffect(() => {
         const fetchReviews = async () => {
@@ -70,6 +71,10 @@ function ReviewList({
         }
     }, [scrollToId, reviews]);
 
+    const handleExpand = (id) => {
+        setExpandedId((prev) => (prev === id ? null : id));
+    };
+
     if (loading) {
         return (
             <div className={statusCardClass}>
@@ -100,6 +105,8 @@ function ReviewList({
                     review={review}
                     size="sm"
                     isNew={review.id === scrollToId}
+                    isExpanded={review.id === expandedId}
+                    onExpand={() => handleExpand(review.id)}
                 />
             ))}
         </div>

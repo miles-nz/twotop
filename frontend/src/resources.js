@@ -43,6 +43,12 @@ export const text = {
     reviewNotesLabel: "Review notes",
     reviewNotesPlaceholder: "Write your review here...",
     markAsPublic: "Mark as Public",
+    imagesLabel: "Photos",
+    uploadImages: "Upload Photos",
+    reviewPhoto: "Review photo",
+    reviewPhotoIndex: (index) => `Review photo ${index + 1}`,
+    photoCount: (count) =>
+        `${count} ${count === 1 ? "photo" : "photos"} - tap to view`,
 
     loading: "Loading...",
     loadingReviews: "Loading reviews...",
@@ -52,4 +58,6 @@ export const text = {
     errorGeneric: "Something went wrong, please try again",
     errorFailedSubmit: "Failed to submit review.",
     errorFailedFetch: "Failed to fetch reviews.",
+    errorMaxImages: "You can upload a maximum of 5 images",
+    errorImageSize: "Images must be 20MB or less",
 };

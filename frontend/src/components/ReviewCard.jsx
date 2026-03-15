@@ -3,10 +3,11 @@ import RatingField from "./RatingField";
 import Avatar from "./Avatar";
 import { themes } from "../themes";
 import { text } from "../resources";
+import ImageCarousel from "./ImageCarousel";
 
 const glowShadow = "0 0 10px var(--color-primary-500)";
 
-function ReviewCard({ review, size = "md", isNew }) {
+function ReviewCard({ review, size = "md", isNew, isExpanded, onExpand }) {
     const theme = themes[review.user_id] || {};
     const themeStyle = Object.fromEntries(
         Object.entries(theme).map(([key, value]) => [key, value]),
@@ -49,6 +50,30 @@ function ReviewCard({ review, size = "md", isNew }) {
                     </div>
                 </div>
             </div>
+
+            {review.image_urls && review.image_urls.length > 0 && (
+                <div className="px-6 pb-4">
+                    <div
+                        className="rounded-xl overflow-hidden cursor-pointer"
+                        onClick={onExpand}
+                    >
+                        {isExpanded ? (
+                            <ImageCarousel images={review.image_urls} />
+                        ) : (
+                            <div
+                                className="w-full h-16 rounded-xl bg-cover bg-center flex items-center justify-center"
+                                style={{
+                                    backgroundImage: `url(${review.image_urls[0]})`,
+                                }}
+                            >
+                                <span className="bg-black/40 text-white text-xs px-2 py-1 rounded-full">
+                                    {text.photoCount(review.image_urls.length)}
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {(review.food_rating ||
                 review.drink_rating ||

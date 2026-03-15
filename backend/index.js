@@ -4,6 +4,28 @@ const cors = require("cors");
 const { auth } = require("express-oauth2-jwt-bearer");
 const supabase = require("./supabase");
 
+const multer = require("multer");
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 20 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = [
+            "image/jpeg",
+            "image/png",
+            "image/webp",
+            "image/heic",
+            "image/heif",
+            "image/gif",
+            "image/avif",
+        ];
+        if (allowedTypes.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error("Only JPEG, PNG, WebP and HEIC images are allowed"));
+        }
+    },
+});
+
 const app = express();
 
 app.use(
@@ -46,7 +68,8 @@ const validateReview = (body) => {
     const ratings = { food_rating, drink_rating, ambience_rating };
     for (const [name, value] of Object.entries(ratings)) {
         if (value !== null && value !== undefined && value !== "") {
-            if (typeof value !== "number" || value < 0.5 || value > 5) {
+            const parsed = parseFloat(value);
+            if (isNaN(parsed) || parsed < 0.5 || parsed > 5) {
                 errors.push(`${name} must be a number between 0.5 and 5.`);
             }
         }
@@ -68,51 +91,82 @@ app.listen(3000, () => {
     console.log("Server running on http://localhost:3000");
 });
 
-app.post("/reviews", checkJwt, async (req, res) => {
-    const errors = validateReview(req.body);
+app.post(
+    "/reviews",
+    checkJwt,
+    (req, res, next) => {
+        upload.array("images", 5)(req, res, (err) => {
+            if (err) return res.status(400).json({ errors: [err.message] });
+            next();
+        });
+    },
+    async (req, res) => {
+        const errors = validateReview(req.body);
+        if (errors.length > 0) return res.status(400).json({ errors });
 
-    if (errors.length > 0) {
-        return res.status(400).json({ errors });
-    }
+        const {
+            restaurant_name,
+            review_text,
+            food_rating,
+            drink_rating,
+            ambience_rating,
+            reviewer_name,
+            reviewer_picture,
+            visit_date,
+            is_public,
+        } = req.body;
+        const user_id = req.auth.payload.sub;
 
-    const {
-        restaurant_name,
-        review_text,
-        food_rating,
-        drink_rating,
-        ambience_rating,
-        reviewer_name,
-        reviewer_picture,
-        visit_date,
-        is_public,
-    } = req.body;
-    const user_id = req.auth.payload.sub;
+        const image_urls = [];
+        if (req.files && req.files.length > 0) {
+            for (const file of req.files) {
+                const sanitizedUserId = user_id.replace("|", "-");
+                const filename = `${sanitizedUserId}/${Date.now()}-${file.originalname}`;
+                const { data, error } = await supabase.storage
+                    .from("review-images")
+                    .upload(filename, file.buffer, {
+                        contentType: file.mimetype,
+                    });
 
-    const { data, error } = await supabase
-        .from("reviews")
-        .insert([
-            {
-                user_id,
-                restaurant_name: restaurant_name.trim(),
-                review_text: review_text ? review_text.trim() : null,
-                food_rating: food_rating || null,
-                drink_rating: drink_rating || null,
-                ambience_rating: ambience_rating || null,
-                reviewer_name: reviewer_name || null,
-                reviewer_picture: reviewer_picture || null,
-                visit_date:
-                    visit_date || new Date().toISOString().split("T")[0],
-                is_public: is_public === true,
-            },
-        ])
-        .select();
+                if (error)
+                    return res.status(500).json({ error: error.message });
 
-    if (error) {
-        return res.status(500).json({ error: error.message });
-    }
+                const { data: urlData } = supabase.storage
+                    .from("review-images")
+                    .getPublicUrl(data.path);
 
-    res.status(201).json(data[0]);
-});
+                image_urls.push(urlData.publicUrl);
+            }
+        }
+
+        const { data, error } = await supabase
+            .from("reviews")
+            .insert([
+                {
+                    user_id,
+                    restaurant_name: restaurant_name.trim(),
+                    review_text: review_text ? review_text.trim() : null,
+                    food_rating: food_rating ? parseFloat(food_rating) : null,
+                    drink_rating: drink_rating
+                        ? parseFloat(drink_rating)
+                        : null,
+                    ambience_rating: ambience_rating
+                        ? parseFloat(ambience_rating)
+                        : null,
+                    reviewer_name: reviewer_name || null,
+                    reviewer_picture: reviewer_picture || null,
+                    visit_date:
+                        visit_date || new Date().toISOString().split("T")[0],
+                    is_public: is_public === "true",
+                    image_urls,
+                },
+            ])
+            .select();
+
+        if (error) return res.status(500).json({ error: error.message });
+        res.status(201).json(data[0]);
+    },
+);
 
 app.get("/reviews", checkJwt, async (req, res) => {
     const { data, error } = await supabase
