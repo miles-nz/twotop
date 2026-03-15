@@ -4,11 +4,12 @@ import Avatar from "./Avatar";
 import { themes } from "../themes";
 import { text } from "../resources";
 import ImageCarousel from "./ImageCarousel";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { MoreHorizontal, Trash2 } from "lucide-react";
 import { useAuth0 } from "@auth0/auth0-react";
 import ConfirmModal from "./ConfirmModal";
 import { useReviewList } from "../contexts/ReviewListContext";
+import LoadingOverlay from "./LoadingOverlay";
 
 const glowShadow = "0 0 10px var(--color-primary-500)";
 
@@ -36,6 +37,16 @@ function ReviewCard({
 
     const { getAccessTokenSilently } = useAuth0();
     const [confirmOpen, setConfirmOpen] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+    const carouselRef = useRef(null);
+    const [expandedHeight, setExpandedHeight] = useState(64);
+    const [isCollapsed, setIsCollapsed] = useState(true);
+
+    useEffect(() => {
+        if (carouselRef.current) {
+            setExpandedHeight(carouselRef.current.offsetWidth);
+        }
+    }, []);
 
     useEffect(() => {
         if (!menuOpen) return;
@@ -45,6 +56,7 @@ function ReviewCard({
     }, [menuOpen]);
 
     const handleDelete = async () => {
+        setDeleting(true);
         try {
             const token = await getAccessTokenSilently();
             const response = await fetch(
@@ -58,6 +70,7 @@ function ReviewCard({
             onReviewDeleted();
         } catch (err) {
             console.error(err);
+            setDeleting(false);
         }
         setConfirmOpen(false);
     };
@@ -132,23 +145,38 @@ function ReviewCard({
             {review.image_urls && review.image_urls.length > 0 && (
                 <div className="px-6 pb-4">
                     <div
+                        ref={carouselRef}
                         className="rounded-xl overflow-hidden cursor-pointer"
                         onClick={() => handleExpand(review.id)}
                     >
-                        {isExpanded ? (
+                        <motion.div
+                            initial={{ height: 64 }}
+                            animate={{
+                                height: isExpanded ? expandedHeight : 64,
+                            }}
+                            transition={{ duration: 0.3, ease: "easeInOut" }}
+                            className="overflow-hidden relative"
+                            onAnimationComplete={(definition) => {
+                                if ("height" in definition)
+                                    setIsCollapsed(!isExpanded);
+                            }}
+                        >
                             <ImageCarousel images={review.image_urls} />
-                        ) : (
-                            <div
-                                className="w-full h-16 rounded-xl bg-cover bg-center flex items-center justify-center"
-                                style={{
-                                    backgroundImage: `url(${review.image_urls[0]})`,
-                                }}
-                            >
-                                <span className="bg-black/40 text-white text-xs px-2 py-1 rounded-full">
-                                    {text.photoCount(review.image_urls.length)}
-                                </span>
-                            </div>
-                        )}
+                            {isCollapsed && !isExpanded && (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="absolute inset-0 flex items-center justify-center"
+                                >
+                                    <span className="bg-black/40 text-white text-xs px-2 py-1 rounded-full">
+                                        {text.photoCount(
+                                            review.image_urls.length,
+                                        )}
+                                    </span>
+                                </motion.div>
+                            )}
+                        </motion.div>
                     </div>
                 </div>
             )}
@@ -201,7 +229,9 @@ function ReviewCard({
                 onConfirm={handleDelete}
                 onCancel={() => setConfirmOpen(false)}
                 message={text.confirmDeleteReview}
+                deleting={deleting}
             />
+            <LoadingOverlay isVisible={deleting} />
         </motion.div>
     );
 }

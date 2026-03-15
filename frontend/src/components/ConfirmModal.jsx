@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Button from "./Button";
 import { text } from "../resources";
 
-function ConfirmModal({ isOpen, onConfirm, onCancel, message }) {
+function ConfirmModal({ isOpen, onConfirm, onCancel, message, deleting }) {
     return createPortal(
         <AnimatePresence>
             {isOpen && (
@@ -29,8 +29,12 @@ function ConfirmModal({ isOpen, onConfirm, onCancel, message }) {
                             <Button variant="surface" onClick={onCancel}>
                                 {text.cancel}
                             </Button>
-                            <Button variant="error" onClick={onConfirm}>
-                                {text.delete}
+                            <Button
+                                variant="error"
+                                onClick={onConfirm}
+                                disabled={deleting}
+                            >
+                                {deleting ? text.deleting : text.delete}
                             </Button>
                         </div>
                     </motion.div>

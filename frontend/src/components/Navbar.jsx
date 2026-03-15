@@ -7,7 +7,7 @@ function Navbar() {
     const { user, logout, isAuthenticated, loginWithRedirect } = useAuth0();
 
     return (
-        <nav className="bg-surface-50 border-b border-surface-200 shadow-sm sticky top-0 z-10">
+        <nav className="bg-surface-50 border-b border-surface-200 shadow-sm sticky top-0 z-50">
             <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
                 <h1
                     style={{

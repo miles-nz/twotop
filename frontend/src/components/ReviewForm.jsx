@@ -5,6 +5,7 @@ import RatingField from "./RatingField";
 import Button from "./Button";
 import { text, placeholders } from "../resources";
 import { ImagePlus, X } from "lucide-react";
+import LoadingOverlay from "./LoadingOverlay";
 
 const inputClass =
     "w-full border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400";
@@ -278,6 +279,7 @@ function ReviewForm({ onReviewSubmitted }) {
                     {submitting ? text.submitting : text.submitReview}
                 </Button>
             </div>
+            <LoadingOverlay isVisible={submitting} />
         </motion.div>
     );
 }

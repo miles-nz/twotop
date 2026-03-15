@@ -51,9 +51,9 @@ export const text = {
         `${count} ${count === 1 ? "photo" : "photos"} - tap to view`,
 
     loading: "Loading...",
-    loadingReviews: "Loading reviews...",
     cancel: "Cancel",
     delete: "Delete",
+    deleting: "Deleting...",
     confirmDeleteReview: "Are you sure you want to delete this review?",
 
     noReviews: "No reviews yet.",

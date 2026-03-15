@@ -3,6 +3,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import ReviewCard from "./ReviewCard";
 import { text } from "../resources";
 import { ReviewListProvider } from "../contexts/ReviewListContext";
+import { motion } from "framer-motion";
 
 const statusCardClass =
     "bg-surface-50 rounded-2xl shadow-md p-6 text-center border border-surface-200";
@@ -50,7 +51,7 @@ function ReviewList({
                     return;
                 }
 
-                setReviews(data);
+                setReviews(alternateReviewers(data));
                 if (onReviewsLoaded) onReviewsLoaded(data.length);
             } catch (err) {
                 setError(text.errorGeneric);
@@ -72,10 +73,49 @@ function ReviewList({
         }
     }, [scrollToId, reviews]);
 
+    const alternateReviewers = (reviews) => {
+        const result = [...reviews];
+
+        for (let i = 1; i < result.length; i++) {
+            if (result[i].user_id === result[i - 1].user_id) {
+                // Look ahead for a different reviewer with the same date
+                const sameDate = result[i - 1].visit_date;
+                const swapIndex = result.findIndex(
+                    (r, idx) =>
+                        idx > i &&
+                        r.user_id !== result[i].user_id &&
+                        r.visit_date === sameDate,
+                );
+                if (swapIndex !== -1) {
+                    [result[i], result[swapIndex]] = [
+                        result[swapIndex],
+                        result[i],
+                    ];
+                }
+            }
+        }
+
+        return result;
+    };
+
     if (loading) {
         return (
             <div className={statusCardClass}>
-                <p className="text-text-light">{text.loadingReviews}</p>
+                <div className="flex items-center justify-center gap-1.5">
+                    {[0, 1, 2].map((i) => (
+                        <motion.div
+                            key={i}
+                            className="w-2 h-2 rounded-full bg-primary-400"
+                            animate={{ y: [0, -8, 0] }}
+                            transition={{
+                                duration: 0.6,
+                                repeat: Infinity,
+                                delay: i * 0.15,
+                                ease: "easeInOut",
+                            }}
+                        />
+                    ))}
+                </div>
             </div>
         );
     }

@@ -1,10 +1,59 @@
 import useEmblaCarousel from "embla-carousel-react";
-import { useCallback } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { text } from "../resources";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { motion } from "framer-motion";
 
 const arrowClass =
     "absolute top-1/2 -translate-y-1/2 bg-black/40 text-white rounded-full w-8 h-8 flex items-center justify-center cursor-pointer";
+
+function CarouselSlide({ src, alt }) {
+    const [loaded, setLoaded] = useState(false);
+    const imgRef = useRef(null);
+
+    useEffect(() => {
+        if (imgRef.current?.complete) {
+            setLoaded(true);
+        }
+    }, []);
+
+    return (
+        <div className="relative w-full h-full">
+            {!loaded && (
+                <div
+                    className="absolute inset-0 flex items-center justify-center"
+                    style={{
+                        backgroundColor: "var(--color-secondary-400)",
+                        opacity: 0.8,
+                    }}
+                >
+                    <div className="flex items-center gap-1.5">
+                        {[0, 1, 2].map((i) => (
+                            <motion.div
+                                key={i}
+                                className="w-3 h-3 rounded-full bg-white"
+                                animate={{ y: [0, -8, 0] }}
+                                transition={{
+                                    duration: 0.6,
+                                    repeat: Infinity,
+                                    delay: i * 0.15,
+                                    ease: "easeInOut",
+                                }}
+                            />
+                        ))}
+                    </div>
+                </div>
+            )}
+            <img
+                ref={imgRef}
+                src={src}
+                alt={alt}
+                className={`w-full h-full object-cover object-center transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0"}`}
+                onLoad={() => setLoaded(true)}
+            />
+        </div>
+    );
+}
 
 function ImageCarousel({ images }) {
     const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false });
@@ -27,16 +76,15 @@ function ImageCarousel({ images }) {
                     {images.map((url, index) => (
                         <div
                             key={index}
-                            className="flex-none w-full aspect-square bg-surface-200"
+                            className="flex-none w-full aspect-square"
                         >
-                            <img
+                            <CarouselSlide
                                 src={url}
                                 alt={
                                     index === 0
                                         ? text.reviewPhoto
                                         : text.reviewPhotoIndex(index)
                                 }
-                                className="w-full h-full object-cover"
                             />
                         </div>
                     ))}
