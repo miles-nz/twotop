@@ -185,12 +185,13 @@ function ReviewForm({ onReviewSubmitted }) {
                 <label className="block text-sm font-medium text-text-mid mb-1">
                     {text.reviewNotesLabel}
                 </label>
-                <div className="relative">
+                <div className={`${inputClass} relative`}>
                     <textarea
                         value={reviewText}
                         onChange={(e) => setReviewText(e.target.value)}
-                        className={`${inputClass} h-28 resize-none placeholder-text-light`}
+                        className="w-full resize-none placeholder-text-light bg-transparent focus:outline-none pb-10"
                         placeholder={text.reviewNotesPlaceholder}
+                        rows={4}
                     />
                     <input
                         type="file"
@@ -200,37 +201,39 @@ function ReviewForm({ onReviewSubmitted }) {
                         className="hidden"
                         ref={fileInputRef}
                     />
-                    <button
-                        type="button"
-                        onClick={(e) => {
-                            e.preventDefault();
-                            fileInputRef.current.click();
-                        }}
-                        className="absolute bottom-2 right-2 pb-2 text-secondary-400 hover:text-secondary-600 cursor-pointer transition-colors"
-                    >
-                        <ImagePlus size={24} />
-                    </button>
+                    <div className="absolute bottom-1 right-1 flex items-center gap-1 p-2">
+                        <div className="flex gap-1">
+                            {images.map((image, index) => (
+                                <div key={index} className="relative">
+                                    <img
+                                        src={URL.createObjectURL(image)}
+                                        className="w-6 h-6 object-cover rounded"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => handleImageRemove(index)}
+                                        className="absolute -top-1 -right-1 bg-surface-300 rounded-full w-3 h-3 flex items-center justify-center cursor-pointer"
+                                    >
+                                        <X size={8} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                        {images.length < 5 && (
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    fileInputRef.current.click();
+                                }}
+                                className="text-secondary-400 hover:text-secondary-600 cursor-pointer transition-colors"
+                            >
+                                <ImagePlus size={24} />
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
-
-            {images.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-4">
-                    {images.map((image, index) => (
-                        <div key={index} className="relative">
-                            <img
-                                src={URL.createObjectURL(image)}
-                                className="w-16 h-16 object-cover rounded-lg"
-                            />
-                            <button
-                                onClick={() => handleImageRemove(index)}
-                                className="absolute -top-1 -right-1 bg-surface-300 rounded-full w-4 h-4 text-xs flex items-center justify-center cursor-pointer"
-                            >
-                                <X size={10} />
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            )}
 
             <div className="mb-4 flex items-center justify-between bg-surface-100 rounded-lg px-4 py-3 border border-surface-200">
                 <div>
