@@ -210,7 +210,7 @@ function ReviewForm({ onReviewSubmitted }) {
                 <label className="block text-sm font-medium text-text-mid mb-2">
                     {text.ratingsLabel}
                 </label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-3 gap-2 sm:gap-4">
                     <RatingField
                         label={text.foodLabel}
                         value={foodRating}

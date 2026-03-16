@@ -86,7 +86,6 @@ function App() {
         >
             <Navbar />
             <div className="max-w-2xl mx-auto pt-6 pb-10 px-4">
-                {" "}
                 <div className="mb-6 flex justify-center">
                     <Button
                         onClick={() => setFormOpen((prev) => !prev)}

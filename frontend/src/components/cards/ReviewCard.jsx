@@ -215,7 +215,7 @@ function ReviewCard({
                 ) : (
                     <>
                         <div className="px-6 pb-4">
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-2">
                                 {review.food_rating && (
                                     <RatingField
                                         label={text.foodLabel}
