@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Check, X, ImagePlus } from "lucide-react";
+import ImageCropModal from "../cards/ImageCropModal";
 
 function EditPhotosUI({
     review,
@@ -6,11 +8,37 @@ function EditPhotosUI({
     setAddPhotoImages,
     removedPhotoUrls,
     addPhotoInputRef,
-    handleAddPhotoChange,
     handleRemoveExistingPhoto,
     handleSavePhotos,
     onClose,
 }) {
+    const [cropQueue, setCropQueue] = useState([]);
+    const [currentCropSrc, setCurrentCropSrc] = useState(null);
+
+    const handleImageChange = (e) => {
+        const files = Array.from(e.target.files);
+        const remaining =
+            5 - (review.image_urls?.length || 0) - addPhotoImages.length;
+        const validFiles = files.slice(0, remaining);
+        const srcs = validFiles.map((file) => URL.createObjectURL(file));
+        setCropQueue(srcs);
+        setCurrentCropSrc(srcs[0]);
+        e.target.value = "";
+    };
+
+    const handleCropConfirm = (croppedFile) => {
+        setAddPhotoImages((prev) => [...prev, croppedFile].slice(0, 5));
+        const remaining = cropQueue.slice(1);
+        setCropQueue(remaining);
+        setCurrentCropSrc(remaining.length > 0 ? remaining[0] : null);
+    };
+
+    const handleCropCancel = () => {
+        const remaining = cropQueue.slice(1);
+        setCropQueue(remaining);
+        setCurrentCropSrc(remaining.length > 0 ? remaining[0] : null);
+    };
+
     return (
         <div className="px-6 pb-4">
             <div className="border border-surface-200 rounded-xl p-4 bg-surface-50">
@@ -65,7 +93,7 @@ function EditPhotosUI({
                                     type="file"
                                     accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
                                     multiple
-                                    onChange={handleAddPhotoChange}
+                                    onChange={handleImageChange}
                                     className="hidden"
                                     ref={addPhotoInputRef}
                                 />
@@ -100,6 +128,13 @@ function EditPhotosUI({
                     </div>
                 </div>
             </div>
+            {currentCropSrc && (
+                <ImageCropModal
+                    imageSrc={currentCropSrc}
+                    onConfirm={handleCropConfirm}
+                    onCancel={handleCropCancel}
+                />
+            )}
         </div>
     );
 }

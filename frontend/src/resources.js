@@ -58,6 +58,8 @@ export const text = {
     reviewPhotoIndex: (index) => `Review photo ${index + 1}`,
     photoCount: (count) =>
         `${count} ${count === 1 ? "photo" : "photos"} - tap to view`,
+    cropPhoto: "Crop Photo",
+    crop: "Crop",
 
     // Review card menu
     updateRestaurant: "Update Restaurant",

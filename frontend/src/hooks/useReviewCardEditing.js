@@ -78,13 +78,6 @@ export function useReviewCardEditing(review, onReviewUpdated) {
         }
     };
 
-    const handleAddPhotoChange = (e) => {
-        const files = Array.from(e.target.files);
-        const remaining = 5 - (review.image_urls?.length || 0);
-        if (files.length > remaining) return;
-        setAddPhotoImages((prev) => [...prev, ...files].slice(0, remaining));
-    };
-
     const handleRemoveExistingPhoto = (url) => {
         setRemovedPhotoUrls((prev) => [...prev, url]);
     };
@@ -145,7 +138,6 @@ export function useReviewCardEditing(review, onReviewUpdated) {
         removedPhotoUrls,
         setRemovedPhotoUrls,
         addPhotoInputRef,
-        handleAddPhotoChange,
         handleRemoveExistingPhoto,
         handleSavePhotos,
         deleting,

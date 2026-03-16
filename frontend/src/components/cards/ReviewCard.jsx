@@ -59,7 +59,6 @@ function ReviewCard({
         removedPhotoUrls,
         setRemovedPhotoUrls,
         addPhotoInputRef,
-        handleAddPhotoChange,
         handleRemoveExistingPhoto,
         handleSavePhotos,
         deleting,
@@ -135,7 +134,6 @@ function ReviewCard({
                     setAddPhotoImages={setAddPhotoImages}
                     removedPhotoUrls={removedPhotoUrls}
                     addPhotoInputRef={addPhotoInputRef}
-                    handleAddPhotoChange={handleAddPhotoChange}
                     handleRemoveExistingPhoto={handleRemoveExistingPhoto}
                     handleSavePhotos={handleSavePhotos}
                     onClose={() => {

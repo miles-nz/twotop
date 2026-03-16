@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { motion } from "framer-motion";
 import { ImagePlus, X } from "lucide-react";
+import ImageCropModal from "../cards/ImageCropModal";
 import Button from "../ui/Button";
 import LoadingOverlay from "../ui/LoadingOverlay";
 import RatingField from "../ui/RatingField";
@@ -29,6 +30,9 @@ function ReviewForm({ onReviewSubmitted }) {
 
     const [images, setImages] = useState([]);
     const fileInputRef = useRef(null);
+
+    const [cropQueue, setCropQueue] = useState([]);
+    const [currentCropSrc, setCurrentCropSrc] = useState(null);
 
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState(null);
@@ -113,7 +117,23 @@ function ReviewForm({ onReviewSubmitted }) {
             return;
         }
 
-        setImages((prev) => [...prev, ...files].slice(0, 5));
+        const srcs = files.map((file) => URL.createObjectURL(file));
+        setCropQueue(srcs);
+        setCurrentCropSrc(srcs[0]);
+        e.target.value = "";
+    };
+
+    const handleCropConfirm = (croppedFile) => {
+        setImages((prev) => [...prev, croppedFile].slice(0, 5));
+        const remaining = cropQueue.slice(1);
+        setCropQueue(remaining);
+        setCurrentCropSrc(remaining.length > 0 ? remaining[0] : null);
+    };
+
+    const handleCropCancel = () => {
+        const remaining = cropQueue.slice(1);
+        setCropQueue(remaining);
+        setCurrentCropSrc(remaining.length > 0 ? remaining[0] : null);
     };
 
     const handleImageRemove = (index) => {
@@ -284,6 +304,13 @@ function ReviewForm({ onReviewSubmitted }) {
                 </Button>
             </div>
             <LoadingOverlay isVisible={submitting} />
+            {currentCropSrc && (
+                <ImageCropModal
+                    imageSrc={currentCropSrc}
+                    onConfirm={handleCropConfirm}
+                    onCancel={handleCropCancel}
+                />
+            )}
         </motion.div>
     );
 }
