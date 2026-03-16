@@ -8,12 +8,15 @@ import ReviewList from "./components/reviews/ReviewList";
 import LoadingDots from "./components/ui/LoadingDots";
 import { themes } from "./themes";
 import { text } from "./resources";
+import { useDarkMode } from "./hooks/useDarkMode";
 
 function App() {
     const { isLoading, isAuthenticated, user } = useAuth0();
+    const isDarkMode = useDarkMode();
 
     const [formOpen, setFormOpen] = useState(false);
     const [justSubmitted, setJustSubmitted] = useState(false);
+    const [isPublicOnly, setIsPublicOnly] = useState(false);
 
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [scrollToId, setScrollToId] = useState(null);
@@ -33,12 +36,26 @@ function App() {
     };
 
     useEffect(() => {
-        if (!user) return;
-        const theme = themes[user.sub] || {};
-        Object.entries(theme).forEach(([key, value]) => {
-            document.documentElement.style.setProperty(key, value);
-        });
-    }, [user]);
+        // Apply appropriate theme based on dark mode preference
+        // If user is logged in, use their personalized theme
+        // Otherwise, use the default theme colors adjusted for dark mode
+        if (user) {
+            const themeSet = isDarkMode ? themes.dark : themes.light;
+            const theme = themeSet[user.sub] || {};
+
+            Object.entries(theme).forEach(([key, value]) => {
+                document.documentElement.style.setProperty(key, value);
+            });
+        } else {
+            // Apply default theme based on dark mode preference when logged out
+            const defaultTheme = isDarkMode
+                ? themes.dark.default
+                : themes.light.default;
+            Object.entries(defaultTheme).forEach(([key, value]) => {
+                document.documentElement.style.setProperty(key, value);
+            });
+        }
+    }, [user, isDarkMode]);
 
     if (isLoading) {
         return (
@@ -56,7 +73,10 @@ function App() {
                 transition={{ duration: 0.4 }}
                 className="min-h-screen w-full bg-surface-100"
             >
-                <Navbar />
+                <Navbar
+                    isPublic={isPublicOnly}
+                    onTogglePublic={setIsPublicOnly}
+                />
                 <div className="max-w-2xl mx-auto py-8 px-4">
                     <ReviewList isPublic />
                 </div>
@@ -71,7 +91,7 @@ function App() {
             transition={{ duration: 0.4 }}
             className="min-h-screen w-full bg-surface-100"
         >
-            <Navbar />
+            <Navbar isPublic={isPublicOnly} onTogglePublic={setIsPublicOnly} />
             <div className="max-w-2xl mx-auto pt-6 pb-10 px-4">
                 <div className="mb-6 flex justify-center">
                     <Button
@@ -108,6 +128,7 @@ function App() {
                 <ReviewList
                     refreshTrigger={refreshTrigger}
                     onReviewsLoaded={handleReviewsLoaded}
+                    isPublic={isPublicOnly}
                     scrollToId={scrollToId}
                     currentUserId={user.sub}
                     onReviewUpdated={(id) => {

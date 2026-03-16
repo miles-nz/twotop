@@ -1,9 +1,10 @@
 import { useAuth0 } from "@auth0/auth0-react";
+import { motion } from "framer-motion";
 import Button from "../ui/Button";
 import Avatar from "../ui/Avatar";
 import { text } from "../../resources";
 
-function Navbar() {
+function Navbar({ isPublic = false, onTogglePublic }) {
     const { user, logout, isAuthenticated, loginWithRedirect } = useAuth0();
 
     return (
@@ -24,6 +25,25 @@ function Navbar() {
                 <div className="flex items-center gap-3">
                     {isAuthenticated ? (
                         <>
+                            {/* Toggle for public only reviews */}
+                            <div className="flex items-center gap-3 bg-surface-100 rounded-lg px-4 py-2 border border-surface-200 hidden sm:flex">
+                                <p className="text-sm font-medium text-text-dark">
+                                    {text.publicOnly}
+                                </p>
+                                <button
+                                    onClick={() => onTogglePublic(!isPublic)}
+                                    className={`relative w-11 h-6 rounded-full transition-colors duration-200 cursor-pointer focus:outline-none ${
+                                        isPublic ? "bg-secondary-500" : "bg-surface-300"
+                                    }`}
+                                >
+                                    <span
+                                        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${
+                                            isPublic ? "translate-x-5" : "translate-x-0"
+                                        }`}
+                                    />
+                                </button>
+                            </div>
+
                             <div className="flex items-center gap-2">
                                 <Avatar
                                     name={user?.name}

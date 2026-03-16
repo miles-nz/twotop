@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
+import { motion, AnimatePresence } from "framer-motion";
 import LoadingDots from "../ui/LoadingDots";
 import { ReviewListProvider } from "../../contexts/ReviewListContext";
 import ReviewCard from "../cards/ReviewCard";
@@ -98,23 +99,52 @@ function ReviewList({
 
     if (loading) {
         return (
-            <div className={statusCardClass}>
-                <LoadingDots />
-            </div>
+            <AnimatePresence mode="wait">
+                <motion.div
+                    key="loading"
+                    className={statusCardClass}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                >
+                    <LoadingDots />
+                </motion.div>
+            </AnimatePresence>
         );
     }
     if (error) {
         return (
-            <div className={statusCardClass}>
-                <p className="text-error-600">{text.errorFormatted(error)}</p>
-            </div>
+            <AnimatePresence mode="wait">
+                <motion.div
+                    key="error"
+                    className={statusCardClass}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                >
+                    <p className="text-error-600">
+                        {text.errorFormatted(error)}
+                    </p>
+                </motion.div>
+            </AnimatePresence>
         );
     }
     if (reviews.length === 0) {
         return (
-            <div className={statusCardClass}>
-                <p className="text-text-mid">{text.noReviews}</p>
-            </div>
+            <AnimatePresence mode="wait">
+                <motion.div
+                    key="no-reviews"
+                    className={statusCardClass}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                >
+                    <p className="text-text-mid">{text.noReviews}</p>
+                </motion.div>
+            </AnimatePresence>
         );
     }
 

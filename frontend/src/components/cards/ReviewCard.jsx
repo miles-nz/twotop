@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useReviewCardEditing } from "../../hooks/useReviewCardEditing";
+import { useDarkMode } from "../../hooks/useDarkMode";
 import Avatar from "../ui/Avatar";
 import EditNameUI from "./EditNameUI";
 import EditPhotosUI from "./EditPhotosUI";
@@ -16,7 +17,9 @@ import { Quote } from "lucide-react";
 const glowShadow = "0 0 10px var(--color-primary-500)";
 
 function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
-    const theme = themes[review.user_id] || {};
+    const isDarkMode = useDarkMode();
+    const themeSet = isDarkMode ? themes.dark : themes.light;
+    const theme = themeSet[review.user_id] || {};
     const themeStyle = Object.fromEntries(
         Object.entries(theme).map(([key, value]) => [key, value]),
     );

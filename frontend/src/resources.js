@@ -41,6 +41,7 @@ export const text = {
     // Navigation
     writeReview: "Write a Review",
     close: "Close",
+    publicOnly: "Public Only",
 
     // Review form
     restaurantNameLabel: "Restaurant Name",
