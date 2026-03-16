@@ -92,7 +92,7 @@ export const emojiOptions = {
     food: [
         text.defaultFoodEmoji,
         "🍳",
-        "🥞",
+        "🧇",
         "🥯",
         "🥪",
         "🥗",
