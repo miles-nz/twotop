@@ -101,7 +101,7 @@ function ReviewForm({ onReviewSubmitted }) {
         }
     };
 
-    const handleImageChange = (e) => {
+    const handleImageChange = async (e) => {
         const files = Array.from(e.target.files);
 
         const oversizedFiles = files.filter(
@@ -117,9 +117,33 @@ function ReviewForm({ onReviewSubmitted }) {
             return;
         }
 
-        const srcs = files.map((file) => URL.createObjectURL(file));
-        setCropQueue(srcs);
-        setCurrentCropSrc(srcs[0]);
+        const nonSquareSrcs = [];
+        const squareFiles = [];
+
+        await Promise.all(
+            files.map(
+                (file) =>
+                    new Promise((resolve) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            if (img.width === img.height) {
+                                squareFiles.push(file);
+                            } else {
+                                nonSquareSrcs.push(URL.createObjectURL(file));
+                            }
+                            resolve();
+                        };
+                        img.src = URL.createObjectURL(file);
+                    }),
+            ),
+        );
+
+        setImages((prev) => [...prev, ...squareFiles].slice(0, 5));
+        if (nonSquareSrcs.length > 0) {
+            setCropQueue(nonSquareSrcs);
+            setCurrentCropSrc(nonSquareSrcs[0]);
+        }
+
         e.target.value = "";
     };
 

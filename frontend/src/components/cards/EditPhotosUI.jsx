@@ -15,14 +15,39 @@ function EditPhotosUI({
     const [cropQueue, setCropQueue] = useState([]);
     const [currentCropSrc, setCurrentCropSrc] = useState(null);
 
-    const handleImageChange = (e) => {
+    const handleImageChange = async (e) => {
         const files = Array.from(e.target.files);
         const remaining =
             5 - (review.image_urls?.length || 0) - addPhotoImages.length;
         const validFiles = files.slice(0, remaining);
-        const srcs = validFiles.map((file) => URL.createObjectURL(file));
-        setCropQueue(srcs);
-        setCurrentCropSrc(srcs[0]);
+
+        const nonSquareSrcs = [];
+        const squareFiles = [];
+
+        await Promise.all(
+            validFiles.map(
+                (file) =>
+                    new Promise((resolve) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            if (img.width === img.height) {
+                                squareFiles.push(file);
+                            } else {
+                                nonSquareSrcs.push(URL.createObjectURL(file));
+                            }
+                            resolve();
+                        };
+                        img.src = URL.createObjectURL(file);
+                    }),
+            ),
+        );
+
+        setAddPhotoImages((prev) => [...prev, ...squareFiles].slice(0, 5));
+        if (nonSquareSrcs.length > 0) {
+            setCropQueue(nonSquareSrcs);
+            setCurrentCropSrc(nonSquareSrcs[0]);
+        }
+
         e.target.value = "";
     };
 
