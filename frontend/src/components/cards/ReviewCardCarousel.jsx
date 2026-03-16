@@ -15,7 +15,7 @@ function ReviewCardCarousel({ images, reviewId }) {
     const shouldCollapse = isDesktop && preferences.collapseReviewImages;
 
     return (
-        <div className="pt-2">
+        <div className="pt-0">
             <div
                 ref={carouselRef}
                 className={`relative overflow-hidden ${shouldCollapse ? "cursor-pointer" : ""}`}
