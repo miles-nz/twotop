@@ -151,25 +151,33 @@ function ReviewCard({
                         className="rounded-xl overflow-hidden cursor-pointer"
                         onClick={() => handleExpand(review.id)}
                     >
-                        <motion.div
-                            initial={{ height: 64 }}
-                            animate={{
-                                height: isExpanded ? expandedHeight : 64,
-                            }}
-                            transition={{ duration: 0.3, ease: "easeInOut" }}
-                            className="overflow-hidden relative"
-                            onAnimationComplete={(definition) => {
-                                if ("height" in definition)
-                                    setIsCollapsed(!isExpanded);
-                            }}
-                        >
-                            <ImageCarousel images={review.image_urls} />
+                        <div className="relative">
+                            <motion.div
+                                initial={{ height: 64 }}
+                                animate={{
+                                    height: isExpanded ? expandedHeight : 64,
+                                    filter: isExpanded
+                                        ? "blur(0px)"
+                                        : "blur(2px)",
+                                }}
+                                transition={{
+                                    duration: 0.3,
+                                    ease: "easeInOut",
+                                }}
+                                className="overflow-hidden relative"
+                                onAnimationComplete={(definition) => {
+                                    if ("height" in definition)
+                                        setIsCollapsed(!isExpanded);
+                                }}
+                            >
+                                <ImageCarousel images={review.image_urls} />
+                            </motion.div>
                             {isCollapsed && !isExpanded && (
                                 <motion.div
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     transition={{ duration: 0.2 }}
-                                    className="absolute inset-0 flex items-center justify-center"
+                                    className="absolute inset-0 flex items-center justify-center pointer-events-none"
                                 >
                                     <span className="bg-black/40 text-white text-xs px-2 py-1 rounded-full">
                                         {text.photoCount(
@@ -178,7 +186,7 @@ function ReviewCard({
                                     </span>
                                 </motion.div>
                             )}
-                        </motion.div>
+                        </div>
                     </div>
                 </div>
             )}
