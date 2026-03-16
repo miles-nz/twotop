@@ -4,6 +4,7 @@ import EmojiPicker from "../ui/EmojiPicker";
 import { text } from "../../resources";
 import { useRef } from "react";
 import MarkdownToolbar from "../ui/MarkdownToolbar";
+import { getLocalDate } from "../../utils";
 
 function EditReviewUI({
     editedFoodRating,
@@ -85,6 +86,7 @@ function EditReviewUI({
                         type="date"
                         value={editedVisitDate}
                         onChange={(e) => setEditedVisitDate(e.target.value)}
+                        max={getLocalDate()}
                         className="w-full border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-dark"
                     />
                 </div>

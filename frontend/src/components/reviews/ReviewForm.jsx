@@ -157,6 +157,7 @@ function ReviewForm({ onReviewSubmitted }) {
                     type="date"
                     value={visitDate}
                     onChange={(e) => setvisitDate(e.target.value)}
+                    max={getLocalDate()}
                     className={inputClass}
                     style={{
                         color: visitDate
