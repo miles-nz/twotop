@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { text } from "../resources";
+import { text, preferences } from "../resources";
 
 export function useImageUpload(
     maxImages = 5,
@@ -18,7 +18,7 @@ export function useImageUpload(
         const files = Array.from(e.target.files);
 
         const oversizedFiles = files.filter(
-            (file) => file.size > text.maxImageSize,
+            (file) => file.size > preferences.maxImageSize,
         );
         if (oversizedFiles.length > 0) {
             setUploadError([text.errorImageSize]);

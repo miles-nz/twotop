@@ -1,3 +1,8 @@
+export const preferences = {
+    collapseReviewImages: true,
+    maxImageSize: 20 * 1024 * 1024,
+};
+
 export const placeholders = [
     "Blend Café",
     "Boston Café",
@@ -85,7 +90,6 @@ export const text = {
     errorFailedFetch: "Failed to fetch reviews.",
     errorMaxImages: "You can upload a maximum of 5 images",
     errorImageSize: "Images must be 20MB or less",
-    maxImageSize: 20 * 1024 * 1024,
 };
 
 export const emojiOptions = {
