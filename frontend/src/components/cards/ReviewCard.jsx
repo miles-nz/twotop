@@ -71,12 +71,12 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.8 }}
             style={themeStyle}
-            className="bg-surface-50 rounded-2xl shadow-md border border-surface-200 border-l-4 border-l-secondary-400 overflow-hidden transition-transform duration-200 hover:-translate-y-0.25 hover:shadow-lg"
+            className="bg-surface-50 rounded-2xl shadow-sm border border-surface-200 border-l-3 border-l-secondary-400 overflow-hidden transition-transform duration-200 hover:-translate-y-0.25 hover:shadow-md"
         >
-            <div className="p-6 pb-4">
+            <div className="p-6 pb-3">
                 <div className="flex items-start justify-between">
-                    <div className="flex flex-col">
-                        <h3 className="text-2xl font-bold text-text-dark hyphens-auto break-words">
+                    <div className="flex flex-col gap-0.5">
+                        <h3 className="text-2xl font-bold text-text-dark hyphens-auto break-words leading-tight">
                             {editingName ? (
                                 <EditNameUI
                                     editedName={editedName}
@@ -88,16 +88,11 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                                 review.restaurant_name
                             )}
                         </h3>
-                        <span className="text-sm text-text-light mt-1">
+                        <span className="text-xs text-text-light tracking-wide mt-0.5">
                             {new Date(review.visit_date).toLocaleDateString()}
                         </span>
                     </div>
-                    <div className="flex items-center gap-2 ml-4 flex-shrink-0">
-                        <Avatar
-                            name={review.reviewer_name}
-                            picture={review.reviewer_picture}
-                            size="md"
-                        />
+                    <div className="flex items-center gap-2 ml-3 flex-shrink-0">
                         {currentUserId === review.user_id && (
                             <ReviewCardMenu
                                 review={review}
@@ -107,6 +102,11 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                                 onReviewUpdated={onReviewUpdated}
                             />
                         )}
+                        <Avatar
+                            name={review.reviewer_name}
+                            picture={review.reviewer_picture}
+                            size="md"
+                        />
                     </div>
                 </div>
             </div>
@@ -148,11 +148,10 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                 ))}
             {!editingReview && (
                 <>
-                    {(review.review_text ||
-                        (review.image_urls && review.image_urls.length > 0) ||
-                        addingPhotos) && (
-                        <div className="border-t border-surface-200 mx-6" />
-                    )}
+                    {(review.review_text || addingPhotos) &&
+                        !review.image_urls?.length && (
+                            <div className="border-t border-surface-200 mx-6" />
+                        )}
                     {addingPhotos && (
                         <EditPhotosUI
                             review={review}
@@ -177,8 +176,8 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                         />
                     )}
                     {review.review_text && (
-                        <div className="px-6 py-4">
-                            <p className="text-text-mid text-sm leading-relaxed hyphens-auto break-words">
+                        <div className="px-6 pt-3 pb-4">
+                            <p className="text-text-mid text-sm leading-normal hyphens-auto break-words">
                                 {review.review_text}
                             </p>
                         </div>

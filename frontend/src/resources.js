@@ -1,5 +1,5 @@
 export const preferences = {
-    collapseReviewImages: true,
+    collapseReviewImages: false,
     maxImageSize: 20 * 1024 * 1024,
 };
 

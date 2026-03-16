@@ -3,7 +3,7 @@ import ImageCarousel from "./ImageCarousel";
 import { useCarousel } from "../../hooks/useCarousel";
 import { useReviewList } from "../../contexts/ReviewListContext";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
-import { text } from "../../resources";
+import { preferences, text } from "../../resources";
 
 function ReviewCardCarousel({ images, reviewId }) {
     const { expandedId, handleExpand } = useReviewList();
@@ -12,13 +12,13 @@ function ReviewCardCarousel({ images, reviewId }) {
         useCarousel();
 
     const isDesktop = useBreakpoint();
-    const shouldCollapse = isDesktop || text.collapseReviewImages;
+    const shouldCollapse = isDesktop && preferences.collapseReviewImages;
 
     return (
-        <div className="px-6 pt-4">
+        <div className="pt-2">
             <div
                 ref={carouselRef}
-                className={`relative rounded-xl overflow-hidden ${shouldCollapse ? "cursor-pointer" : ""}`}
+                className={`relative overflow-hidden ${shouldCollapse ? "cursor-pointer" : ""}`}
                 onClick={() => shouldCollapse && handleExpand(reviewId)}
             >
                 <motion.div

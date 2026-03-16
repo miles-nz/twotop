@@ -1,5 +1,6 @@
 import StarRating from "../ui/StarRating";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
+import { text } from "../../resources";
 
 function ReviewCardRatings({
     foodRating,
@@ -15,10 +16,10 @@ function ReviewCardRatings({
 
     return (
         <div className="px-6 pt-1 pb-4 sm:py-0 sm:pb-4 overflow-x-auto">
-            <div className="flex gap-4 w-full justify-between">
+            <div className="flex gap-3">
                 {foodRating && (
                     <span className="flex items-center gap-1 text-sm text-text-mid">
-                        <span>{foodEmoji || "🍽️"}</span>
+                        <span>{foodEmoji || text.defaultFoodEmoji}</span>
                         <StarRating
                             value={foodRating}
                             readOnly
@@ -28,7 +29,7 @@ function ReviewCardRatings({
                 )}
                 {drinkRating && (
                     <span className="flex items-center gap-1 text-sm text-text-mid">
-                        <span>{drinkEmoji || "☕️"}</span>
+                        <span>{drinkEmoji || text.defaultDrinkEmoji}</span>
                         <StarRating
                             value={drinkRating}
                             readOnly
@@ -38,7 +39,9 @@ function ReviewCardRatings({
                 )}
                 {ambienceRating && (
                     <span className="flex items-center gap-1 text-sm text-text-mid">
-                        <span>{ambienceEmoji || "✨"}</span>
+                        <span>
+                            {ambienceEmoji || text.defaultAmbienceEmoji}
+                        </span>
                         <StarRating
                             value={ambienceRating}
                             readOnly
