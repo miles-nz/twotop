@@ -61,7 +61,7 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                 isNew
                     ? {
                           opacity: 1,
-                          scale: 1.05,
+                          scale: 1.01,
                           boxShadow: glowShadow,
                       }
                     : {
@@ -71,7 +71,7 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.8 }}
             style={themeStyle}
-            className="bg-surface-50 rounded-2xl shadow-md border border-surface-200 border-l-4 border-l-secondary-400 overflow-hidden transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg"
+            className="bg-surface-50 rounded-2xl shadow-md border border-surface-200 border-l-4 border-l-secondary-400 overflow-hidden transition-transform duration-200 hover:-translate-y-0.25 hover:shadow-lg"
         >
             <div className="p-6 pb-4">
                 <div className="flex items-start justify-between">
