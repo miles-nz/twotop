@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { text, preferences } from "../resources";
 
 export function useImageUpload(
@@ -12,9 +12,15 @@ export function useImageUpload(
     const [uploadError, setUploadError] = useState(null);
     const fileInputRef = useRef(null);
 
-    const totalCount = () => getExistingCount() + images.length;
+    const imagesRef = useRef(images);
+    useEffect(() => {
+        imagesRef.current = images;
+    }, [images]);
+
+    const totalCount = () => getExistingCount() + imagesRef.current.length;
 
     const handleImageChange = async (e) => {
+        setUploadError(null);
         const files = Array.from(e.target.files);
 
         const oversizedFiles = files.filter(
@@ -32,26 +38,28 @@ export function useImageUpload(
             return;
         }
 
-        const nonSquareSrcs = [];
-        const squareFiles = [];
-
-        await Promise.all(
+        const results = await Promise.all(
             files.map(
                 (file) =>
                     new Promise((resolve) => {
+                        const url = URL.createObjectURL(file);
                         const img = new Image();
                         img.onload = () => {
-                            if (img.width === img.height) {
-                                squareFiles.push(file);
-                            } else {
-                                nonSquareSrcs.push(URL.createObjectURL(file));
-                            }
-                            resolve();
+                            const isSquare = img.width === img.height;
+                            if (isSquare) URL.revokeObjectURL(url);
+                            resolve({ file, url, isSquare });
                         };
-                        img.src = URL.createObjectURL(file);
+                        img.src = url;
                     }),
             ),
         );
+
+        const squareFiles = results
+            .filter((r) => r.isSquare)
+            .map((r) => r.file);
+        const nonSquareSrcs = results
+            .filter((r) => !r.isSquare)
+            .map((r) => r.url);
 
         const addFiles = (prev) =>
             [...prev, ...squareFiles].slice(0, maxImages);
@@ -69,6 +77,12 @@ export function useImageUpload(
         e.target.value = "";
     };
 
+    const advanceCropQueue = () => {
+        const remaining = cropQueue.slice(1);
+        setCropQueue(remaining);
+        setCurrentCropSrc(remaining.length > 0 ? remaining[0] : null);
+    };
+
     const handleCropConfirm = (croppedFile) => {
         const addFile = (prev) => [...prev, croppedFile].slice(0, maxImages);
         if (onImagesAdded) {
@@ -76,15 +90,11 @@ export function useImageUpload(
         } else {
             setImages(addFile);
         }
-        const remaining = cropQueue.slice(1);
-        setCropQueue(remaining);
-        setCurrentCropSrc(remaining.length > 0 ? remaining[0] : null);
+        advanceCropQueue();
     };
 
     const handleCropCancel = () => {
-        const remaining = cropQueue.slice(1);
-        setCropQueue(remaining);
-        setCurrentCropSrc(remaining.length > 0 ? remaining[0] : null);
+        advanceCropQueue();
     };
 
     const handleImageRemove = (index) => {

@@ -73,12 +73,12 @@ const checkJwt = auth({
 
 // Helpers
 const uploadImage = async (file, userId) => {
-    const sanitizedUserId = userId.replace("|", "-");
+    const sanitizedUserId = userId.replace(/\|/g, "-");
     const sanitizedFilename = file.originalname.replace(
         /[^a-zA-Z0-9._-]/g,
         "_",
     );
-    const filename = `${sanitizedUserId}/${Date.now()}-${sanitizedFilename}`;
+    const filename = `${sanitizedUserId}/${Date.now()}-${Math.random().toString(36).slice(2, 7)}-${sanitizedFilename}`;
 
     const { data, error } = await supabase.storage
         .from(REVIEW_IMAGE_BUCKET)
@@ -94,7 +94,7 @@ const uploadImage = async (file, userId) => {
 };
 
 const getStoragePath = (url, userId) => {
-    const sanitizedUserId = userId.replace("|", "-");
+    const sanitizedUserId = userId.replace(/\|/g, "-");
     const filename = decodeURIComponent(url.split("/").pop());
     return `${sanitizedUserId}/${filename}`;
 };
@@ -147,7 +147,6 @@ const validateReview = (body) => {
         }
     }
 
-    const missingRestaurantName = !restaurant_name;
     const missingText = !review_text;
     const missingRatings = !food_rating && !drink_rating && !ambience_rating;
     if (missingText && missingRatings) {
@@ -316,12 +315,9 @@ app.patch(
             updates.visit_date = req.body.visit_date || null;
         }
 
-        if (req.body.food_emoji !== undefined)
-            updates.food_emoji = req.body.food_emoji;
-        if (req.body.drink_emoji !== undefined)
-            updates.drink_emoji = req.body.drink_emoji;
-        if (req.body.ambience_emoji !== undefined)
-            updates.ambience_emoji = req.body.ambience_emoji;
+        for (const field of ["food_emoji", "drink_emoji", "ambience_emoji"]) {
+            if (req.body[field] !== undefined) updates[field] = req.body[field];
+        }
 
         try {
             if (req.body.image_urls !== undefined) {
