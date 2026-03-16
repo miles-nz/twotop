@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { motion } from "framer-motion";
 import { ImagePlus, X } from "lucide-react";
@@ -6,7 +6,11 @@ import ImageCropModal from "../cards/ImageCropModal";
 import Button from "../ui/Button";
 import LoadingOverlay from "../ui/LoadingOverlay";
 import RatingField from "../ui/RatingField";
+import EmojiPicker from "../ui/EmojiPicker";
+import { useBreakpoint } from "../../hooks/useBreakpoint";
+import { useImageUpload } from "../../hooks/useImageUpload";
 import { text, placeholders } from "../../resources";
+import { getLocalDate } from "../../utils";
 
 const inputClass =
     "w-full border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400";
@@ -28,19 +32,28 @@ function ReviewForm({ onReviewSubmitted }) {
     const [reviewText, setReviewText] = useState("");
     const [isPublic, setIsPublic] = useState(false);
 
-    const [images, setImages] = useState([]);
-    const fileInputRef = useRef(null);
-
-    const [cropQueue, setCropQueue] = useState([]);
-    const [currentCropSrc, setCurrentCropSrc] = useState(null);
+    const {
+        images,
+        fileInputRef,
+        currentCropSrc,
+        handleImageChange,
+        handleCropConfirm,
+        handleCropCancel,
+        handleImageRemove,
+        resetImages,
+        uploadError,
+    } = useImageUpload();
 
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState(null);
 
-    const getLocalDate = () => {
-        const today = new Date();
-        return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-    };
+    const [foodEmoji, setFoodEmoji] = useState(text.defaultFoodEmoji);
+    const [drinkEmoji, setDrinkEmoji] = useState(text.defaultDrinkEmoji);
+    const [ambienceEmoji, setAmbienceEmoji] = useState(
+        text.defaultAmbienceEmoji,
+    );
+
+    const isDesktop = useBreakpoint();
 
     const handleSubmit = async () => {
         setError(null);
@@ -69,6 +82,10 @@ function ReviewForm({ onReviewSubmitted }) {
             formData.append("is_public", isPublic);
             images.forEach((image) => formData.append("images", image));
 
+            formData.append("food_emoji", foodEmoji);
+            formData.append("drink_emoji", drinkEmoji);
+            formData.append("ambience_emoji", ambienceEmoji);
+
             const response = await fetch(
                 `${import.meta.env.VITE_API_URL}/reviews`,
                 {
@@ -91,77 +108,17 @@ function ReviewForm({ onReviewSubmitted }) {
             setDrinkRating("");
             setAmbienceRating("");
             setvisitDate("");
-            setImages([]);
+            resetImages();
             onReviewSubmitted(data.id);
             setIsPublic(false);
+            setFoodEmoji(text.defaultFoodEmoji);
+            setDrinkEmoji(text.defaultDrinkEmoji);
+            setAmbienceEmoji(text.defaultAmbienceEmoji);
         } catch (err) {
             setError(err.message || text.errorGeneric);
         } finally {
             setSubmitting(false);
         }
-    };
-
-    const handleImageChange = async (e) => {
-        const files = Array.from(e.target.files);
-
-        const oversizedFiles = files.filter(
-            (file) => file.size > 20 * 1024 * 1024,
-        );
-        if (oversizedFiles.length > 0) {
-            setError([text.errorImageSize]);
-            return;
-        }
-
-        if (files.length + images.length > 5) {
-            setError([text.errorMaxImages]);
-            return;
-        }
-
-        const nonSquareSrcs = [];
-        const squareFiles = [];
-
-        await Promise.all(
-            files.map(
-                (file) =>
-                    new Promise((resolve) => {
-                        const img = new Image();
-                        img.onload = () => {
-                            if (img.width === img.height) {
-                                squareFiles.push(file);
-                            } else {
-                                nonSquareSrcs.push(URL.createObjectURL(file));
-                            }
-                            resolve();
-                        };
-                        img.src = URL.createObjectURL(file);
-                    }),
-            ),
-        );
-
-        setImages((prev) => [...prev, ...squareFiles].slice(0, 5));
-        if (nonSquareSrcs.length > 0) {
-            setCropQueue(nonSquareSrcs);
-            setCurrentCropSrc(nonSquareSrcs[0]);
-        }
-
-        e.target.value = "";
-    };
-
-    const handleCropConfirm = (croppedFile) => {
-        setImages((prev) => [...prev, croppedFile].slice(0, 5));
-        const remaining = cropQueue.slice(1);
-        setCropQueue(remaining);
-        setCurrentCropSrc(remaining.length > 0 ? remaining[0] : null);
-    };
-
-    const handleCropCancel = () => {
-        const remaining = cropQueue.slice(1);
-        setCropQueue(remaining);
-        setCurrentCropSrc(remaining.length > 0 ? remaining[0] : null);
-    };
-
-    const handleImageRemove = (index) => {
-        setImages((prev) => prev.filter((_, i) => i !== index));
     };
 
     return (
@@ -212,19 +169,49 @@ function ReviewForm({ onReviewSubmitted }) {
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <RatingField
-                        label={text.foodLabel}
+                        label={
+                            <span className="flex items-center justify-center gap-1">
+                                <EmojiPicker
+                                    type="food"
+                                    value={foodEmoji}
+                                    onChange={setFoodEmoji}
+                                />
+                                {text.foodLabel}
+                            </span>
+                        }
                         value={foodRating}
                         onChange={setFoodRating}
+                        size={isDesktop ? "sm" : "md"}
                     />
                     <RatingField
-                        label={text.drinksLabel}
+                        label={
+                            <span className="flex items-center justify-center gap-1">
+                                <EmojiPicker
+                                    type="drink"
+                                    value={drinkEmoji}
+                                    onChange={setDrinkEmoji}
+                                />
+                                {text.drinksLabel}
+                            </span>
+                        }
                         value={drinkRating}
                         onChange={setDrinkRating}
+                        size={isDesktop ? "sm" : "md"}
                     />
                     <RatingField
-                        label={text.ambienceLabel}
+                        label={
+                            <span className="flex items-center justify-center gap-1">
+                                <EmojiPicker
+                                    type="ambience"
+                                    value={ambienceEmoji}
+                                    onChange={setAmbienceEmoji}
+                                />
+                                {text.ambienceLabel}
+                            </span>
+                        }
                         value={ambienceRating}
                         onChange={setAmbienceRating}
+                        size={isDesktop ? "sm" : "md"}
                     />
                 </div>
             </div>
@@ -244,7 +231,7 @@ function ReviewForm({ onReviewSubmitted }) {
                     />
                     <input
                         type="file"
-                        accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                        accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/gif,image/avif"
                         multiple
                         onChange={handleImageChange}
                         className="hidden"
@@ -304,16 +291,18 @@ function ReviewForm({ onReviewSubmitted }) {
                 </button>
             </div>
 
-            {error && (
-                <div className="bg-error-50 border border-error-200 rounded-2xl shadow-md p-6 mb-4 border">
-                    {Array.isArray(error) ? (
-                        error.map((err, index) => (
+            {(error || uploadError) && (
+                <div className="bg-error-50 border border-error-200 rounded-2xl shadow-md p-6 mb-4">
+                    {Array.isArray(error || uploadError) ? (
+                        (error || uploadError).map((err, index) => (
                             <p key={index} className="text-error-600 text-sm">
                                 {err}
                             </p>
                         ))
                     ) : (
-                        <p className="text-error-600 text-sm">{error}</p>
+                        <p className="text-error-600 text-sm">
+                            {error || uploadError}
+                        </p>
                     )}
                 </div>
             )}

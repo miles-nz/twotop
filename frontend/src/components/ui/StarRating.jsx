@@ -3,6 +3,8 @@ import { useState, useRef, useEffect } from "react";
 function StarRating({ value, onChange, readOnly = false, size = "md" }) {
     const containerRef = useRef(null);
     const sizes = {
+        xxs: "w-3 h-3",
+        xs: "w-4 h-4",
         sm: "w-7 h-7",
         md: "w-8 h-8",
     };

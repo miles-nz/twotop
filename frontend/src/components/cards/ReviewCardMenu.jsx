@@ -12,13 +12,15 @@ import { useReviewList } from "../../contexts/ReviewListContext";
 import { text } from "../../resources";
 import { createPortal } from "react-dom";
 import { useRef, useState, useEffect } from "react";
+import { useDeleteReview } from "../../hooks/useDeleteReview";
+import ConfirmModal from "../modals/ConfirmModal";
+import LoadingOverlay from "../ui/LoadingOverlay";
 
 function ReviewCardMenu({
     review,
     onAddPhotos,
     onEditReview,
     onEditName,
-    onDelete,
     onReviewUpdated,
 }) {
     const { getAccessTokenSilently } = useAuth0();
@@ -26,6 +28,9 @@ function ReviewCardMenu({
     const menuOpen = openMenuId === review.id;
     const buttonRef = useRef(null);
     const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+
+    const { deleting, handleDelete, confirmOpen, setConfirmOpen } =
+        useDeleteReview(review.id, onReviewUpdated);
 
     const handleOpenMenu = (e) => {
         e.stopPropagation();
@@ -150,7 +155,7 @@ function ReviewCardMenu({
                         <button
                             onClick={() => {
                                 handleMenuClose();
-                                onDelete();
+                                setConfirmOpen(true);
                             }}
                             className="flex items-center gap-2 w-full px-4 py-2 text-sm text-error-600 hover:bg-surface-100 rounded-b-lg cursor-pointer"
                         >
@@ -160,6 +165,14 @@ function ReviewCardMenu({
                     </div>,
                     document.body,
                 )}
+            <ConfirmModal
+                isOpen={confirmOpen}
+                onConfirm={handleDelete}
+                onCancel={() => setConfirmOpen(false)}
+                message={text.confirmDeleteReview}
+                deleting={deleting}
+            />
+            <LoadingOverlay isVisible={deleting} />
         </div>
     );
 }

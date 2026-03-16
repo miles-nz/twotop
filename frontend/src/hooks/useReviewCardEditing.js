@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
+import { text } from "../resources";
 
 export function useReviewCardEditing(review, onReviewUpdated) {
     const { getAccessTokenSilently } = useAuth0();
@@ -23,15 +24,19 @@ export function useReviewCardEditing(review, onReviewUpdated) {
     const [editedAmbienceRating, setEditedAmbienceRating] = useState(
         review.ambience_rating || null,
     );
+    const [editedFoodEmoji, setEditedFoodEmoji] = useState(
+        review.food_emoji || text.defaultFoodEmoji,
+    );
+    const [editedDrinkEmoji, setEditedDrinkEmoji] = useState(
+        review.drink_emoji || text.defaultDrinkEmoji,
+    );
+    const [editedAmbienceEmoji, setEditedAmbienceEmoji] = useState(
+        review.ambience_emoji || text.defaultAmbienceEmoji,
+    );
 
     // Photo editing
     const [addPhotoImages, setAddPhotoImages] = useState([]);
     const [removedPhotoUrls, setRemovedPhotoUrls] = useState([]);
-    const addPhotoInputRef = useRef(null);
-
-    // Delete
-    const [deleting, setDeleting] = useState(false);
-    const [confirmOpen, setConfirmOpen] = useState(false);
 
     const [saving, setSaving] = useState(false);
 
@@ -72,6 +77,9 @@ export function useReviewCardEditing(review, onReviewUpdated) {
             formData.append("drink_rating", editedDrinkRating || "");
             formData.append("ambience_rating", editedAmbienceRating || "");
             formData.append("visit_date", editedVisitDate);
+            formData.append("food_emoji", editedFoodEmoji);
+            formData.append("drink_emoji", editedDrinkEmoji);
+            formData.append("ambience_emoji", editedAmbienceEmoji);
             await patchReview(formData);
         } catch (err) {
             console.error(err);
@@ -98,26 +106,6 @@ export function useReviewCardEditing(review, onReviewUpdated) {
         }
     };
 
-    const handleDelete = async () => {
-        setDeleting(true);
-        try {
-            const token = await getAccessTokenSilently();
-            const response = await fetch(
-                `${import.meta.env.VITE_API_URL}/reviews/${review.id}`,
-                {
-                    method: "DELETE",
-                    headers: { Authorization: `Bearer ${token}` },
-                },
-            );
-            if (!response.ok) throw new Error("Failed to delete");
-            onReviewUpdated();
-        } catch (err) {
-            console.error(err);
-            setDeleting(false);
-        }
-        setConfirmOpen(false);
-    };
-
     return {
         editedName,
         setEditedName,
@@ -132,18 +120,19 @@ export function useReviewCardEditing(review, onReviewUpdated) {
         setEditedDrinkRating,
         editedAmbienceRating,
         setEditedAmbienceRating,
+        editedFoodEmoji,
+        setEditedFoodEmoji,
+        editedDrinkEmoji,
+        setEditedDrinkEmoji,
+        editedAmbienceEmoji,
+        setEditedAmbienceEmoji,
         handleSaveReview,
         addPhotoImages,
         setAddPhotoImages,
         removedPhotoUrls,
         setRemovedPhotoUrls,
-        addPhotoInputRef,
         handleRemoveExistingPhoto,
         handleSavePhotos,
-        deleting,
-        handleDelete,
-        confirmOpen,
-        setConfirmOpen,
         saving,
     };
 }

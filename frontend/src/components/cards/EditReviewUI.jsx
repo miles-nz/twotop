@@ -1,9 +1,9 @@
 import { Check, X } from "lucide-react";
 import RatingField from "../ui/RatingField";
+import EmojiPicker from "../ui/EmojiPicker";
 import { text } from "../../resources";
 
 function EditReviewUI({
-    size,
     editedFoodRating,
     setEditedFoodRating,
     editedDrinkRating,
@@ -14,6 +14,12 @@ function EditReviewUI({
     setEditedVisitDate,
     editedReviewText,
     setEditedReviewText,
+    editedFoodEmoji,
+    setEditedFoodEmoji,
+    editedDrinkEmoji,
+    setEditedDrinkEmoji,
+    editedAmbienceEmoji,
+    setEditedAmbienceEmoji,
     handleSaveReview,
     onClose,
 }) {
@@ -22,22 +28,49 @@ function EditReviewUI({
             <div className="px-6 pb-4">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <RatingField
-                        label={text.foodLabel}
+                        label={
+                            <span className="flex items-center justify-center gap-1">
+                                <EmojiPicker
+                                    type="food"
+                                    value={editedFoodEmoji}
+                                    onChange={setEditedFoodEmoji}
+                                />
+                                {text.foodLabel}
+                            </span>
+                        }
                         value={editedFoodRating}
                         onChange={setEditedFoodRating}
-                        size={size}
+                        size="sm"
                     />
                     <RatingField
-                        label={text.drinksLabel}
+                        label={
+                            <span className="flex items-center justify-center gap-1">
+                                <EmojiPicker
+                                    type="drink"
+                                    value={editedDrinkEmoji}
+                                    onChange={setEditedDrinkEmoji}
+                                />
+                                {text.drinksLabel}
+                            </span>
+                        }
                         value={editedDrinkRating}
                         onChange={setEditedDrinkRating}
-                        size={size}
+                        size="sm"
                     />
                     <RatingField
-                        label={text.ambienceLabel}
+                        label={
+                            <span className="flex items-center justify-center gap-1">
+                                <EmojiPicker
+                                    type="ambience"
+                                    value={editedAmbienceEmoji}
+                                    onChange={setEditedAmbienceEmoji}
+                                />
+                                {text.ambienceLabel}
+                            </span>
+                        }
                         value={editedAmbienceRating}
                         onChange={setEditedAmbienceRating}
-                        size={size}
+                        size="sm"
                     />
                 </div>
             </div>

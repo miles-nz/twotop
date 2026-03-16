@@ -1,29 +1,19 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useReviewList } from "../../contexts/ReviewListContext";
-import { useCarousel } from "../../hooks/useCarousel";
 import { useReviewCardEditing } from "../../hooks/useReviewCardEditing";
 import Avatar from "../ui/Avatar";
-import ConfirmModal from "../modals/ConfirmModal";
 import EditNameUI from "./EditNameUI";
 import EditPhotosUI from "./EditPhotosUI";
 import EditReviewUI from "./EditReviewUI";
-import ImageCarousel from "./ImageCarousel";
 import LoadingOverlay from "../ui/LoadingOverlay";
-import RatingField from "../ui/RatingField";
 import ReviewCardMenu from "./ReviewCardMenu";
+import ReviewCardRatings from "./ReviewCardRatings";
+import ReviewCardCarousel from "./ReviewCardCarousel";
 import { themes } from "../../themes";
-import { text } from "../../resources";
 
 const glowShadow = "0 0 10px var(--color-primary-500)";
 
-function ReviewCard({
-    review,
-    size = "md",
-    isNew,
-    currentUserId,
-    onReviewUpdated,
-}) {
+function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
     const theme = themes[review.user_id] || {};
     const themeStyle = Object.fromEntries(
         Object.entries(theme).map(([key, value]) => [key, value]),
@@ -32,12 +22,6 @@ function ReviewCard({
     const [addingPhotos, setAddingPhotos] = useState(false);
     const [editingReview, setEditingReview] = useState(false);
     const [editingName, setEditingName] = useState(false);
-
-    const { expandedId, handleExpand } = useReviewList();
-    const isExpanded = expandedId === review.id;
-
-    const { carouselRef, expandedHeight, isCollapsed, setIsCollapsed } =
-        useCarousel();
 
     const {
         editedName,
@@ -51,6 +35,12 @@ function ReviewCard({
         setEditedDrinkRating,
         editedAmbienceRating,
         setEditedAmbienceRating,
+        editedFoodEmoji,
+        setEditedFoodEmoji,
+        editedDrinkEmoji,
+        setEditedDrinkEmoji,
+        editedAmbienceEmoji,
+        setEditedAmbienceEmoji,
         editedVisitDate,
         setEditedVisitDate,
         handleSaveReview,
@@ -58,13 +48,8 @@ function ReviewCard({
         setAddPhotoImages,
         removedPhotoUrls,
         setRemovedPhotoUrls,
-        addPhotoInputRef,
         handleRemoveExistingPhoto,
         handleSavePhotos,
-        deleting,
-        handleDelete,
-        confirmOpen,
-        setConfirmOpen,
         saving,
     } = useReviewCardEditing(review, onReviewUpdated);
 
@@ -119,7 +104,6 @@ function ReviewCard({
                                 onAddPhotos={() => setAddingPhotos(true)}
                                 onEditReview={() => setEditingReview(true)}
                                 onEditName={() => setEditingName(true)}
-                                onDelete={() => setConfirmOpen(true)}
                                 onReviewUpdated={onReviewUpdated}
                             />
                         )}
@@ -127,78 +111,12 @@ function ReviewCard({
                 </div>
             </div>
 
-            {addingPhotos && (
-                <EditPhotosUI
-                    review={review}
-                    addPhotoImages={addPhotoImages}
-                    setAddPhotoImages={setAddPhotoImages}
-                    removedPhotoUrls={removedPhotoUrls}
-                    addPhotoInputRef={addPhotoInputRef}
-                    handleRemoveExistingPhoto={handleRemoveExistingPhoto}
-                    handleSavePhotos={handleSavePhotos}
-                    onClose={() => {
-                        setAddingPhotos(false);
-                        setAddPhotoImages([]);
-                        setRemovedPhotoUrls([]);
-                    }}
-                />
-            )}
-
-            {review.image_urls && review.image_urls.length > 0 && (
-                <div className="px-6 pb-4">
-                    <div
-                        ref={carouselRef}
-                        className="rounded-xl overflow-hidden cursor-pointer"
-                        onClick={() => handleExpand(review.id)}
-                    >
-                        <div className="relative">
-                            <motion.div
-                                initial={{ height: 64 }}
-                                animate={{
-                                    height: isExpanded ? expandedHeight : 64,
-                                    filter: isExpanded
-                                        ? "blur(0px)"
-                                        : "blur(2px)",
-                                }}
-                                transition={{
-                                    duration: 0.3,
-                                    ease: "easeInOut",
-                                }}
-                                className="overflow-hidden relative"
-                                onAnimationComplete={(definition) => {
-                                    if ("height" in definition)
-                                        setIsCollapsed(!isExpanded);
-                                }}
-                            >
-                                <ImageCarousel images={review.image_urls} />
-                            </motion.div>
-                            {isCollapsed && !isExpanded && (
-                                <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ duration: 0.2 }}
-                                    className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                                >
-                                    <span className="bg-black/40 text-white text-xs px-2 py-1 rounded-full">
-                                        {text.photoCount(
-                                            review.image_urls.length,
-                                        )}
-                                    </span>
-                                </motion.div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
-
             {(review.food_rating ||
                 review.drink_rating ||
                 review.ambience_rating ||
-                review.review_text ||
                 editingReview) &&
                 (editingReview ? (
                     <EditReviewUI
-                        size={size}
                         editedFoodRating={editedFoodRating}
                         setEditedFoodRating={setEditedFoodRating}
                         editedDrinkRating={editedDrinkRating}
@@ -209,59 +127,65 @@ function ReviewCard({
                         setEditedVisitDate={setEditedVisitDate}
                         editedReviewText={editedReviewText}
                         setEditedReviewText={setEditedReviewText}
+                        editedFoodEmoji={editedFoodEmoji}
+                        setEditedFoodEmoji={setEditedFoodEmoji}
+                        editedDrinkEmoji={editedDrinkEmoji}
+                        setEditedDrinkEmoji={setEditedDrinkEmoji}
+                        editedAmbienceEmoji={editedAmbienceEmoji}
+                        setEditedAmbienceEmoji={setEditedAmbienceEmoji}
                         handleSaveReview={handleSaveReview}
                         onClose={() => setEditingReview(false)}
                     />
                 ) : (
-                    <>
-                        <div className="px-6 pb-4">
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-2">
-                                {review.food_rating && (
-                                    <RatingField
-                                        label={text.foodLabel}
-                                        value={review.food_rating}
-                                        readOnly
-                                        size={size}
-                                    />
-                                )}
-                                {review.drink_rating && (
-                                    <RatingField
-                                        label={text.drinksLabel}
-                                        value={review.drink_rating}
-                                        readOnly
-                                        size={size}
-                                    />
-                                )}
-                                {review.ambience_rating && (
-                                    <RatingField
-                                        label={text.ambienceLabel}
-                                        value={review.ambience_rating}
-                                        readOnly
-                                        size={size}
-                                    />
-                                )}
-                            </div>
-                        </div>
-                        {review.review_text && (
-                            <>
-                                <div className="border-t border-surface-200 mx-6" />
-                                <div className="px-6 py-4">
-                                    <p className="text-text-mid text-sm leading-relaxed hyphens-auto break-words">
-                                        {review.review_text}
-                                    </p>
-                                </div>
-                            </>
-                        )}
-                    </>
+                    <ReviewCardRatings
+                        foodRating={review.food_rating}
+                        drinkRating={review.drink_rating}
+                        ambienceRating={review.ambience_rating}
+                        foodEmoji={review.food_emoji}
+                        drinkEmoji={review.drink_emoji}
+                        ambienceEmoji={review.ambience_emoji}
+                    />
                 ))}
-            <ConfirmModal
-                isOpen={confirmOpen}
-                onConfirm={handleDelete}
-                onCancel={() => setConfirmOpen(false)}
-                message={text.confirmDeleteReview}
-                deleting={deleting}
-            />
-            <LoadingOverlay isVisible={saving || deleting} />
+            {!editingReview && (
+                <>
+                    {(review.review_text ||
+                        (review.image_urls && review.image_urls.length > 0) ||
+                        addingPhotos) && (
+                        <div className="border-t border-surface-200 mx-6" />
+                    )}
+                    {addingPhotos && (
+                        <EditPhotosUI
+                            review={review}
+                            addPhotoImages={addPhotoImages}
+                            setAddPhotoImages={setAddPhotoImages}
+                            removedPhotoUrls={removedPhotoUrls}
+                            handleRemoveExistingPhoto={
+                                handleRemoveExistingPhoto
+                            }
+                            handleSavePhotos={handleSavePhotos}
+                            onClose={() => {
+                                setAddingPhotos(false);
+                                setAddPhotoImages([]);
+                                setRemovedPhotoUrls([]);
+                            }}
+                        />
+                    )}
+                    {review.image_urls && review.image_urls.length > 0 && (
+                        <ReviewCardCarousel
+                            images={review.image_urls}
+                            reviewId={review.id}
+                        />
+                    )}
+                    {review.review_text && (
+                        <div className="px-6 py-4">
+                            <p className="text-text-mid text-sm leading-relaxed hyphens-auto break-words">
+                                {review.review_text}
+                            </p>
+                        </div>
+                    )}
+                </>
+            )}
+            <LoadingOverlay isVisible={saving} />
         </motion.div>
     );
 }

@@ -26,6 +26,9 @@ const MAX_RESTAURANT_NAME_LENGTH = 100;
 const MAX_REVIEW_TEXT_LENGTH = 10000;
 const RATING_MIN = 0.5;
 const RATING_MAX = 5;
+const DEFAULT_FOOD_EMOJI = "🍽️";
+const DEFAULT_DRINK_EMOJI = "☕️";
+const DEFAULT_AMBIENCE_EMOJI = "✨";
 
 // Errors
 const ERRORS = {
@@ -42,8 +45,7 @@ const ERRORS = {
     reviewTextTooLong: `Review text must be less than ${MAX_REVIEW_TEXT_LENGTH} characters.`,
     ratingInvalid: (name) =>
         `${name} must be a number between ${RATING_MIN} and ${RATING_MAX}.`,
-    missingRequiredFields:
-        "Restaurant name and either a review text or all three ratings are required.",
+    missingRequiredFields: "Review notes or all ratings are required.",
 };
 
 // Multer setup
@@ -148,7 +150,7 @@ const validateReview = (body) => {
     const missingRestaurantName = !restaurant_name;
     const missingText = !review_text;
     const missingRatings = !food_rating && !drink_rating && !ambience_rating;
-    if (missingRestaurantName || (missingText && missingRatings)) {
+    if (missingText && missingRatings) {
         errors.push(ERRORS.missingRequiredFields);
     }
 
@@ -200,6 +202,9 @@ app.post(
             reviewer_picture,
             visit_date,
             is_public,
+            food_emoji,
+            drink_emoji,
+            ambience_emoji,
         } = req.body;
         const user_id = req.auth.payload.sub;
 
@@ -231,6 +236,10 @@ app.post(
                             new Date().toISOString().split("T")[0],
                         is_public: is_public === "true",
                         image_urls,
+                        food_emoji: food_emoji || DEFAULT_FOOD_EMOJI,
+                        drink_emoji: drink_emoji || DEFAULT_DRINK_EMOJI,
+                        ambience_emoji:
+                            ambience_emoji || DEFAULT_AMBIENCE_EMOJI,
                     },
                 ])
                 .select();
@@ -306,6 +315,13 @@ app.patch(
         if (req.body.visit_date !== undefined) {
             updates.visit_date = req.body.visit_date || null;
         }
+
+        if (req.body.food_emoji !== undefined)
+            updates.food_emoji = req.body.food_emoji;
+        if (req.body.drink_emoji !== undefined)
+            updates.drink_emoji = req.body.drink_emoji;
+        if (req.body.ambience_emoji !== undefined)
+            updates.ambience_emoji = req.body.ambience_emoji;
 
         try {
             if (req.body.image_urls !== undefined) {

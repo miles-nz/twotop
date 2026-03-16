@@ -8,8 +8,10 @@ function RatingField({
     size = "md",
 }) {
     return (
-        <div className="rounded-lg p-2 sm:p-3 text-center sm:bg-surface-100 sm:border sm:border-surface-200">
-            <p className="text-xs text-text-light mb-1">{label}</p>
+        <div className="bg-surface-100 rounded-lg px-5 py-3 text-center border border-surface-200">
+            <p className="text-xs text-text-light mb-2 flex items-center justify-center gap-1">
+                {label}
+            </p>
             <div className="flex justify-center">
                 <StarRating
                     value={value}

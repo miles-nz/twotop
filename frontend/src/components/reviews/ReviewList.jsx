@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import { motion } from "framer-motion";
+import LoadingDots from "../ui/LoadingDots";
 import { ReviewListProvider } from "../../contexts/ReviewListContext";
 import ReviewCard from "../cards/ReviewCard";
 import { text } from "../../resources";
@@ -99,28 +99,14 @@ function ReviewList({
     if (loading) {
         return (
             <div className={statusCardClass}>
-                <div className="flex items-center justify-center gap-1.5">
-                    {[0, 1, 2].map((i) => (
-                        <motion.div
-                            key={i}
-                            className="w-2 h-2 rounded-full bg-primary-400"
-                            animate={{ y: [0, -8, 0] }}
-                            transition={{
-                                duration: 0.6,
-                                repeat: Infinity,
-                                delay: i * 0.15,
-                                ease: "easeInOut",
-                            }}
-                        />
-                    ))}
-                </div>
+                <LoadingDots />
             </div>
         );
     }
     if (error) {
         return (
             <div className={statusCardClass}>
-                <p className="text-primary-600">{text.errorFormatted(error)}</p>
+                <p className="text-error-600">{text.errorFormatted(error)}</p>
             </div>
         );
     }
@@ -139,7 +125,6 @@ function ReviewList({
                     <ReviewCard
                         key={review.id}
                         review={review}
-                        size="sm"
                         isNew={review.id === scrollToId}
                         currentUserId={currentUserId}
                         onReviewUpdated={onReviewUpdated}

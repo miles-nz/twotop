@@ -26,16 +26,10 @@ function ImageCropModal({ imageSrc, onConfirm, onCancel }) {
         const scaleY = image.naturalHeight / image.height;
 
         const pixelCrop = {
-            x: crop.x * scaleX * (crop.unit === "%" ? image.width / 100 : 1),
-            y: crop.y * scaleY * (crop.unit === "%" ? image.height / 100 : 1),
-            width:
-                crop.width *
-                scaleX *
-                (crop.unit === "%" ? image.width / 100 : 1),
-            height:
-                crop.height *
-                scaleY *
-                (crop.unit === "%" ? image.height / 100 : 1),
+            x: crop.x * scaleX,
+            y: crop.y * scaleY,
+            width: crop.width * scaleX,
+            height: crop.height * scaleY,
         };
 
         canvas.width = pixelCrop.width;

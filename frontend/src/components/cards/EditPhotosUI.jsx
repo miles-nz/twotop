@@ -1,71 +1,34 @@
-import { useState } from "react";
 import { Check, X, ImagePlus } from "lucide-react";
 import ImageCropModal from "../cards/ImageCropModal";
+import { useImageUpload } from "../../hooks/useImageUpload";
 
 function EditPhotosUI({
     review,
     addPhotoImages,
     setAddPhotoImages,
     removedPhotoUrls,
-    addPhotoInputRef,
     handleRemoveExistingPhoto,
     handleSavePhotos,
     onClose,
 }) {
-    const [cropQueue, setCropQueue] = useState([]);
-    const [currentCropSrc, setCurrentCropSrc] = useState(null);
-
-    const handleImageChange = async (e) => {
-        const files = Array.from(e.target.files);
-        const remaining =
-            5 - (review.image_urls?.length || 0) - addPhotoImages.length;
-        const validFiles = files.slice(0, remaining);
-
-        const nonSquareSrcs = [];
-        const squareFiles = [];
-
-        await Promise.all(
-            validFiles.map(
-                (file) =>
-                    new Promise((resolve) => {
-                        const img = new Image();
-                        img.onload = () => {
-                            if (img.width === img.height) {
-                                squareFiles.push(file);
-                            } else {
-                                nonSquareSrcs.push(URL.createObjectURL(file));
-                            }
-                            resolve();
-                        };
-                        img.src = URL.createObjectURL(file);
-                    }),
-            ),
-        );
-
-        setAddPhotoImages((prev) => [...prev, ...squareFiles].slice(0, 5));
-        if (nonSquareSrcs.length > 0) {
-            setCropQueue(nonSquareSrcs);
-            setCurrentCropSrc(nonSquareSrcs[0]);
-        }
-
-        e.target.value = "";
-    };
-
-    const handleCropConfirm = (croppedFile) => {
-        setAddPhotoImages((prev) => [...prev, croppedFile].slice(0, 5));
-        const remaining = cropQueue.slice(1);
-        setCropQueue(remaining);
-        setCurrentCropSrc(remaining.length > 0 ? remaining[0] : null);
-    };
-
-    const handleCropCancel = () => {
-        const remaining = cropQueue.slice(1);
-        setCropQueue(remaining);
-        setCurrentCropSrc(remaining.length > 0 ? remaining[0] : null);
-    };
+    const {
+        fileInputRef,
+        currentCropSrc,
+        handleImageChange,
+        handleCropConfirm,
+        handleCropCancel,
+        uploadError,
+    } = useImageUpload(
+        5,
+        () =>
+            (review.image_urls?.length || 0) -
+            removedPhotoUrls.length +
+            addPhotoImages.length,
+        setAddPhotoImages,
+    );
 
     return (
-        <div className="px-6 pb-4">
+        <div className="px-6 pt-4">
             <div className="border border-surface-200 rounded-xl p-4 bg-surface-50">
                 <div className="flex items-center justify-between">
                     <div className="flex flex-wrap gap-2 flex-1">
@@ -110,23 +73,22 @@ function EditPhotosUI({
                                 </button>
                             </div>
                         ))}
-                        {(review.image_urls?.length || 0) +
+                        {(review.image_urls?.length || 0) -
+                            removedPhotoUrls.length +
                             addPhotoImages.length <
                             5 && (
                             <>
                                 <input
                                     type="file"
-                                    accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                                    accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/gif,image/avif"
                                     multiple
                                     onChange={handleImageChange}
                                     className="hidden"
-                                    ref={addPhotoInputRef}
+                                    ref={fileInputRef}
                                 />
                                 <button
                                     type="button"
-                                    onClick={() =>
-                                        addPhotoInputRef.current.click()
-                                    }
+                                    onClick={() => fileInputRef.current.click()}
                                     className="w-16 h-16 flex items-center justify-center text-secondary-400 hover:text-secondary-600 cursor-pointer transition-colors"
                                 >
                                     <ImagePlus size={24} />
@@ -153,6 +115,19 @@ function EditPhotosUI({
                     </div>
                 </div>
             </div>
+            {uploadError && (
+                <div className="mt-2">
+                    {Array.isArray(uploadError) ? (
+                        uploadError.map((err, index) => (
+                            <p key={index} className="text-error-600 text-sm">
+                                {err}
+                            </p>
+                        ))
+                    ) : (
+                        <p className="text-error-600 text-sm">{uploadError}</p>
+                    )}
+                </div>
+            )}
             {currentCropSrc && (
                 <ImageCropModal
                     imageSrc={currentCropSrc}
