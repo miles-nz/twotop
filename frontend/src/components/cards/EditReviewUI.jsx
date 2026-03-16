@@ -2,6 +2,8 @@ import { Check, X } from "lucide-react";
 import RatingField from "../ui/RatingField";
 import EmojiPicker from "../ui/EmojiPicker";
 import { text } from "../../resources";
+import { useRef } from "react";
+import MarkdownToolbar from "../ui/MarkdownToolbar";
 
 function EditReviewUI({
     editedFoodRating,
@@ -23,6 +25,8 @@ function EditReviewUI({
     handleSaveReview,
     onClose,
 }) {
+    const textareaRef = useRef(null);
+
     return (
         <>
             <div className="px-6 pb-4">
@@ -84,7 +88,13 @@ function EditReviewUI({
                         className="w-full border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-dark"
                     />
                 </div>
+                <MarkdownToolbar
+                    textareaRef={textareaRef}
+                    value={editedReviewText}
+                    onChange={setEditedReviewText}
+                />
                 <textarea
+                    ref={textareaRef}
                     value={editedReviewText}
                     onChange={(e) => setEditedReviewText(e.target.value)}
                     maxLength={2000}

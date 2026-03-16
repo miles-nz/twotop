@@ -10,6 +10,8 @@ import ReviewCardMenu from "./ReviewCardMenu";
 import ReviewCardRatings from "./ReviewCardRatings";
 import ReviewCardCarousel from "./ReviewCardCarousel";
 import { themes } from "../../themes";
+import ReactMarkdown from "react-markdown";
+import { Quote } from "lucide-react";
 
 const glowShadow = "0 0 10px var(--color-primary-500)";
 
@@ -177,9 +179,36 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                     )}
                     {review.review_text && (
                         <div className="px-6 pt-3 pb-4">
-                            <p className="text-text-mid text-sm leading-normal hyphens-auto break-words">
-                                {review.review_text}
-                            </p>
+                            <div className="text-text-mid text-sm leading-normal hyphens-auto break-words">
+                                <ReactMarkdown
+                                    components={{
+                                        p: ({ children }) => (
+                                            <p className="mb-2 last:mb-0">
+                                                {children}
+                                            </p>
+                                        ),
+                                        em: ({ children }) => (
+                                            <em className="italic">
+                                                {children}
+                                            </em>
+                                        ),
+                                        blockquote: ({ children }) => (
+                                            <div className="flex gap-1">
+                                                <Quote
+                                                    size={50}
+                                                    className="fill-current"
+                                                />
+
+                                                <blockquote className="pl-3 border-l-0 text-text-light italic">
+                                                    {children}
+                                                </blockquote>
+                                            </div>
+                                        ),
+                                    }}
+                                >
+                                    {review.review_text}
+                                </ReactMarkdown>
+                            </div>
                         </div>
                     )}
                 </>

@@ -11,6 +11,8 @@ import { useBreakpoint } from "../../hooks/useBreakpoint";
 import { useImageUpload } from "../../hooks/useImageUpload";
 import { text, placeholders } from "../../resources";
 import { getLocalDate } from "../../utils";
+import { useRef } from "react";
+import MarkdownToolbar from "../ui/MarkdownToolbar";
 
 const inputClass =
     "w-full border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400";
@@ -31,6 +33,8 @@ function ReviewForm({ onReviewSubmitted }) {
     const [ambienceRating, setAmbienceRating] = useState(null);
     const [reviewText, setReviewText] = useState("");
     const [isPublic, setIsPublic] = useState(false);
+
+    const textareaRef = useRef(null);
 
     const {
         images,
@@ -220,8 +224,14 @@ function ReviewForm({ onReviewSubmitted }) {
                 <label className="block text-sm font-medium text-text-mid mb-1">
                     {text.reviewNotesLabel}
                 </label>
+                <MarkdownToolbar
+                    textareaRef={textareaRef}
+                    value={reviewText}
+                    onChange={setReviewText}
+                />
                 <div className={`${inputClass} relative`}>
                     <textarea
+                        ref={textareaRef}
                         value={reviewText}
                         onChange={(e) => setReviewText(e.target.value)}
                         maxLength={2000}
