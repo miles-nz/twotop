@@ -88,7 +88,7 @@ function ReviewCardMenu({
                 onClick={handleOpenMenu}
                 className="flex items-center text-text-light hover:text-text-mid cursor-pointer transition-colors"
             >
-                <MoreHorizontal size={18} />
+                <MoreHorizontal size={22} />
             </button>
             {menuOpen &&
                 createPortal(

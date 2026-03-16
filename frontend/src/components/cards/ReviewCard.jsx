@@ -89,29 +89,29 @@ function ReviewCard({
             className="bg-surface-50 rounded-2xl shadow-md border border-surface-200 border-l-4 border-l-secondary-400 overflow-hidden transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg"
         >
             <div className="p-6 pb-4">
-                <div className="flex items-center justify-between">
-                    <h3 className="text-2xl font-bold text-text-dark hyphens-auto break-words">
-                        {editingName ? (
-                            <EditNameUI
-                                editedName={editedName}
-                                setEditedName={setEditedName}
-                                handleSaveName={handleSaveName}
-                                onClose={() => {
-                                    setEditingName(false);
-                                }}
-                            />
-                        ) : (
-                            review.restaurant_name
-                        )}
-                    </h3>
-                    <div className="flex items-center gap-2 ml-4 flex-shrink-0">
-                        <span className="text-sm text-text-light whitespace-nowrap">
+                <div className="flex items-start justify-between">
+                    <div className="flex flex-col">
+                        <h3 className="text-2xl font-bold text-text-dark hyphens-auto break-words">
+                            {editingName ? (
+                                <EditNameUI
+                                    editedName={editedName}
+                                    setEditedName={setEditedName}
+                                    handleSaveName={handleSaveName}
+                                    onClose={() => setEditingName(false)}
+                                />
+                            ) : (
+                                review.restaurant_name
+                            )}
+                        </h3>
+                        <span className="text-sm text-text-light mt-1">
                             {new Date(review.visit_date).toLocaleDateString()}
                         </span>
+                    </div>
+                    <div className="flex items-center gap-2 ml-4 flex-shrink-0">
                         <Avatar
                             name={review.reviewer_name}
                             picture={review.reviewer_picture}
-                            size="sm"
+                            size="md"
                         />
                         {currentUserId === review.user_id && (
                             <ReviewCardMenu
