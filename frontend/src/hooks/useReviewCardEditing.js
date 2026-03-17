@@ -83,7 +83,15 @@ export function useReviewCardEditing(review, onReviewUpdated) {
             if (typeof isPublic === "boolean") {
                 formData.append("is_public", isPublic);
             }
+            // Handle photo removals and additions
+            const updatedUrls = (review.image_urls || []).filter(
+                (url) => !removedPhotoUrls.includes(url),
+            );
+            formData.append("image_urls", JSON.stringify(updatedUrls));
+            addPhotoImages.forEach((image) => formData.append("images", image));
             await patchReview(formData);
+            setAddPhotoImages([]);
+            setRemovedPhotoUrls([]);
         } catch (err) {
             console.error(err);
         }
