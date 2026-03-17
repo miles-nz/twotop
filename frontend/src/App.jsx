@@ -5,13 +5,13 @@ import Button from "./components/ui/Button";
 import Navbar from "./components/layout/Navbar";
 import ReviewForm from "./components/reviews/ReviewForm";
 import ReviewList from "./components/reviews/ReviewList";
-import LoadingDots from "./components/ui/LoadingDots";
 import { themes } from "./themes";
 import { text } from "./resources";
 import { useDarkMode } from "./hooks/useDarkMode";
+import { smoothScrollToTop } from "./utils";
 
 function App() {
-    const { isLoading, isAuthenticated, user } = useAuth0();
+    const { isAuthenticated, user } = useAuth0();
     const isDarkMode = useDarkMode();
 
     const [formOpen, setFormOpen] = useState(false);
@@ -85,8 +85,44 @@ function App() {
             className="min-h-screen w-full bg-surface-100"
         >
             <Navbar isPublic={isPublicOnly} onTogglePublic={setIsPublicOnly} />
-            <div className="max-w-2xl mx-auto pt-6 pb-10 px-4">
-                <div className="mb-6 flex justify-center">
+            <div className="max-w-3xl mx-auto pt-6 pb-16 px-4 sm:px-6 lg:px-0">
+                {/* Floating Write a Review Button (desktop only) */}
+                <div className="hidden lg:block">
+                    <button
+                        onClick={() => {
+                            if (!formOpen) {
+                                setFormOpen(true);
+                                // Try native smooth scroll, fallback to manual animation
+                                let scrolled = false;
+                                try {
+                                    window.scrollTo({
+                                        top: 0,
+                                        behavior: "smooth",
+                                    });
+                                    scrolled = true;
+                                } catch (e) {}
+                                if (!scrolled || window.pageYOffset > 10) {
+                                    smoothScrollToTop();
+                                }
+                            } else {
+                                setFormOpen(false);
+                            }
+                        }}
+                        className="fixed bottom-8 right-8 z-40 bg-secondary-500 hover:bg-secondary-600 text-white rounded-full shadow-lg w-16 h-16 flex items-center justify-center text-3xl font-bold transition-colors duration-200 drop-shadow-lg"
+                        style={{ boxShadow: "0 4px 24px 0 rgba(0,0,0,0.10)" }}
+                        aria-label={formOpen ? text.close : text.writeReview}
+                    >
+                        <motion.span
+                            animate={{ rotate: formOpen ? 45 : 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="inline-block"
+                        >
+                            +
+                        </motion.span>
+                    </button>
+                </div>
+                {/* Top button for mobile/tablet */}
+                <div className="mb-6 flex justify-center lg:hidden">
                     <Button
                         onClick={() => setFormOpen((prev) => !prev)}
                         variant="secondary"
