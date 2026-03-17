@@ -61,7 +61,9 @@ function App() {
     if (isLoading) {
         return (
             <div className="min-h-screen w-full bg-surface-100 flex items-center justify-center">
-                <LoadingDots />
+                <div className="bg-surface-50 rounded-2xl shadow-md p-6 text-center border border-surface-200 w-full max-w-xl mx-auto">
+                    <LoadingDots />
+                </div>
             </div>
         );
     }
