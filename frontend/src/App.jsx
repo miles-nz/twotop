@@ -28,7 +28,8 @@ function App() {
     };
 
     const handleReviewsLoaded = (count) => {
-        if (count === 0) setFormOpen(true);
+        // Only auto-expand the form if not in public only mode
+        if (count === 0 && !isPublicOnly) setFormOpen(true);
         if (justSubmitted) {
             setFormOpen(false);
             setJustSubmitted(false);
