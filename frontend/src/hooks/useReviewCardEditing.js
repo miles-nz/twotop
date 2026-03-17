@@ -69,7 +69,7 @@ export function useReviewCardEditing(review, onReviewUpdated) {
         }
     };
 
-    const handleSaveReview = async () => {
+    const handleSaveReview = async (isPublic) => {
         try {
             const formData = new FormData();
             formData.append("review_text", editedReviewText);
@@ -80,6 +80,9 @@ export function useReviewCardEditing(review, onReviewUpdated) {
             formData.append("food_emoji", editedFoodEmoji);
             formData.append("drink_emoji", editedDrinkEmoji);
             formData.append("ambience_emoji", editedAmbienceEmoji);
+            if (typeof isPublic === "boolean") {
+                formData.append("is_public", isPublic);
+            }
             await patchReview(formData);
         } catch (err) {
             console.error(err);

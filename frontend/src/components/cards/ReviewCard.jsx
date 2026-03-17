@@ -3,8 +3,6 @@ import { motion } from "framer-motion";
 import { useReviewCardEditing } from "../../hooks/useReviewCardEditing";
 import { useDarkMode } from "../../hooks/useDarkMode";
 import Avatar from "../ui/Avatar";
-import EditNameUI from "./EditNameUI";
-import EditPhotosUI from "./EditPhotosUI";
 import EditReviewUI from "./EditReviewUI";
 import LoadingOverlay from "../ui/LoadingOverlay";
 import ReviewCardMenu from "./ReviewCardMenu";
@@ -24,9 +22,7 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
         Object.entries(theme).map(([key, value]) => [key, value]),
     );
 
-    const [addingPhotos, setAddingPhotos] = useState(false);
-    const [editingReview, setEditingReview] = useState(false);
-    const [editingName, setEditingName] = useState(false);
+    const [editing, setEditing] = useState(false);
 
     const {
         editedName,
@@ -78,100 +74,80 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
             style={themeStyle}
             className="bg-surface-50 rounded-2xl shadow-sm border border-surface-200 border-l-3 border-l-secondary-400 overflow-hidden transition-transform duration-200 hover:-translate-y-0.25 hover:shadow-md"
         >
-            <div className="p-6 pb-3">
-                <div className="flex items-start justify-between">
-                    <div className="flex flex-col gap-0.5">
-                        <h3 className="text-2xl font-bold text-text-dark hyphens-auto break-words leading-tight">
-                            {editingName ? (
-                                <EditNameUI
-                                    editedName={editedName}
-                                    setEditedName={setEditedName}
-                                    handleSaveName={handleSaveName}
-                                    onClose={() => setEditingName(false)}
-                                />
-                            ) : (
-                                review.restaurant_name
-                            )}
-                        </h3>
-                        <span className="text-xs text-text-light tracking-wide mt-0.5">
-                            {new Date(review.visit_date).toLocaleDateString()}
-                        </span>
-                    </div>
-                    <div className="flex items-center gap-2 ml-3 flex-shrink-0">
-                        {currentUserId === review.user_id && (
-                            <ReviewCardMenu
-                                review={review}
-                                onAddPhotos={() => setAddingPhotos(true)}
-                                onEditReview={() => setEditingReview(true)}
-                                onEditName={() => setEditingName(true)}
-                                onReviewUpdated={onReviewUpdated}
-                            />
-                        )}
-                        <Avatar
-                            name={review.reviewer_name}
-                            picture={review.reviewer_picture}
-                            size="md"
-                        />
-                    </div>
-                </div>
-            </div>
-
-            {(review.food_rating ||
-                review.drink_rating ||
-                review.ambience_rating ||
-                editingReview) &&
-                (editingReview ? (
-                    <EditReviewUI
-                        editedFoodRating={editedFoodRating}
-                        setEditedFoodRating={setEditedFoodRating}
-                        editedDrinkRating={editedDrinkRating}
-                        setEditedDrinkRating={setEditedDrinkRating}
-                        editedAmbienceRating={editedAmbienceRating}
-                        setEditedAmbienceRating={setEditedAmbienceRating}
-                        editedVisitDate={editedVisitDate}
-                        setEditedVisitDate={setEditedVisitDate}
-                        editedReviewText={editedReviewText}
-                        setEditedReviewText={setEditedReviewText}
-                        editedFoodEmoji={editedFoodEmoji}
-                        setEditedFoodEmoji={setEditedFoodEmoji}
-                        editedDrinkEmoji={editedDrinkEmoji}
-                        setEditedDrinkEmoji={setEditedDrinkEmoji}
-                        editedAmbienceEmoji={editedAmbienceEmoji}
-                        setEditedAmbienceEmoji={setEditedAmbienceEmoji}
-                        handleSaveReview={handleSaveReview}
-                        onClose={() => setEditingReview(false)}
-                    />
-                ) : (
-                    <ReviewCardRatings
-                        foodRating={review.food_rating}
-                        drinkRating={review.drink_rating}
-                        ambienceRating={review.ambience_rating}
-                        foodEmoji={review.food_emoji}
-                        drinkEmoji={review.drink_emoji}
-                        ambienceEmoji={review.ambience_emoji}
-                    />
-                ))}
-            {!editingReview && (
+            {editing ? (
+                <EditReviewUI
+                    editedName={editedName}
+                    setEditedName={setEditedName}
+                    editedFoodRating={editedFoodRating}
+                    setEditedFoodRating={setEditedFoodRating}
+                    editedDrinkRating={editedDrinkRating}
+                    setEditedDrinkRating={setEditedDrinkRating}
+                    editedAmbienceRating={editedAmbienceRating}
+                    setEditedAmbienceRating={setEditedAmbienceRating}
+                    editedVisitDate={editedVisitDate}
+                    setEditedVisitDate={setEditedVisitDate}
+                    editedReviewText={editedReviewText}
+                    setEditedReviewText={setEditedReviewText}
+                    editedFoodEmoji={editedFoodEmoji}
+                    setEditedFoodEmoji={setEditedFoodEmoji}
+                    editedDrinkEmoji={editedDrinkEmoji}
+                    setEditedDrinkEmoji={setEditedDrinkEmoji}
+                    editedAmbienceEmoji={editedAmbienceEmoji}
+                    setEditedAmbienceEmoji={setEditedAmbienceEmoji}
+                    addPhotoImages={addPhotoImages}
+                    setAddPhotoImages={setAddPhotoImages}
+                    removedPhotoUrls={removedPhotoUrls}
+                    setRemovedPhotoUrls={setRemovedPhotoUrls}
+                    handleRemoveExistingPhoto={handleRemoveExistingPhoto}
+                    handleSave={async (isPublic) => {
+                        await handleSaveReview(isPublic);
+                        setEditing(false);
+                    }}
+                    onClose={() => setEditing(false)}
+                    review={review}
+                />
+            ) : (
                 <>
-                    {(review.review_text || addingPhotos) &&
-                        !review.image_urls?.length && (
-                            <div className="border-t border-surface-200 mx-6" />
-                        )}
-                    {addingPhotos && (
-                        <EditPhotosUI
-                            review={review}
-                            addPhotoImages={addPhotoImages}
-                            setAddPhotoImages={setAddPhotoImages}
-                            removedPhotoUrls={removedPhotoUrls}
-                            handleRemoveExistingPhoto={
-                                handleRemoveExistingPhoto
-                            }
-                            handleSavePhotos={handleSavePhotos}
-                            onClose={() => {
-                                setAddingPhotos(false);
-                                setAddPhotoImages([]);
-                                setRemovedPhotoUrls([]);
-                            }}
+                    <div className="p-6 pb-3">
+                        <div className="flex items-start justify-between">
+                            <div className="flex flex-col gap-0.5">
+                                <h3 className="text-2xl font-bold text-text-dark hyphens-auto break-words leading-tight">
+                                    {review.restaurant_name}
+                                </h3>
+                                <span className="text-xs text-text-light tracking-wide mt-0.5">
+                                    {new Date(
+                                        review.visit_date,
+                                    ).toLocaleDateString()}
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2 ml-3 flex-shrink-0">
+                                {currentUserId === review.user_id && (
+                                    <ReviewCardMenu
+                                        review={review}
+                                        onAddPhotos={() => setEditing(true)}
+                                        onEditReview={() => setEditing(true)}
+                                        onEditName={() => setEditing(true)}
+                                        onReviewUpdated={onReviewUpdated}
+                                    />
+                                )}
+                                <Avatar
+                                    name={review.reviewer_name}
+                                    picture={review.reviewer_picture}
+                                    size="md"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    {(review.food_rating ||
+                        review.drink_rating ||
+                        review.ambience_rating) && (
+                        <ReviewCardRatings
+                            foodRating={review.food_rating}
+                            drinkRating={review.drink_rating}
+                            ambienceRating={review.ambience_rating}
+                            foodEmoji={review.food_emoji}
+                            drinkEmoji={review.drink_emoji}
+                            ambienceEmoji={review.ambience_emoji}
                         />
                     )}
                     {review.image_urls && review.image_urls.length > 0 && (
@@ -201,7 +177,6 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                                                     size={50}
                                                     className="fill-current"
                                                 />
-
                                                 <blockquote className="pl-3 border-l-0 text-text-light italic">
                                                     {children}
                                                 </blockquote>

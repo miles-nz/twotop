@@ -80,7 +80,7 @@ function ReviewCardMenu({
                 },
             );
             if (!response.ok) throw new Error("Failed to update");
-            onReviewUpdated();
+            onReviewUpdated(review.id);
         } catch (err) {
             console.error(err);
         }
@@ -107,34 +107,12 @@ function ReviewCardMenu({
                         <button
                             onClick={() => {
                                 handleMenuClose();
-                                onEditName();
+                                onEditReview();
                             }}
                             className="flex items-center gap-2 w-full px-4 py-2 text-sm text-text-dark hover:bg-surface-100 rounded-t-lg cursor-pointer"
                         >
-                            <Store size={14} />
-                            {text.updateRestaurant}
-                        </button>
-                        <button
-                            onClick={() => {
-                                handleMenuClose();
-                                onEditReview();
-                            }}
-                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-text-dark hover:bg-surface-100 cursor-pointer"
-                        >
                             <Pencil size={14} />
-                            {text.editReview}
-                        </button>
-                        <button
-                            onClick={() => {
-                                handleMenuClose();
-                                onAddPhotos();
-                            }}
-                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-text-dark hover:bg-surface-100 cursor-pointer"
-                        >
-                            <ImagePlus size={14} />
-                            {review.image_urls && review.image_urls.length > 0
-                                ? text.editPhotos
-                                : text.addPhotos}
+                            {text.edit}
                         </button>
                         <button
                             onClick={() => {

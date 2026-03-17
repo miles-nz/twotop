@@ -30,6 +30,7 @@ export const placeholders = [
 ];
 
 export const text = {
+    edit: "Edit",
     // App
     appName: "MIMU",
     tagline: "Log in to view and write reviews",

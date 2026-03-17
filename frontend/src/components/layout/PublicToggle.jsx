@@ -13,9 +13,7 @@ import { text } from "../../resources";
 export default function PublicToggle({ isPublic, onToggle, className = "" }) {
     return (
         <div className={`flex items-center gap-3 ${className}`}>
-            <p className="text-sm font-medium text-text-dark">
-                {text.publicOnly}
-            </p>
+            <p className="text-xs text-text-light">Public</p>
             <button
                 onClick={() => onToggle(!isPublic)}
                 className={`relative w-11 h-6 rounded-full transition-colors duration-200 cursor-pointer focus:outline-none ${
