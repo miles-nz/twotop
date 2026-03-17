@@ -156,6 +156,11 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                             reviewId={review.id}
                         />
                     )}
+                    {/* Divider if no photos and there is review text */}
+                    {(!review.image_urls || review.image_urls.length === 0) &&
+                        review.review_text && (
+                            <div className="border-t border-surface-200 mx-6" />
+                        )}
                     {review.review_text && (
                         <div className="px-6 pt-3 pb-4">
                             <div className="text-text-mid text-sm leading-normal hyphens-auto break-words">
