@@ -1,4 +1,4 @@
-function Avatar({ name, picture, size = "md" }) {
+function Avatar({ name, picture, size = "md", title }) {
     const sizes = {
         sm: "w-6 h-6 text-xs",
         md: "w-8 h-8 text-sm",
@@ -19,6 +19,7 @@ function Avatar({ name, picture, size = "md" }) {
     return (
         <div
             className={`${sizes[size]} rounded-full bg-primary-400 text-white flex items-center justify-center font-semibold overflow-hidden flex-shrink-0`}
+            title={title || name}
         >
             {picture ? (
                 <img

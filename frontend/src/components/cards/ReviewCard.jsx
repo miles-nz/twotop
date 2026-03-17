@@ -134,6 +134,7 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                                     name={review.reviewer_name}
                                     picture={review.reviewer_picture}
                                     size="md"
+                                    title={review.reviewer_name}
                                 />
                             </div>
                         </div>
