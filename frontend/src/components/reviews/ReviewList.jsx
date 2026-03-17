@@ -102,7 +102,10 @@ function ReviewList({
             <AnimatePresence mode="wait">
                 <motion.div
                     key="loading"
-                    className={statusCardClass}
+                    className={
+                        statusCardClass +
+                        " flex items-center justify-center min-h-20"
+                    }
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
@@ -136,7 +139,10 @@ function ReviewList({
             <AnimatePresence mode="wait">
                 <motion.div
                     key="no-reviews"
-                    className={statusCardClass}
+                    className={
+                        statusCardClass +
+                        " min-h-20 flex items-center justify-center"
+                    }
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
