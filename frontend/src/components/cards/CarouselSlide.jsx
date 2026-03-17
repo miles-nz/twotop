@@ -45,7 +45,7 @@ function CarouselSlide({ src, alt }) {
                     },
                 }}
             >
-                {!loaded && <LoadingDots color="bg-white" size="w-3 h-3" />}
+                {!loaded && <LoadingDots color={lightColor} size="w-3 h-3" />}
             </motion.div>
             <img
                 ref={imgRef}

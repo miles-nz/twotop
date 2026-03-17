@@ -68,6 +68,21 @@ function StarRating({ value, onChange, readOnly = false, size = "md" }) {
         return () => el.removeEventListener("touchmove", handleTouchMove);
     }, [hoverValue]);
 
+    // Keyboard navigation
+    const handleStarKeyDown = (e, starIndex) => {
+        if (readOnly) return;
+        if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
+            e.preventDefault();
+            onChange(Math.max(0.5, (value || 0) - 0.5));
+        } else if (e.key === "ArrowRight" || e.key === "ArrowUp") {
+            e.preventDefault();
+            onChange(Math.min(5, (value || 0) + 0.5));
+        } else if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+            e.preventDefault();
+            onChange(starIndex);
+        }
+    };
+
     return (
         <div
             ref={containerRef}
@@ -84,6 +99,11 @@ function StarRating({ value, onChange, readOnly = false, size = "md" }) {
                         className={`relative ${readOnly ? "cursor-default" : "cursor-pointer"} ${sizes[size]}`}
                         onMouseMove={(e) => handleMouseMove(e, starIndex)}
                         onClick={(e) => handleClick(e, starIndex)}
+                        tabIndex={readOnly ? -1 : 0}
+                        aria-label={`Set rating to ${starIndex} star${starIndex > 1 ? "s" : ""}`}
+                        onKeyDown={(e) => handleStarKeyDown(e, starIndex)}
+                        role="radio"
+                        aria-checked={value === starIndex}
                     >
                         <svg
                             viewBox="0 0 24 24"

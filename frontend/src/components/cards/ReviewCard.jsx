@@ -141,14 +141,16 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                     {(review.food_rating ||
                         review.drink_rating ||
                         review.ambience_rating) && (
-                        <ReviewCardRatings
-                            foodRating={review.food_rating}
-                            drinkRating={review.drink_rating}
-                            ambienceRating={review.ambience_rating}
-                            foodEmoji={review.food_emoji}
-                            drinkEmoji={review.drink_emoji}
-                            ambienceEmoji={review.ambience_emoji}
-                        />
+                        <div className="mt-2 flex justify-start lg:justify-center">
+                            <ReviewCardRatings
+                                foodRating={review.food_rating}
+                                drinkRating={review.drink_rating}
+                                ambienceRating={review.ambience_rating}
+                                foodEmoji={review.food_emoji}
+                                drinkEmoji={review.drink_emoji}
+                                ambienceEmoji={review.ambience_emoji}
+                            />
+                        </div>
                     )}
                     {review.image_urls && review.image_urls.length > 0 && (
                         <ReviewCardCarousel

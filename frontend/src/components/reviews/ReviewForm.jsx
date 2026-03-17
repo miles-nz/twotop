@@ -36,6 +36,13 @@ function ReviewForm({ onReviewSubmitted }) {
 
     const textareaRef = useRef(null);
 
+    // Auto-resize textarea
+    const handleTextareaInput = (e) => {
+        const ta = e.target;
+        ta.style.height = "auto";
+        ta.style.height = ta.scrollHeight + "px";
+    };
+
     const {
         images,
         fileInputRef,
@@ -130,30 +137,39 @@ function ReviewForm({ onReviewSubmitted }) {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="bg-primary-200 rounded-2xl shadow-md p-6 mb-6 border border-surface-200"
+            className="bg-gradient-to-br from-primary-200 to-primary-100 dark:from-primary-900 dark:to-primary-800 dark:bg-gradient-to-br rounded-2xl shadow-md p-6 mb-6 border border-surface-200 dark:border-surface-700 text-text-dark dark:text-text-light"
         >
-            <h2 className="text-xl font-bold text-secondary-600 mb-4">
+            <h2 className="text-xl font-bold text-text-mid dark:text-text-light mb-4">
                 {text.writeReview}
             </h2>
             <div className="mb-4">
-                <label className="block text-sm font-medium text-text-mid mb-1">
+                <label
+                    htmlFor="restaurantName"
+                    className="block text-sm font-medium text-text-mid mb-1"
+                >
                     {text.restaurantNameLabel}
                 </label>
                 <input
+                    id="restaurantName"
                     type="text"
                     value={restaurantName}
                     onChange={(e) => setRestaurantName(e.target.value)}
                     maxLength={100}
                     className={`${inputClass} placeholder-text-light`}
                     placeholder={text.restaurantNamePlaceholder(placeholder)}
+                    aria-label={text.restaurantNameLabel}
                 />
             </div>
 
             <div className="mb-4 pr-[26px] md:pr-0">
-                <label className="block text-sm font-medium text-text-mid mb-1">
+                <label
+                    htmlFor="visitDate"
+                    className="block text-sm font-medium text-text-mid mb-1"
+                >
                     {text.dateVisitedLabel}
                 </label>
                 <input
+                    id="visitDate"
                     type="date"
                     value={visitDate}
                     onChange={(e) => setvisitDate(e.target.value)}
@@ -165,6 +181,7 @@ function ReviewForm({ onReviewSubmitted }) {
                             : "var(--color-text-mid)",
                         opacity: 1,
                     }}
+                    aria-label={text.dateVisitedLabel}
                 />
             </div>
 
@@ -187,6 +204,7 @@ function ReviewForm({ onReviewSubmitted }) {
                         value={foodRating}
                         onChange={setFoodRating}
                         size={isDesktop ? "sm" : "md"}
+                        aria-label={text.foodLabel}
                     />
                     <RatingField
                         label={
@@ -202,6 +220,7 @@ function ReviewForm({ onReviewSubmitted }) {
                         value={drinkRating}
                         onChange={setDrinkRating}
                         size={isDesktop ? "sm" : "md"}
+                        aria-label={text.drinksLabel}
                     />
                     <RatingField
                         label={
@@ -217,12 +236,16 @@ function ReviewForm({ onReviewSubmitted }) {
                         value={ambienceRating}
                         onChange={setAmbienceRating}
                         size={isDesktop ? "sm" : "md"}
+                        aria-label={text.ambienceLabel}
                     />
                 </div>
             </div>
 
             <div className="mb-4">
-                <label className="block text-sm font-medium text-text-mid mb-1">
+                <label
+                    htmlFor="reviewNotes"
+                    className="block text-sm font-medium text-text-mid mb-1"
+                >
                     {text.reviewNotesLabel}
                 </label>
                 <MarkdownToolbar
@@ -232,13 +255,16 @@ function ReviewForm({ onReviewSubmitted }) {
                 />
                 <div className={`${inputClass} relative`}>
                     <textarea
+                        id="reviewNotes"
                         ref={textareaRef}
                         value={reviewText}
                         onChange={(e) => setReviewText(e.target.value)}
+                        onInput={handleTextareaInput}
                         maxLength={2000}
                         className="w-full resize-none placeholder-text-light bg-transparent focus:outline-none pb-10"
                         placeholder={text.reviewNotesPlaceholder}
                         rows={4}
+                        aria-label={text.reviewNotesLabel}
                     />
                     <input
                         type="file"
@@ -284,11 +310,17 @@ function ReviewForm({ onReviewSubmitted }) {
 
             <div className="mb-4 flex items-center justify-between bg-surface-100 rounded-lg px-4 py-3 border border-surface-200">
                 <div>
-                    <p className="text-sm font-medium text-text-dark">
+                    <label
+                        htmlFor="publicToggle"
+                        className="text-sm font-medium text-text-dark cursor-pointer"
+                    >
                         {text.markAsPublic}
-                    </p>
+                    </label>
                 </div>
                 <button
+                    id="publicToggle"
+                    aria-pressed={isPublic}
+                    aria-label={text.markAsPublic}
                     onClick={() => setIsPublic((prev) => !prev)}
                     className={`relative w-11 h-6 rounded-full transition-colors duration-200 cursor-pointer focus:outline-none ${
                         isPublic ? "bg-secondary-500" : "bg-surface-300"

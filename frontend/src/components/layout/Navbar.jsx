@@ -28,7 +28,7 @@ function Navbar({ isPublic = false, onTogglePublic }) {
             window.clearTimeout(desktopAdminHideTimer.current);
             desktopAdminHideTimer.current = window.setTimeout(() => {
                 setShowDesktopAdminButton(false);
-            }, 5000);
+            }, 10000); // 10 seconds
         }, 700);
     };
     const endDesktopAdminTrigger = () => {
@@ -43,7 +43,7 @@ function Navbar({ isPublic = false, onTogglePublic }) {
             window.clearTimeout(menuAdminHideTimer.current);
             menuAdminHideTimer.current = window.setTimeout(() => {
                 setShowMobileAdminButton(false);
-            }, 5000);
+            }, 10000); // 10 seconds
         }, 700);
     };
     const endMenuAdminTrigger = () => {
@@ -138,13 +138,19 @@ function Navbar({ isPublic = false, onTogglePublic }) {
                             <div className="hidden lg:block">{userProfile}</div>
                         )}
                         {!isAuthenticated && (
-                            <div
-                                className={
-                                    showDesktopAdminButton ? "" : "invisible"
-                                }
-                            >
-                                {authButtons}
-                            </div>
+                            <AnimatePresence>
+                                {showDesktopAdminButton && (
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        transition={{ duration: 0.3 }}
+                                        key="admin-desktop-btn"
+                                    >
+                                        {authButtons}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         )}
                     </div>
                 </div>
@@ -220,20 +226,39 @@ function Navbar({ isPublic = false, onTogglePublic }) {
                                         {text.appName}
                                     </div>
                                 </div>
-                                <div className="px-4 py-4 space-y-4">
-                                    <div className="pt-2 border-t border-surface-200 space-y-4">
-                                        <div className="py-2">
-                                            {publicToggle}
+                                <div className="flex flex-col h-[calc(100vh-56px)]">
+                                    <div className="px-4 py-4 flex-1 overflow-y-auto">
+                                        <div className="pt-2 border-t border-surface-200 space-y-4">
+                                            <div className="py-2">
+                                                {publicToggle}
+                                            </div>
                                         </div>
-                                        {/* Show admin button after long press if not logged in */}
-                                        {showMobileAdminButton && !user ? (
-                                            <Button
-                                                variant="surface"
-                                                onClick={loginWithRedirect}
-                                            >
-                                                {text.logIn}
-                                            </Button>
-                                        ) : null}
+                                    </div>
+                                    {/* Admin button at the bottom */}
+                                    <div className="px-4 pb-6 mt-auto">
+                                        <AnimatePresence>
+                                            {showMobileAdminButton && !user && (
+                                                <motion.div
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 1 }}
+                                                    exit={{ opacity: 0 }}
+                                                    transition={{
+                                                        duration: 0.3,
+                                                    }}
+                                                    key="admin-mobile-btn"
+                                                >
+                                                    <Button
+                                                        variant="surface"
+                                                        onClick={
+                                                            loginWithRedirect
+                                                        }
+                                                        className="w-full"
+                                                    >
+                                                        {text.logIn}
+                                                    </Button>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
                                     </div>
                                 </div>
                             </motion.div>
