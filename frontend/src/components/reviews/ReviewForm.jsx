@@ -9,7 +9,7 @@ import RatingField from "../ui/RatingField";
 import EmojiPicker from "../ui/EmojiPicker";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
 import { useImageUpload } from "../../hooks/useImageUpload";
-import { text, placeholders } from "../../resources";
+import { text, placeholders, preferences } from "../../resources";
 import { getLocalDate } from "../../utils";
 import { useRef } from "react";
 import MarkdownToolbar from "../ui/MarkdownToolbar";
@@ -192,14 +192,18 @@ function ReviewForm({ onReviewSubmitted }) {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <RatingField
                         label={
-                            <span className="flex items-center justify-center gap-1">
-                                <EmojiPicker
-                                    type="food"
-                                    value={foodEmoji}
-                                    onChange={setFoodEmoji}
-                                />
-                                {text.foodLabel}
-                            </span>
+                            preferences.enableEmojis ? (
+                                <span className="flex items-center justify-center gap-1">
+                                    <EmojiPicker
+                                        type="food"
+                                        value={foodEmoji}
+                                        onChange={setFoodEmoji}
+                                    />
+                                    {text.foodLabel}
+                                </span>
+                            ) : (
+                                <span>{text.foodLabel}</span>
+                            )
                         }
                         value={foodRating}
                         onChange={setFoodRating}
@@ -208,14 +212,18 @@ function ReviewForm({ onReviewSubmitted }) {
                     />
                     <RatingField
                         label={
-                            <span className="flex items-center justify-center gap-1">
-                                <EmojiPicker
-                                    type="drink"
-                                    value={drinkEmoji}
-                                    onChange={setDrinkEmoji}
-                                />
-                                {text.drinksLabel}
-                            </span>
+                            preferences.enableEmojis ? (
+                                <span className="flex items-center justify-center gap-1">
+                                    <EmojiPicker
+                                        type="drink"
+                                        value={drinkEmoji}
+                                        onChange={setDrinkEmoji}
+                                    />
+                                    {text.drinksLabel}
+                                </span>
+                            ) : (
+                                <span>{text.drinksLabel}</span>
+                            )
                         }
                         value={drinkRating}
                         onChange={setDrinkRating}
@@ -224,14 +232,18 @@ function ReviewForm({ onReviewSubmitted }) {
                     />
                     <RatingField
                         label={
-                            <span className="flex items-center justify-center gap-1">
-                                <EmojiPicker
-                                    type="ambience"
-                                    value={ambienceEmoji}
-                                    onChange={setAmbienceEmoji}
-                                />
-                                {text.ambienceLabel}
-                            </span>
+                            preferences.enableEmojis ? (
+                                <span className="flex items-center justify-center gap-1">
+                                    <EmojiPicker
+                                        type="ambience"
+                                        value={ambienceEmoji}
+                                        onChange={setAmbienceEmoji}
+                                    />
+                                    {text.ambienceLabel}
+                                </span>
+                            ) : (
+                                <span>{text.ambienceLabel}</span>
+                            )
                         }
                         value={ambienceRating}
                         onChange={setAmbienceRating}

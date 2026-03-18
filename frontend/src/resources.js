@@ -1,6 +1,7 @@
 export const preferences = {
     collapseReviewImages: false,
     maxImageSize: 20 * 1024 * 1024,
+    enableEmojis: false,
 };
 
 export const placeholders = [

@@ -1,6 +1,6 @@
 import StarRating from "../ui/StarRating";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
-import { text } from "../../resources";
+import { text, preferences } from "../../resources";
 
 function ReviewCardRatings({
     foodRating,
@@ -15,47 +15,135 @@ function ReviewCardRatings({
     if (!foodRating && !drinkRating && !ambienceRating) return null;
 
     return (
-        <div className="px-6 pt-1 pb-4 sm:py-0 sm:pb-4 overflow-x-auto">
-            <div className="flex gap-3">
+        <div className="px-6 pt-1 pb-4 sm:py-0 sm:pb-4 overflow-x-auto mx-auto">
+            <div
+                className={
+                    isDesktop
+                        ? "flex w-full justify-between items-center"
+                        : "flex flex-col w-full gap-4"
+                }
+            >
+                {/* Food Rating */}
                 {foodRating && (
                     <span
-                        className="flex items-center gap-1 text-sm text-text-mid"
+                        className={
+                            isDesktop
+                                ? "flex flex-col items-center gap-1"
+                                : "flex flex-row items-center gap-4 w-full"
+                        }
                         title="Food"
                     >
-                        <span>{foodEmoji || text.defaultFoodEmoji}</span>
-                        <StarRating
-                            value={foodRating}
-                            readOnly
-                            size={isDesktop ? "sm" : "xs"}
-                        />
+                        <span
+                            className={
+                                isDesktop
+                                    ? "text-xs sm:text-sm text-text-light tracking-wide min-w-[70px] text-left"
+                                    : "text-xs sm:text-sm text-text-light tracking-wide min-w-[70px] text-center"
+                            }
+                        >
+                            Food
+                            {preferences.enableEmojis
+                                ? ` ${foodEmoji || text.defaultFoodEmoji}`
+                                : ""}
+                        </span>
+                        <div
+                            className={
+                                isDesktop
+                                    ? "flex items-center"
+                                    : "flex-1 flex items-center justify-end"
+                            }
+                        >
+                            <StarRating
+                                value={foodRating}
+                                readOnly
+                                size={isDesktop ? "lg" : "md"}
+                            />
+                            {isDesktop && foodRating && drinkRating && (
+                                <span
+                                    className="mx-3 h-10 border-l border-surface-200"
+                                    aria-hidden="true"
+                                ></span>
+                            )}
+                        </div>
                     </span>
                 )}
+                {/* Drink Rating */}
                 {drinkRating && (
                     <span
-                        className="flex items-center gap-1 text-sm text-text-mid"
+                        className={
+                            isDesktop
+                                ? "flex flex-col items-center gap-1"
+                                : "flex flex-row items-center gap-4 w-full"
+                        }
                         title="Drink"
                     >
-                        <span>{drinkEmoji || text.defaultDrinkEmoji}</span>
-                        <StarRating
-                            value={drinkRating}
-                            readOnly
-                            size={isDesktop ? "sm" : "xs"}
-                        />
+                        <span
+                            className={
+                                isDesktop
+                                    ? "text-xs sm:text-sm text-text-light tracking-wide min-w-[70px] text-left"
+                                    : "text-xs sm:text-sm text-text-light tracking-wide min-w-[70px] text-center"
+                            }
+                        >
+                            Drink
+                            {preferences.enableEmojis
+                                ? ` ${drinkEmoji || text.defaultDrinkEmoji}`
+                                : ""}
+                        </span>
+                        <div
+                            className={
+                                isDesktop
+                                    ? "flex items-center"
+                                    : "flex-1 flex items-center justify-end"
+                            }
+                        >
+                            <StarRating
+                                value={drinkRating}
+                                readOnly
+                                size={isDesktop ? "lg" : "md"}
+                            />
+                            {isDesktop && drinkRating && ambienceRating && (
+                                <span
+                                    className="mx-3 h-10 border-l border-surface-200"
+                                    aria-hidden="true"
+                                ></span>
+                            )}
+                        </div>
                     </span>
                 )}
+                {/* Ambience Rating */}
                 {ambienceRating && (
                     <span
-                        className="flex items-center gap-1 text-sm text-text-mid"
+                        className={
+                            isDesktop
+                                ? "flex flex-col items-center gap-1"
+                                : "flex flex-row items-center gap-4 w-full"
+                        }
                         title="Ambience"
                     >
-                        <span>
-                            {ambienceEmoji || text.defaultAmbienceEmoji}
+                        <span
+                            className={
+                                isDesktop
+                                    ? "text-xs sm:text-sm text-text-light tracking-wide min-w-[70px] text-left"
+                                    : "text-xs sm:text-sm text-text-light tracking-wide min-w-[70px] text-center"
+                            }
+                        >
+                            Ambience
+                            {preferences.enableEmojis
+                                ? ` ${ambienceEmoji || text.defaultAmbienceEmoji}`
+                                : ""}
                         </span>
-                        <StarRating
-                            value={ambienceRating}
-                            readOnly
-                            size={isDesktop ? "sm" : "xs"}
-                        />
+                        <div
+                            className={
+                                isDesktop
+                                    ? "flex items-center"
+                                    : "flex-1 flex items-center justify-end"
+                            }
+                        >
+                            <StarRating
+                                value={ambienceRating}
+                                readOnly
+                                size={isDesktop ? "lg" : "md"}
+                            />
+                        </div>
                     </span>
                 )}
             </div>

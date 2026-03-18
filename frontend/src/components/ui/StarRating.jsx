@@ -1,12 +1,15 @@
 import { useState, useRef, useEffect } from "react";
 
 function StarRating({ value, onChange, readOnly = false, size = "md" }) {
+        // Generate a unique gradient id for each StarRating instance
+        const gradientIdBase = `star-gradient-${Math.random().toString(36).substr(2, 9)}`;
     const containerRef = useRef(null);
     const sizes = {
         xxs: "w-3 h-3",
         xs: "w-4 h-4",
         sm: "w-7 h-7",
         md: "w-8 h-8",
+        lg: "w-9.5 h-9.5",
     };
     const [hoverValue, setHoverValue] = useState(null);
 
@@ -92,6 +95,7 @@ function StarRating({ value, onChange, readOnly = false, size = "md" }) {
         >
             {[1, 2, 3, 4, 5].map((starIndex) => {
                 const fill = getStarFill(starIndex);
+                const gradientId = `${gradientIdBase}-${starIndex}`;
                 return (
                     <div
                         key={starIndex}
@@ -121,9 +125,15 @@ function StarRating({ value, onChange, readOnly = false, size = "md" }) {
                             >
                                 <svg
                                     viewBox="0 0 24 24"
-                                    className={`absolute inset-0 ${sizes[size]} text-secondary-400`}
-                                    fill="currentColor"
+                                    className={`absolute inset-0 ${sizes[size]}`}
+                                    fill={`url(#${gradientId})`}
                                 >
+                                    <defs>
+                                        <linearGradient id={gradientId} x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                                            <stop offset="0%" stopColor="var(--color-primary-400)" />
+                                            <stop offset="100%" stopColor="var(--color-gradient-mid)" />
+                                        </linearGradient>
+                                    </defs>
                                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                                 </svg>
                             </div>

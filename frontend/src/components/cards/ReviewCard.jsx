@@ -154,10 +154,15 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                         </div>
                     )}
                     {review.image_urls && review.image_urls.length > 0 && (
-                        <ReviewCardCarousel
-                            images={review.image_urls}
-                            reviewId={review.id}
-                        />
+                        <div className="flex justify-center w-full px-4 pb-2">
+                            <div className="w-full max-w-xl aspect-square rounded-2xl overflow-hidden">
+                                <ReviewCardCarousel
+                                    images={review.image_urls}
+                                    reviewId={review.id}
+                                    className="rounded-2xl"
+                                />
+                            </div>
+                        </div>
                     )}
                     {/* Divider if no photos and there is review text */}
                     {(!review.image_urls || review.image_urls.length === 0) &&

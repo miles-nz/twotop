@@ -51,7 +51,7 @@ function CarouselSlide({ src, alt }) {
                 ref={imgRef}
                 src={src}
                 alt={alt}
-                className={`w-full h-full object-cover transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0"}`}
+                className={`w-full object-cover transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0"}`}
                 onLoad={() => setLoaded(true)}
             />
         </div>
