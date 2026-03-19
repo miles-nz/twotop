@@ -1,67 +1,70 @@
-import useEmblaCarousel from "embla-carousel-react";
-import { useCallback, useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { text } from "../../resources";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
-import CarouselSlide from "./CarouselSlide";
 
 function ImageCarousel({ images }) {
-    const isDesktop = useBreakpoint();
-
-    const [emblaRef, emblaApi] = useEmblaCarousel({
-        loop: false,
-        watchDrag: images.length > 1 && !isDesktop, // Only enable dragging on mobile
-        dragFree: false,
-        containScroll: "keepSnaps",
-    });
-
+    const scrollRef = useRef(null);
+    const [enableLeftArrow, setEnableLeftArrow] = useState(false);
+    const [enableRightArrow, setEnableRightArrow] = useState(true);
     const [currentIndex, setCurrentIndex] = useState(0);
 
-    const updateIndex = useCallback(() => {
-        if (!emblaApi) return;
-        setCurrentIndex(emblaApi.selectedScrollSnap());
-    }, [emblaApi]);
+    const handleScroll = () => {
+        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+        setEnableLeftArrow(scrollLeft > 0);
+        setEnableRightArrow(scrollLeft + clientWidth < scrollWidth);
+        const newIndex = Math.round(scrollLeft / clientWidth);
+        setCurrentIndex(newIndex);
+    };
 
-    useEffect(() => {
-        if (!emblaApi) return;
-        emblaApi.on("select", updateIndex);
-        emblaApi.on("init", updateIndex);
-        return () => {
-            emblaApi.off("select", updateIndex);
-            emblaApi.off("init", updateIndex);
-        };
-    }, [emblaApi, updateIndex]);
+    const scroll = (direction) => {
+        if (scrollRef.current) {
+            const { clientWidth } = scrollRef.current;
+            const scrollTo =
+                direction === "left"
+                    ? scrollRef.current.scrollLeft - clientWidth
+                    : scrollRef.current.scrollLeft + clientWidth;
 
-    const scrollPrev = useCallback(() => {
-        if (emblaApi) emblaApi.scrollPrev();
-    }, [emblaApi]);
+            scrollRef.current.scrollTo({
+                left: scrollTo,
+                behavior: "smooth",
+            });
+        }
+    };
 
-    const scrollNext = useCallback(() => {
-        if (emblaApi) emblaApi.scrollNext();
-    }, [emblaApi]);
+    const scrollToIndex = (index) => {
+        if (scrollRef.current) {
+            const { clientWidth } = scrollRef.current;
+            scrollRef.current.scrollTo({
+                left: index * clientWidth,
+                behavior: "smooth",
+            });
+        }
+    };
+
+    const isDesktop = useBreakpoint();
 
     if (!images || images.length === 0) return null;
 
     return (
-        <div className="relative select-none">
-            <div ref={emblaRef} className="overflow-hidden">
-                <div className="flex">
-                    {images.map((url, index) => (
-                        <div
-                            key={index}
-                            className="flex-none w-full aspect-square"
-                        >
-                            <CarouselSlide
-                                src={url}
-                                alt={
-                                    index === 0
-                                        ? text.reviewPhoto
-                                        : text.reviewPhotoIndex(index)
-                                }
-                            />
-                        </div>
-                    ))}
-                </div>
+        <div className="relative">
+            <div
+                className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth hide-scrollbar"
+                ref={scrollRef}
+                onScroll={handleScroll}
+            >
+                {images.map((url, index) => (
+                    <div
+                        key={index}
+                        className="flex-shrink-0 w-full snap-center"
+                    >
+                        <img
+                            src={url}
+                            className="w-full object-cover"
+                            alt={`${text.photo} ${index + 1}`}
+                        />
+                    </div>
+                ))}
             </div>
             {images.length > 1 && (
                 <>
@@ -69,16 +72,16 @@ function ImageCarousel({ images }) {
                     {isDesktop && (
                         <>
                             <button
-                                onClick={scrollPrev}
-                                disabled={currentIndex === 0}
+                                onClick={() => scroll("left")}
+                                disabled={!enableLeftArrow}
                                 className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 enabled:hover:bg-black/70 disabled:opacity-30 text-white rounded-full p-2 transition-all duration-200 z-10 enabled:cursor-pointer"
                                 aria-label="Previous image"
                             >
                                 <ChevronLeft size={20} />
                             </button>
                             <button
-                                onClick={scrollNext}
-                                disabled={currentIndex === images.length - 1}
+                                onClick={() => scroll("right")}
+                                disabled={!enableRightArrow}
                                 className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 enabled:hover:bg-black/70 disabled:opacity-30 text-white rounded-full p-2 transition-all duration-200 z-10 enabled:cursor-pointer"
                                 aria-label="Next image"
                             >
@@ -91,15 +94,17 @@ function ImageCarousel({ images }) {
                         {images.map((_, index) => (
                             <button
                                 key={index}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    emblaApi?.scrollTo(index);
+                                onClick={() => {
+                                    scrollToIndex(index);
                                 }}
                                 className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
                                     index === currentIndex
                                         ? "bg-white scale-125"
                                         : "bg-white/50"
                                 }`}
+                                {...(index === currentIndex && {
+                                    "aria-current": "true",
+                                })}
                             />
                         ))}
                     </div>

@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import ImageCarousel from "./ImageCarousel";
-import ImageCarouselFlexbox from "./ImageCarouselFlexbox";
 import { useCarousel } from "../../hooks/useCarousel";
 import { useReviewList } from "../../contexts/ReviewListContext";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
@@ -42,7 +41,7 @@ function ReviewCardCarousel({ images, reviewId }) {
                         if ("height" in definition) setIsCollapsed(!isExpanded);
                     }}
                 >
-                    <ImageCarouselFlexbox images={images} />
+                    <ImageCarousel images={images} />
                 </motion.div>
                 {shouldCollapse && isCollapsed && !isExpanded && (
                     <motion.div
