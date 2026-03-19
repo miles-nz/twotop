@@ -107,8 +107,8 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                     review={review}
                 />
             ) : (
-                <>
-                    <div className="p-6 pb-3">
+                <div className="py-6">
+                    <div className="px-6 pb-3">
                         <div className="flex items-start justify-between">
                             <div className="flex flex-col gap-0.5">
                                 <h3 className="text-2xl font-bold text-text-dark hyphens-auto break-words leading-tight">
@@ -154,7 +154,7 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                         </div>
                     )}
                     {review.image_urls && review.image_urls.length > 0 && (
-                        <div className="flex justify-center w-full px-4 pb-2">
+                        <div className="flex justify-center w-full px-4 pt-2">
                             <div className="w-full max-w-xl aspect-square rounded-2xl overflow-hidden">
                                 <ReviewCardCarousel
                                     images={review.image_urls}
@@ -170,7 +170,7 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                             <div className="border-t border-surface-200 mx-6" />
                         )}
                     {review.review_text && (
-                        <div className="px-6 pt-3 pb-4">
+                        <div className="px-6 pt-3">
                             <div className="text-text-mid text-sm leading-normal hyphens-auto break-words">
                                 <ReactMarkdown
                                     components={{
@@ -202,7 +202,7 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                             </div>
                         </div>
                     )}
-                </>
+                </div>
             )}
             <LoadingOverlay isVisible={saving} />
         </motion.div>

@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 
 function StarRating({ value, onChange, readOnly = false, size = "md" }) {
-        // Generate a unique gradient id for each StarRating instance
-        const gradientIdBase = `star-gradient-${Math.random().toString(36).substr(2, 9)}`;
+    // Generate a unique gradient id for each StarRating instance
+    const gradientIdBase = `star-gradient-${Math.random().toString(36).substr(2, 9)}`;
     const containerRef = useRef(null);
     const sizes = {
         xxs: "w-3 h-3",
@@ -129,9 +129,22 @@ function StarRating({ value, onChange, readOnly = false, size = "md" }) {
                                     fill={`url(#${gradientId})`}
                                 >
                                     <defs>
-                                        <linearGradient id={gradientId} x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
-                                            <stop offset="0%" stopColor="var(--color-primary-400)" />
-                                            <stop offset="100%" stopColor="var(--color-gradient-mid)" />
+                                        <linearGradient
+                                            id={gradientId}
+                                            x1="0"
+                                            y1="0"
+                                            x2="24"
+                                            y2="24"
+                                            gradientUnits="userSpaceOnUse"
+                                        >
+                                            <stop
+                                                offset="0%"
+                                                stopColor="var(--color-primary-400)"
+                                            />
+                                            <stop
+                                                offset="100%"
+                                                stopColor="var(--color-gradient-mid)"
+                                            />
                                         </linearGradient>
                                     </defs>
                                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
