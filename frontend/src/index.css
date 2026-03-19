@@ -70,3 +70,10 @@ body {
     @apply bg-surface-100 text-text-dark m-0 w-full;
     font-family: var(--font-sans);
 }
+
+@utility hide-scrollbar {
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
