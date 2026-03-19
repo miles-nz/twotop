@@ -3,6 +3,9 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { text } from "../../resources";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
 
+const arrowButtonClasses =
+    "absolute top-1/2 -translate-y-1/2 bg-black/50 enabled:hover:bg-black/70 disabled:opacity-30 text-white rounded-full p-2 transition-all duration-200 z-10 enabled:cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400";
+
 function ImageCarousel({ images }) {
     const scrollRef = useRef(null);
     const [enableLeftArrow, setEnableLeftArrow] = useState(false);
@@ -11,10 +14,13 @@ function ImageCarousel({ images }) {
 
     const handleScroll = () => {
         const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-        setEnableLeftArrow(scrollLeft > 0);
-        setEnableRightArrow(scrollLeft + clientWidth < scrollWidth);
         const newIndex = Math.round(scrollLeft / clientWidth);
         setCurrentIndex(newIndex);
+        setEnableLeftArrow(scrollLeft > 0 && newIndex > 0);
+        setEnableRightArrow(
+            scrollLeft + clientWidth < scrollWidth &&
+                newIndex < images.length - 1,
+        );
     };
 
     const scroll = (direction) => {
@@ -35,6 +41,13 @@ function ImageCarousel({ images }) {
     const scrollToIndex = (index) => {
         if (scrollRef.current) {
             const { clientWidth } = scrollRef.current;
+            if (index == 0) {
+                setEnableLeftArrow(false);
+                setEnableRightArrow(true);
+            } else if (index === images.length - 1) {
+                setEnableLeftArrow(true);
+                setEnableRightArrow(false);
+            }
             scrollRef.current.scrollTo({
                 left: index * clientWidth,
                 behavior: "smooth",
@@ -74,16 +87,18 @@ function ImageCarousel({ images }) {
                             <button
                                 onClick={() => scroll("left")}
                                 disabled={!enableLeftArrow}
-                                className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 enabled:hover:bg-black/70 disabled:opacity-30 text-white rounded-full p-2 transition-all duration-200 z-10 enabled:cursor-pointer"
+                                className={arrowButtonClasses + " left-2"}
                                 aria-label="Previous image"
+                                tabIndex={0}
                             >
                                 <ChevronLeft size={20} />
                             </button>
                             <button
                                 onClick={() => scroll("right")}
                                 disabled={!enableRightArrow}
-                                className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 enabled:hover:bg-black/70 disabled:opacity-30 text-white rounded-full p-2 transition-all duration-200 z-10 enabled:cursor-pointer"
+                                className={arrowButtonClasses + " right-2"}
                                 aria-label="Next image"
+                                tabIndex={0}
                             >
                                 <ChevronRight size={20} />
                             </button>
@@ -97,7 +112,7 @@ function ImageCarousel({ images }) {
                                 onClick={() => {
                                     scrollToIndex(index);
                                 }}
-                                className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
+                                className={`w-1.5 h-1.5 rounded-full transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 ${
                                     index === currentIndex
                                         ? "bg-white scale-125"
                                         : "bg-white/50"
@@ -105,6 +120,7 @@ function ImageCarousel({ images }) {
                                 {...(index === currentIndex && {
                                     "aria-current": "true",
                                 })}
+                                tabIndex={0}
                             />
                         ))}
                     </div>
