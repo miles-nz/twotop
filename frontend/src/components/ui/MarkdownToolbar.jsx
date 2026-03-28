@@ -1,4 +1,11 @@
-import { Bold, Italic, Quote, List, ListOrdered } from "lucide-react";
+import {
+    Bold,
+    Italic,
+    Quote,
+    List,
+    ListOrdered,
+    CaseLower,
+} from "lucide-react";
 
 function MarkdownToolbar({ textareaRef, value, onChange }) {
     const wrapSelection = (prefix, suffix = prefix) => {
@@ -90,6 +97,14 @@ function MarkdownToolbar({ textareaRef, value, onChange }) {
                 title="Quote"
             >
                 <Quote size={14} />
+            </button>
+            <button
+                type="button"
+                onClick={() => wrapSelection("<caption>", "</caption>")}
+                className={buttonClass}
+                title="Caption"
+            >
+                <CaseLower size={14} />
             </button>
             <button
                 type="button"

@@ -11,6 +11,7 @@ import ReviewCardCarousel from "./ReviewCardCarousel";
 import { themes } from "../../themes";
 import ReactMarkdown from "react-markdown";
 import { Quote } from "lucide-react";
+import rehypeRaw from "rehype-raw";
 
 const glowShadow = "0 0 10px var(--color-primary-500)";
 
@@ -171,6 +172,7 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                         <div className="px-4 pt-3">
                             <div className="text-text-mid text-sm leading-normal wrap-break-word">
                                 <ReactMarkdown
+                                    rehypePlugins={[rehypeRaw]}
                                     components={{
                                         p: ({ children }) => (
                                             <p className="mb-2 last:mb-0">
@@ -207,6 +209,11 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                                             <li className="text-text-mid">
                                                 {children}
                                             </li>
+                                        ),
+                                        caption: ({ children }) => (
+                                            <p className="text-text-light text-xs italic mt-1 text-center">
+                                                {children}
+                                            </p>
                                         ),
                                     }}
                                 >

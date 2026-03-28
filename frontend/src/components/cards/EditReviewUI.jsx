@@ -138,7 +138,7 @@ function EditReviewUI({
             </div>
 
             {/* Visit Date */}
-            <div className="mb-3 pr-[26px] md:pr-0">
+            <div className="mb-3 pr-6.5 md:pr-0">
                 <input
                     type="date"
                     value={editedVisitDate}
@@ -266,13 +266,16 @@ function EditReviewUI({
                         onClick={onClose}
                         className="text-text-light hover:text-text-mid cursor-pointer transition-colors"
                     >
-                        <X size={18} />
+                        <X size={18} className="sm:w-4.5 sm:h-4.5 w-6 h-6" />
                     </button>
                     <button
                         onClick={handleSaveWithPublic}
                         className="text-secondary-500 hover:text-secondary-600 cursor-pointer transition-colors"
                     >
-                        <Check size={18} />
+                        <Check
+                            size={18}
+                            className="sm:w-4.5 sm:h-4.5 w-6 h-6"
+                        />
                     </button>
                 </div>
             </div>
