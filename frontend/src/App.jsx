@@ -70,7 +70,7 @@ function App() {
                     isPublic={isPublicOnly}
                     onTogglePublic={setIsPublicOnly}
                 />
-                <div className="max-w-2xl mx-auto py-8 px-4">
+                <div className="max-w-3xl mx-auto py-8 px-4">
                     <ReviewList isPublic />
                 </div>
             </motion.div>
@@ -85,7 +85,7 @@ function App() {
             className="min-h-screen w-full bg-surface-100"
         >
             <Navbar isPublic={isPublicOnly} onTogglePublic={setIsPublicOnly} />
-            <div className="max-w-3xl mx-auto pt-6 pb-16 px-4 sm:px-6">
+            <div className="max-w-3xl mx-auto pt-6 pb-16 px-4 sm:px-6 lg:px-0">
                 {/* Floating Write a Review Button (desktop only) */}
                 <div className="hidden lg:block">
                     <button
