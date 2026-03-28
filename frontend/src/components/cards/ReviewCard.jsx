@@ -109,8 +109,8 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                 <div className="py-6">
                     <div className="px-6 pb-3">
                         <div className="flex items-start justify-between">
-                            <div className="flex flex-col gap-0.5">
-                                <h3 className="text-2xl font-bold text-text-dark hyphens-auto break-words leading-tight">
+                            <div className="flex flex-col gap-0.5 min-w-0">
+                                <h3 className="text-2xl font-bold text-text-dark wrap-break-word leading-tight">
                                     {review.restaurant_name}
                                 </h3>
                                 <span className="text-xs text-text-light tracking-wide mt-0.5">
@@ -119,7 +119,7 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                                     ).toLocaleDateString()}
                                 </span>
                             </div>
-                            <div className="flex items-center gap-2 ml-3 flex-shrink-0">
+                            <div className="flex items-center gap-2 ml-3 shrink-0">
                                 {currentUserId === review.user_id && (
                                     <ReviewCardMenu
                                         review={review}
@@ -169,7 +169,7 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                         )}
                     {review.review_text && (
                         <div className="px-4 pt-3">
-                            <div className="text-text-mid text-sm leading-normal hyphens-auto break-words">
+                            <div className="text-text-mid text-sm leading-normal wrap-break-word">
                                 <ReactMarkdown
                                     components={{
                                         p: ({ children }) => (
