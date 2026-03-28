@@ -170,7 +170,7 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                             <div className="border-t border-surface-200 mx-6" />
                         )}
                     {review.review_text && (
-                        <div className="px-6 pt-3">
+                        <div className="px-4 pt-3">
                             <div className="text-text-mid text-sm leading-normal hyphens-auto break-words">
                                 <ReactMarkdown
                                     components={{

@@ -59,19 +59,10 @@ export function useReviewCardEditing(review, onReviewUpdated) {
         }
     };
 
-    const handleSaveName = async () => {
-        try {
-            const formData = new FormData();
-            formData.append("restaurant_name", editedName);
-            await patchReview(formData);
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
     const handleSaveReview = async (isPublic) => {
         try {
             const formData = new FormData();
+            formData.append("restaurant_name", editedName); // Ensure name is sent
             formData.append("review_text", editedReviewText);
             formData.append("food_rating", editedFoodRating || "");
             formData.append("drink_rating", editedDrinkRating || "");
@@ -120,7 +111,6 @@ export function useReviewCardEditing(review, onReviewUpdated) {
     return {
         editedName,
         setEditedName,
-        handleSaveName,
         editedVisitDate,
         setEditedVisitDate,
         editedReviewText,
