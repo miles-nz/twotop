@@ -27,7 +27,6 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
     const {
         editedName,
         setEditedName,
-        handleSaveName,
         editedReviewText,
         setEditedReviewText,
         editedFoodRating,
@@ -50,9 +49,9 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
         removedPhotoUrls,
         setRemovedPhotoUrls,
         handleRemoveExistingPhoto,
-        handleSavePhotos,
         saving,
-    } = useReviewCardEditing(review, onReviewUpdated);
+        draftWasRestored,
+    } = useReviewCardEditing(review, onReviewUpdated, editing);
 
     return (
         <motion.div
@@ -97,7 +96,6 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                     addPhotoImages={addPhotoImages}
                     setAddPhotoImages={setAddPhotoImages}
                     removedPhotoUrls={removedPhotoUrls}
-                    setRemovedPhotoUrls={setRemovedPhotoUrls}
                     handleRemoveExistingPhoto={handleRemoveExistingPhoto}
                     handleSave={async (isPublic) => {
                         await handleSaveReview(isPublic);
@@ -105,6 +103,7 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                     }}
                     onClose={() => setEditing(false)}
                     review={review}
+                    draftWasRestored={draftWasRestored}
                 />
             ) : (
                 <div className="py-6">
@@ -164,7 +163,6 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                             </div>
                         </div>
                     )}
-                    {/* Divider if no photos and there is review text */}
                     {(!review.image_urls || review.image_urls.length === 0) &&
                         review.review_text && (
                             <div className="border-t border-surface-200 mx-6" />

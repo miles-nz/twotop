@@ -1,3 +1,7 @@
+export const draftKeys = {
+    newReview: "mimu-review-draft",
+    editReviewPrefix: "mimu-review-draft-edit-",
+};
 export const preferences = {
     collapseReviewImages: false,
     maxImageSize: 20 * 1024 * 1024,
@@ -32,6 +36,7 @@ export const placeholders = [
 
 export const text = {
     edit: "Edit",
+    draftRestored: "Draft restored",
     // App
     appName: "MIMU",
     tagline: "Log in to view and write reviews",

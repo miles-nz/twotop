@@ -85,7 +85,7 @@ function App() {
             className="min-h-screen w-full bg-surface-100"
         >
             <Navbar isPublic={isPublicOnly} onTogglePublic={setIsPublicOnly} />
-            <div className="max-w-3xl mx-auto pt-6 pb-16 px-4 sm:px-6 lg:px-0">
+            <div className="max-w-3xl mx-auto pt-6 pb-16 px-4 sm:px-6">
                 {/* Floating Write a Review Button (desktop only) */}
                 <div className="hidden lg:block">
                     <button

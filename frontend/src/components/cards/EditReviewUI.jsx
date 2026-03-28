@@ -31,13 +31,15 @@ function EditReviewUI({
     addPhotoImages,
     setAddPhotoImages,
     removedPhotoUrls,
-    setRemovedPhotoUrls,
     handleRemoveExistingPhoto,
     handleSave,
     onClose,
     review,
+    draftWasRestored,
 }) {
     const textareaRef = useRef(null);
+    const [draftDismissed, setDraftDismissed] = useState(false);
+
     const {
         fileInputRef,
         currentCropSrc,
@@ -60,8 +62,21 @@ function EditReviewUI({
         await handleSave(isPublic);
         onClose();
     };
+
     return (
         <div className="px-6 pt-6 pb-4">
+            {draftWasRestored && !draftDismissed && (
+                <div className="flex items-center justify-between bg-secondary-50 border border-secondary-200 rounded-lg px-3 py-2 mb-4 text-sm text-secondary-600">
+                    <span>{text.draftRestored}</span>
+                    <button
+                        onClick={() => setDraftDismissed(true)}
+                        className="text-secondary-400 hover:text-secondary-600"
+                    >
+                        <X size={14} />
+                    </button>
+                </div>
+            )}
+
             {/* Restaurant Name */}
             <div className="flex items-center gap-2 mb-4">
                 <input
@@ -72,6 +87,7 @@ function EditReviewUI({
                     className="text-2xl font-bold text-text-dark bg-transparent border-b border-secondary-400 focus:outline-none w-full"
                 />
             </div>
+
             {/* Ratings & Emojis */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
                 <RatingField
@@ -120,6 +136,7 @@ function EditReviewUI({
                     size="sm"
                 />
             </div>
+
             {/* Visit Date */}
             <div className="mb-3 pr-[26px] md:pr-0">
                 <input
@@ -130,6 +147,7 @@ function EditReviewUI({
                     className="w-full border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-dark"
                 />
             </div>
+
             {/* Review Text */}
             <MarkdownToolbar
                 textareaRef={textareaRef}
@@ -143,6 +161,7 @@ function EditReviewUI({
                 maxLength={2000}
                 className="w-full border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 h-28 resize-none text-text-dark"
             />
+
             {/* Photos */}
             <div className="border border-surface-200 rounded-xl p-4 bg-surface-50 mt-4">
                 <div className="flex items-center justify-between">
@@ -238,11 +257,10 @@ function EditReviewUI({
                     />
                 )}
             </div>
+
             {/* Actions & Public Toggle at bottom */}
             <div className="flex items-center justify-between mt-4">
-                <div>
-                    <PublicToggle isPublic={isPublic} onToggle={setIsPublic} />
-                </div>
+                <PublicToggle isPublic={isPublic} onToggle={setIsPublic} />
                 <div className="flex gap-2">
                     <button
                         onClick={onClose}

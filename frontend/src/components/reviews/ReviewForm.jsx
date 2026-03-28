@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { motion } from "framer-motion";
 import { ImagePlus, X } from "lucide-react";
@@ -9,10 +9,12 @@ import RatingField from "../ui/RatingField";
 import EmojiPicker from "../ui/EmojiPicker";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
 import { useImageUpload } from "../../hooks/useImageUpload";
-import { text, placeholders, preferences } from "../../resources";
+import { useReviewDraft } from "../../hooks/useReviewDraft";
+import { text, placeholders, preferences, draftKeys } from "../../resources";
 import { getLocalDate } from "../../utils";
-import { useRef } from "react";
 import MarkdownToolbar from "../ui/MarkdownToolbar";
+
+const DRAFT_KEY = draftKeys.newReview;
 
 const inputClass =
     "w-full border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400";
@@ -33,10 +35,32 @@ function ReviewForm({ onReviewSubmitted }) {
     const [ambienceRating, setAmbienceRating] = useState(null);
     const [reviewText, setReviewText] = useState("");
     const [isPublic, setIsPublic] = useState(false);
+    const [foodEmoji, setFoodEmoji] = useState(text.defaultFoodEmoji);
+    const [drinkEmoji, setDrinkEmoji] = useState(text.defaultDrinkEmoji);
+    const [ambienceEmoji, setAmbienceEmoji] = useState(
+        text.defaultAmbienceEmoji,
+    );
+
+    const [draftRestored, setDraftRestored] = useState(() => {
+        try {
+            const saved = localStorage.getItem(DRAFT_KEY);
+            if (!saved) return false;
+            const draft = JSON.parse(saved);
+            return !!(
+                draft.restaurantName ||
+                draft.reviewText ||
+                draft.foodRating ||
+                draft.drinkRating ||
+                draft.ambienceRating
+            );
+        } catch {
+            return false;
+        }
+    });
+    const [showClearConfirm, setShowClearConfirm] = useState(false);
 
     const textareaRef = useRef(null);
 
-    // Auto-resize textarea
     const handleTextareaInput = (e) => {
         const ta = e.target;
         ta.style.height = "auto";
@@ -58,13 +82,45 @@ function ReviewForm({ onReviewSubmitted }) {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState(null);
 
-    const [foodEmoji, setFoodEmoji] = useState(text.defaultFoodEmoji);
-    const [drinkEmoji, setDrinkEmoji] = useState(text.defaultDrinkEmoji);
-    const [ambienceEmoji, setAmbienceEmoji] = useState(
-        text.defaultAmbienceEmoji,
-    );
-
     const isDesktop = useBreakpoint();
+
+    const { clearDraft } = useReviewDraft({
+        draftKey: DRAFT_KEY,
+        restaurantName,
+        visitDate,
+        reviewText,
+        foodRating,
+        drinkRating,
+        ambienceRating,
+        foodEmoji,
+        drinkEmoji,
+        ambienceEmoji,
+        isPublic,
+        setRestaurantName,
+        setvisitDate,
+        setReviewText,
+        setFoodRating,
+        setDrinkRating,
+        setAmbienceRating,
+        setFoodEmoji,
+        setDrinkEmoji,
+        setAmbienceEmoji,
+        setIsPublic,
+    });
+
+    const resetForm = () => {
+        setRestaurantName("");
+        setReviewText("");
+        setFoodRating(null);
+        setDrinkRating(null);
+        setAmbienceRating(null);
+        setvisitDate("");
+        setFoodEmoji(text.defaultFoodEmoji);
+        setDrinkEmoji(text.defaultDrinkEmoji);
+        setAmbienceEmoji(text.defaultAmbienceEmoji);
+        setIsPublic(false);
+        resetImages();
+    };
 
     const handleSubmit = async () => {
         setError(null);
@@ -92,7 +148,6 @@ function ReviewForm({ onReviewSubmitted }) {
             formData.append("reviewer_picture", user?.picture || "");
             formData.append("is_public", isPublic);
             images.forEach((image) => formData.append("images", image));
-
             formData.append("food_emoji", foodEmoji);
             formData.append("drink_emoji", drinkEmoji);
             formData.append("ambience_emoji", ambienceEmoji);
@@ -113,18 +168,11 @@ function ReviewForm({ onReviewSubmitted }) {
                 return;
             }
 
-            setRestaurantName("");
-            setReviewText("");
-            setFoodRating("");
-            setDrinkRating("");
-            setAmbienceRating("");
-            setvisitDate("");
-            resetImages();
+            // Only clear draft after confirmed success
+            clearDraft();
+            resetForm();
+            setDraftRestored(false);
             onReviewSubmitted(data.id);
-            setIsPublic(false);
-            setFoodEmoji(text.defaultFoodEmoji);
-            setDrinkEmoji(text.defaultDrinkEmoji);
-            setAmbienceEmoji(text.defaultAmbienceEmoji);
         } catch (err) {
             setError(err.message || text.errorGeneric);
         } finally {
@@ -142,6 +190,19 @@ function ReviewForm({ onReviewSubmitted }) {
             <h2 className="text-xl font-bold text-text-mid dark:text-text-light mb-4">
                 {text.writeReview}
             </h2>
+
+            {draftRestored && (
+                <div className="flex items-center justify-between bg-secondary-50 border border-secondary-200 rounded-lg px-3 py-2 mb-4 text-sm text-secondary-600">
+                    <span>{text.draftRestored}</span>
+                    <button
+                        onClick={() => setDraftRestored(false)}
+                        className="text-secondary-400 hover:text-secondary-600"
+                    >
+                        <X size={14} />
+                    </button>
+                </div>
+            )}
+
             <div className="mb-4">
                 <label
                     htmlFor="restaurantName"
@@ -208,7 +269,6 @@ function ReviewForm({ onReviewSubmitted }) {
                         value={foodRating}
                         onChange={setFoodRating}
                         size={isDesktop ? "sm" : "md"}
-                        aria-label={text.foodLabel}
                     />
                     <RatingField
                         label={
@@ -228,7 +288,6 @@ function ReviewForm({ onReviewSubmitted }) {
                         value={drinkRating}
                         onChange={setDrinkRating}
                         size={isDesktop ? "sm" : "md"}
-                        aria-label={text.drinksLabel}
                     />
                     <RatingField
                         label={
@@ -248,7 +307,6 @@ function ReviewForm({ onReviewSubmitted }) {
                         value={ambienceRating}
                         onChange={setAmbienceRating}
                         size={isDesktop ? "sm" : "md"}
-                        aria-label={text.ambienceLabel}
                     />
                 </div>
             </div>
@@ -321,14 +379,12 @@ function ReviewForm({ onReviewSubmitted }) {
             </div>
 
             <div className="mb-4 flex items-center justify-between bg-surface-100 rounded-lg px-4 py-3 border border-surface-200">
-                <div>
-                    <label
-                        htmlFor="publicToggle"
-                        className="text-sm font-medium text-text-dark cursor-pointer"
-                    >
-                        {text.markAsPublic}
-                    </label>
-                </div>
+                <label
+                    htmlFor="publicToggle"
+                    className="text-sm font-medium text-text-dark cursor-pointer"
+                >
+                    {text.markAsPublic}
+                </label>
                 <button
                     id="publicToggle"
                     aria-pressed={isPublic}
@@ -370,7 +426,37 @@ function ReviewForm({ onReviewSubmitted }) {
                 >
                     {submitting ? text.submitting : text.submitReview}
                 </Button>
+                {showClearConfirm ? (
+                    <div className="flex items-center gap-2 text-sm text-text-light">
+                        <span>Clear draft?</span>
+                        <button
+                            onClick={() => {
+                                clearDraft();
+                                resetForm();
+                                setDraftRestored(false);
+                                setShowClearConfirm(false);
+                            }}
+                            className="text-error-500 hover:text-error-600 font-medium"
+                        >
+                            Yes
+                        </button>
+                        <button
+                            onClick={() => setShowClearConfirm(false)}
+                            className="text-text-light hover:text-text-mid"
+                        >
+                            No
+                        </button>
+                    </div>
+                ) : (
+                    <button
+                        onClick={() => setShowClearConfirm(true)}
+                        className="text-xs text-text-light hover:text-text-mid transition-colors"
+                    >
+                        Clear draft
+                    </button>
+                )}
             </div>
+
             <LoadingOverlay isVisible={submitting} />
             {currentCropSrc && (
                 <ImageCropModal
