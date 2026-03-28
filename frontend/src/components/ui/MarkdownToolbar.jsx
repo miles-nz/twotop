@@ -1,4 +1,4 @@
-import { Bold, Italic, Quote } from "lucide-react";
+import { Bold, Italic, Quote, List, ListOrdered } from "lucide-react";
 
 function MarkdownToolbar({ textareaRef, value, onChange }) {
     const wrapSelection = (prefix, suffix = prefix) => {
@@ -33,6 +33,35 @@ function MarkdownToolbar({ textareaRef, value, onChange }) {
         setTimeout(() => el.focus(), 0);
     };
 
+    const insertList = (prefix) => {
+        const el = textareaRef.current;
+        if (!el) return;
+        const start = el.selectionStart;
+        const end = el.selectionEnd;
+        const selected = value.slice(start, end);
+
+        let newText;
+        if (selected) {
+            // Prefix each selected line
+            const lines = selected
+                .split("\n")
+                .map((line) => `${prefix}${line}`);
+            newText =
+                value.slice(0, start) + lines.join("\n") + value.slice(end);
+        } else {
+            // Insert a new list item at the current line
+            const lineStart = value.lastIndexOf("\n", start - 1) + 1;
+            const alreadyApplied = value.slice(lineStart).startsWith(prefix);
+            newText = alreadyApplied
+                ? value.slice(0, lineStart) +
+                  value.slice(lineStart + prefix.length)
+                : value.slice(0, lineStart) + prefix + value.slice(lineStart);
+        }
+
+        onChange(newText);
+        setTimeout(() => el.focus(), 0);
+    };
+
     const buttonClass =
         "text-text-light hover:text-text-mid cursor-pointer transition-colors p-1 rounded";
 
@@ -42,7 +71,7 @@ function MarkdownToolbar({ textareaRef, value, onChange }) {
                 type="button"
                 onClick={() => wrapSelection("**")}
                 className={buttonClass}
-                title="Italic"
+                title="Bold"
             >
                 <Bold size={14} />
             </button>
@@ -61,6 +90,22 @@ function MarkdownToolbar({ textareaRef, value, onChange }) {
                 title="Quote"
             >
                 <Quote size={14} />
+            </button>
+            <button
+                type="button"
+                onClick={() => insertList("- ")}
+                className={buttonClass}
+                title="Bullet list"
+            >
+                <List size={14} />
+            </button>
+            <button
+                type="button"
+                onClick={() => insertList("1. ")}
+                className={buttonClass}
+                title="Numbered list"
+            >
+                <ListOrdered size={14} />
             </button>
         </div>
     );

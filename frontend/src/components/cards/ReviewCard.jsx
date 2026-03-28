@@ -193,6 +193,21 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                                                 </blockquote>
                                             </div>
                                         ),
+                                        ul: ({ children }) => (
+                                            <ul className="list-disc pl-4 mb-2 space-y-1">
+                                                {children}
+                                            </ul>
+                                        ),
+                                        ol: ({ children }) => (
+                                            <ol className="list-decimal pl-4 mb-2 space-y-1">
+                                                {children}
+                                            </ol>
+                                        ),
+                                        li: ({ children }) => (
+                                            <li className="text-text-mid">
+                                                {children}
+                                            </li>
+                                        ),
                                     }}
                                 >
                                     {review.review_text}
