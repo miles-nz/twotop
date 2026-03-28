@@ -211,7 +211,7 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                                             </li>
                                         ),
                                         caption: ({ children }) => (
-                                            <p className="text-text-light text-xs italic mt-1 text-center">
+                                            <p className="text-text-light text-xs italic my-3 text-center">
                                                 {children}
                                             </p>
                                         ),
