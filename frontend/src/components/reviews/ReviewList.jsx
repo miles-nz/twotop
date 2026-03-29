@@ -93,8 +93,6 @@ function ReviewList({
                 el.scrollIntoView({ behavior: "smooth", block: "center" });
                 if (onScrollComplete) onScrollComplete();
             }, 300);
-        } else {
-            if (onScrollComplete) onScrollComplete();
         }
     }, [scrollToId, reviews]);
 
