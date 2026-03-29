@@ -13,8 +13,6 @@ import ReactMarkdown from "react-markdown";
 import { Quote } from "lucide-react";
 import rehypeRaw from "rehype-raw";
 
-const glowShadow = "0 0 10px var(--color-primary-500)";
-
 function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
     const isDarkMode = useDarkMode();
     const themeSet = isDarkMode ? themes.dark : themes.light;
@@ -28,17 +26,9 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
         <motion.div
             id={`review-${review.id}`}
             initial={{ opacity: 0 }}
-            animate={
-                isNew
-                    ? {
-                          opacity: 1,
-                          scale: 1.01,
-                          boxShadow: glowShadow,
-                      }
-                    : {
-                          opacity: 1,
-                      }
-            }
+            animate={{
+                opacity: 1,
+            }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.8 }}
             style={theme}

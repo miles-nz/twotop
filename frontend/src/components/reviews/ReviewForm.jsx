@@ -185,7 +185,7 @@ function ReviewForm({ onReviewSubmitted }) {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="bg-gradient-to-br from-primary-200 to-primary-100 dark:from-primary-900 dark:to-primary-800 dark:bg-gradient-to-br rounded-2xl shadow-md p-6 mb-6 border border-surface-200 dark:border-surface-700 text-text-dark dark:text-text-light"
+            className="bg-linear-to-br from-primary-200 to-primary-100 dark:from-primary-900 dark:to-primary-800 dark:bg-linear-to-br rounded-2xl shadow-md p-6 mb-6 border border-surface-200 dark:border-surface-700 text-text-dark dark:text-text-light"
         >
             <h2 className="text-xl font-bold text-text-mid dark:text-text-light mb-4">
                 {text.writeReview}
@@ -222,7 +222,7 @@ function ReviewForm({ onReviewSubmitted }) {
                 />
             </div>
 
-            <div className="mb-4 pr-[26px] md:pr-0">
+            <div className="mb-4 pr-6.5 md:pr-0">
                 <label
                     htmlFor="visitDate"
                     className="block text-sm font-medium text-text-mid mb-1"

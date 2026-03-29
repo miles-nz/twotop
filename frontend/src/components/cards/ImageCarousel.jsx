@@ -67,10 +67,7 @@ function ImageCarousel({ images }) {
                 onScroll={handleScroll}
             >
                 {images.map((url, index) => (
-                    <div
-                        key={index}
-                        className="flex-shrink-0 w-full snap-center"
-                    >
+                    <div key={index} className="shrink-0 w-full snap-center">
                         <img
                             src={url}
                             className="w-full object-cover"

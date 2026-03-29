@@ -92,7 +92,7 @@ function ReviewList({
             setTimeout(() => {
                 el.scrollIntoView({ behavior: "smooth", block: "center" });
                 if (onScrollComplete) onScrollComplete();
-            }, 300);
+            }, 600);
         }
     }, [scrollToId, reviews]);
 
@@ -160,7 +160,6 @@ function ReviewList({
                     <ReviewCard
                         key={review.id}
                         review={review}
-                        isNew={review.id === scrollToId}
                         currentUserId={currentUserId}
                         onReviewUpdated={onReviewUpdated}
                     />
