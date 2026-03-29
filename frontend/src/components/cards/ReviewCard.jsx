@@ -13,7 +13,7 @@ import ReactMarkdown from "react-markdown";
 import { Quote } from "lucide-react";
 import rehypeRaw from "rehype-raw";
 
-function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
+function ReviewCard({ review, currentUserId, onReviewUpdated }) {
     const isDarkMode = useDarkMode();
     const themeSet = isDarkMode ? themes.dark : themes.light;
     const theme = themeSet[review.user_id] || {};
@@ -159,7 +159,7 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                                             </li>
                                         ),
                                         caption: ({ children }) => (
-                                            <p className="text-text-light text-xs italic mt-1 mb-3 text-center">
+                                            <p className="text-text-light text-[10px] sm:text-xs italic mb-3 text-center">
                                                 {children}
                                             </p>
                                         ),
