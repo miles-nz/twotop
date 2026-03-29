@@ -15,10 +15,12 @@ export const placeholders = [
     "Daily Bread",
     "Elixir Café",
     "Flying Burrito Brothers",
+    "Gerome",
     "Honey Café",
     "Humbug",
     "Jam Organic Café",
     "Kokodak",
+    "Leafé",
     "Lola",
     "Major Tom",
     "McCafé",
@@ -35,8 +37,6 @@ export const placeholders = [
 ];
 
 export const text = {
-    edit: "Edit",
-    draftRestored: "Draft restored",
     // App
     appName: "MIMU",
     tagline: "Log in to view and write reviews",
@@ -66,6 +66,9 @@ export const text = {
     markAsPublic: "Mark as Public",
     submitReview: "Submit Review",
     submitting: "Submitting...",
+    edit: "Edit",
+    draftRestored: "Draft restored",
+    clearDraft: "Clear draft",
 
     // Photos
     addPhotos: "Add Photos",
@@ -76,6 +79,9 @@ export const text = {
         `${count} ${count === 1 ? "photo" : "photos"} - tap to view`,
     cropPhoto: "Crop Photo",
     crop: "Crop",
+    uploading: "Uploading...",
+    uploadPhoto: "Upload photo",
+    removePhoto: "Remove photo",
 
     // Review card menu
     updateRestaurant: "Update Restaurant",
@@ -95,6 +101,7 @@ export const text = {
     errorFormatted: (error) => `Error: ${error}`,
     errorGeneric: "Something went wrong, please try again",
     errorFailedSubmit: "Failed to submit review.",
+    errorFailedSave: "Failed to save review. Please try again.",
     errorFailedFetch: "Failed to fetch reviews.",
     errorMaxImages: "You can upload a maximum of 5 images",
     errorImageSize: "Images must be 20MB or less",

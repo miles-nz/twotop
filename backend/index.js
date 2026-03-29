@@ -46,6 +46,7 @@ const ERRORS = {
     ratingInvalid: (name) =>
         `${name} must be a number between ${RATING_MIN} and ${RATING_MAX}.`,
     missingRequiredFields: "Review notes or all ratings are required.",
+    restaurantNameTooLong: `Restaurant name must be less than ${MAX_RESTAURANT_NAME_LENGTH} characters.`,
 };
 
 // Multer setup
@@ -72,7 +73,7 @@ const checkJwt = auth({
 });
 
 // Helpers
-const uploadImage = async (file, userId) => {
+const uploadImage = async (file, userId, bucket = REVIEW_IMAGE_BUCKET) => {
     const sanitizedUserId = userId.replace(/\|/g, "-");
     const sanitizedFilename = file.originalname.replace(
         /[^a-zA-Z0-9._-]/g,
@@ -81,27 +82,25 @@ const uploadImage = async (file, userId) => {
     const filename = `${sanitizedUserId}/${Date.now()}-${Math.random().toString(36).slice(2, 7)}-${sanitizedFilename}`;
 
     const { data, error } = await supabase.storage
-        .from(REVIEW_IMAGE_BUCKET)
+        .from(bucket)
         .upload(filename, file.buffer, { contentType: file.mimetype });
 
     if (error) throw new Error(error.message);
 
     const { data: urlData } = supabase.storage
-        .from(REVIEW_IMAGE_BUCKET)
+        .from(bucket)
         .getPublicUrl(data.path);
 
     return urlData.publicUrl;
 };
 
-const getStoragePath = (url, userId) => {
-    const sanitizedUserId = userId.replace(/\|/g, "-");
-    const filename = decodeURIComponent(url.split("/").pop());
-    return `${sanitizedUserId}/${filename}`;
+const getStoragePath = (url) => {
+    return decodeURIComponent(url.split(`/${REVIEW_IMAGE_BUCKET}/`)[1]);
 };
 
-const deleteImages = async (urls, userId) => {
+const deleteImages = async (urls) => {
     if (!urls || urls.length === 0) return;
-    const paths = urls.map((url) => getStoragePath(url, userId));
+    const paths = urls.map((url) => getStoragePath(url));
     const { error } = await supabase.storage
         .from(REVIEW_IMAGE_BUCKET)
         .remove(paths);
@@ -126,6 +125,8 @@ const validateReview = (body) => {
         restaurant_name.trim().length === 0
     ) {
         errors.push(ERRORS.restaurantNameInvalid);
+    } else if (restaurant_name.trim().length > MAX_RESTAURANT_NAME_LENGTH) {
+        errors.push(ERRORS.restaurantNameTooLong);
     }
 
     if (review_text && typeof review_text !== "string") {
@@ -154,6 +155,34 @@ const validateReview = (body) => {
     }
 
     return errors;
+};
+
+// Management API token cache
+let mgmtToken = null;
+let mgmtTokenExpiry = null;
+
+const getMgmtToken = async () => {
+    if (mgmtToken && mgmtTokenExpiry && Date.now() < mgmtTokenExpiry) {
+        return mgmtToken;
+    }
+    const response = await fetch(
+        `https://${process.env.AUTH0_DOMAIN}/oauth/token`,
+        {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                client_id: process.env.AUTH0_MGMT_CLIENT_ID,
+                client_secret: process.env.AUTH0_MGMT_CLIENT_SECRET,
+                audience: `https://${process.env.AUTH0_DOMAIN}/api/v2/`,
+                grant_type: "client_credentials",
+            }),
+        },
+    );
+    const data = await response.json();
+    mgmtToken = data.access_token;
+    // Cache for 23 hours (token lasts 24)
+    mgmtTokenExpiry = Date.now() + 23 * 60 * 60 * 1000;
+    return mgmtToken;
 };
 
 // Routes
@@ -254,7 +283,12 @@ app.post(
 app.patch(
     "/reviews/:id",
     checkJwt,
-    upload.array("images", MAX_IMAGES_PER_REVIEW),
+    (req, res, next) => {
+        upload.array("images", MAX_IMAGES_PER_REVIEW)(req, res, (err) => {
+            if (err) return res.status(400).json({ errors: [err.message] });
+            next();
+        });
+    },
     async (req, res) => {
         const { id } = req.params;
         const user_id = req.auth.payload.sub;
@@ -325,7 +359,7 @@ app.patch(
                 const removedUrls = (review.image_urls || []).filter(
                     (url) => !updatedUrls.includes(url),
                 );
-                await deleteImages(removedUrls, user_id);
+                await deleteImages(removedUrls);
                 updates.image_urls = updatedUrls;
             }
 
@@ -374,7 +408,7 @@ app.delete("/reviews/:id", checkJwt, async (req, res) => {
         return res.status(403).json({ error: ERRORS.unauthorised });
 
     try {
-        await deleteImages(review.image_urls, user_id);
+        await deleteImages(review.image_urls);
 
         const { error: deleteError } = await supabase
             .from("reviews")
@@ -385,6 +419,156 @@ app.delete("/reviews/:id", checkJwt, async (req, res) => {
             return res.status(500).json({ error: deleteError.message });
         res.status(200).json({ success: true });
     } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.patch(
+    "/user/picture",
+    checkJwt,
+    (req, res, next) => {
+        upload.single("picture")(req, res, (err) => {
+            if (err) return res.status(400).json({ error: err.message });
+            next();
+        });
+    },
+    async (req, res) => {
+        if (!req.file)
+            return res.status(400).json({ error: "No image provided" });
+        const user_id = req.auth.payload.sub;
+
+        try {
+            const token = await getMgmtToken();
+
+            // Get current user to find old picture URL
+            const userResponse = await fetch(
+                `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(user_id)}`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                },
+            );
+            const userData = await userResponse.json();
+            const oldPictureUrl = userData.picture;
+
+            // Upload new picture to Supabase Storage
+            const publicUrl = await uploadImage(
+                req.file,
+                user_id,
+                "profile-pictures",
+            );
+
+            // Update Auth0 user picture
+            const mgmtResponse = await fetch(
+                `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(user_id)}`,
+                {
+                    method: "PATCH",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ picture: publicUrl }),
+                },
+            );
+
+            if (!mgmtResponse.ok) {
+                const err = await mgmtResponse.json();
+                throw new Error(err.message);
+            }
+
+            // Update reviewer_picture on all existing reviews
+            const { error: reviewsError } = await supabase
+                .from("reviews")
+                .update({ reviewer_picture: publicUrl })
+                .eq("user_id", user_id);
+
+            if (reviewsError)
+                console.error(
+                    "Failed to update reviewer pictures:",
+                    reviewsError.message,
+                );
+
+            // Delete old picture from Supabase if it was uploaded by us
+            if (oldPictureUrl && oldPictureUrl.includes("profile-pictures")) {
+                const oldPath = decodeURIComponent(
+                    oldPictureUrl.split("/profile-pictures/")[1],
+                );
+                await supabase.storage
+                    .from("profile-pictures")
+                    .remove([oldPath]);
+            }
+
+            res.status(200).json({ picture: publicUrl });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    },
+);
+
+app.get("/user/picture", checkJwt, async (req, res) => {
+    const user_id = req.auth.payload.sub;
+    try {
+        const token = await getMgmtToken();
+        const userResponse = await fetch(
+            `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(user_id)}`,
+            {
+                headers: { Authorization: `Bearer ${token}` },
+            },
+        );
+        const userData = await userResponse.json();
+        res.status(200).json({ picture: userData.picture });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete("/user/picture", checkJwt, async (req, res) => {
+    const user_id = req.auth.payload.sub;
+    try {
+        const token = await getMgmtToken();
+
+        // Get current picture to delete from Supabase
+        const userResponse = await fetch(
+            `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(user_id)}`,
+            { headers: { Authorization: `Bearer ${token}` } },
+        );
+        const userData = await userResponse.json();
+        const oldPictureUrl = userData.picture;
+
+        // Clear picture in Auth0
+        const mgmtResponse = await fetch(
+            `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(user_id)}`,
+            {
+                method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ picture: null }),
+            },
+        );
+
+        if (!mgmtResponse.ok) {
+            const err = await mgmtResponse.json();
+            throw new Error(err.message);
+        }
+
+        // Delete from Supabase if it was uploaded by us
+        if (oldPictureUrl && oldPictureUrl.includes("profile-pictures")) {
+            const oldPath = decodeURIComponent(
+                oldPictureUrl.split("/profile-pictures/")[1],
+            );
+            await supabase.storage.from("profile-pictures").remove([oldPath]);
+        }
+
+        // Update reviewer_picture on all existing reviews
+        await supabase
+            .from("reviews")
+            .update({ reviewer_picture: null })
+            .eq("user_id", user_id);
+
+        res.status(200).json({ success: true });
+    } catch (err) {
+        console.error("Delete picture error:", err.message);
         res.status(500).json({ error: err.message });
     }
 });

@@ -9,6 +9,26 @@ import { text } from "../../resources";
 const statusCardClass =
     "bg-surface-50 rounded-2xl shadow-md p-6 text-center border border-surface-200";
 
+const alternateReviewers = (reviews) => {
+    const result = [...reviews];
+
+    for (let i = 1; i < result.length; i++) {
+        if (result[i].user_id === result[i - 1].user_id) {
+            const swapIndex = result.findIndex(
+                (r, idx) =>
+                    idx > i &&
+                    r.user_id !== result[i].user_id &&
+                    r.visit_date === result[i].visit_date,
+            );
+            if (swapIndex !== -1) {
+                [result[i], result[swapIndex]] = [result[swapIndex], result[i]];
+            }
+        }
+    }
+
+    return result;
+};
+
 function ReviewList({
     refreshTrigger,
     onReviewsLoaded,
@@ -16,35 +36,13 @@ function ReviewList({
     scrollToId,
     currentUserId,
     onReviewUpdated,
+    onScrollComplete,
 }) {
     const { getAccessTokenSilently } = useAuth0();
 
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
-    const alternateReviewers = (reviews) => {
-        const result = [...reviews];
-
-        for (let i = 1; i < result.length; i++) {
-            if (result[i].user_id === result[i - 1].user_id) {
-                const swapIndex = result.findIndex(
-                    (r, idx) =>
-                        idx > i &&
-                        r.user_id !== result[i].user_id &&
-                        r.visit_date === result[i].visit_date,
-                );
-                if (swapIndex !== -1) {
-                    [result[i], result[swapIndex]] = [
-                        result[swapIndex],
-                        result[i],
-                    ];
-                }
-            }
-        }
-
-        return result;
-    };
 
     useEffect(() => {
         const fetchReviews = async () => {
@@ -85,7 +83,7 @@ function ReviewList({
         };
 
         fetchReviews();
-    }, [refreshTrigger, isPublic]);
+    }, [refreshTrigger, isPublic, getAccessTokenSilently]);
 
     useEffect(() => {
         if (!scrollToId) return;
@@ -93,7 +91,10 @@ function ReviewList({
         if (el) {
             setTimeout(() => {
                 el.scrollIntoView({ behavior: "smooth", block: "center" });
+                if (onScrollComplete) onScrollComplete();
             }, 300);
+        } else {
+            if (onScrollComplete) onScrollComplete();
         }
     }, [scrollToId, reviews]);
 

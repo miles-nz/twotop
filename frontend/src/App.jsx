@@ -8,10 +8,10 @@ import ReviewList from "./components/reviews/ReviewList";
 import { themes } from "./themes";
 import { text } from "./resources";
 import { useDarkMode } from "./hooks/useDarkMode";
-import { smoothScrollToTop } from "./utils";
+import { smoothScrollToTop, isDefaultAvatar } from "./utils";
 
 function App() {
-    const { isAuthenticated, user } = useAuth0();
+    const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
     const isDarkMode = useDarkMode();
 
     const [formOpen, setFormOpen] = useState(false);
@@ -20,6 +20,8 @@ function App() {
 
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [scrollToId, setScrollToId] = useState(null);
+
+    const [currentUserPicture, setCurrentUserPicture] = useState(undefined);
 
     const handleReviewSubmitted = (newId) => {
         setJustSubmitted(true);
@@ -58,6 +60,29 @@ function App() {
         }
     }, [user, isDarkMode]);
 
+    useEffect(() => {
+        if (!user) return;
+        const fetchCurrentPicture = async () => {
+            try {
+                const token = await getAccessTokenSilently();
+                const response = await fetch(
+                    `${import.meta.env.VITE_API_URL}/user/picture`,
+                    {
+                        headers: { Authorization: `Bearer ${token}` },
+                    },
+                );
+                const data = await response.json();
+                if (response.ok)
+                    setCurrentUserPicture(
+                        isDefaultAvatar(data.picture) ? null : data.picture,
+                    );
+            } catch (err) {
+                setCurrentUserPicture(null);
+            }
+        };
+        fetchCurrentPicture();
+    }, [user, isAuthenticated, getAccessTokenSilently]);
+
     if (!isAuthenticated) {
         return (
             <motion.div
@@ -71,7 +96,10 @@ function App() {
                     onTogglePublic={setIsPublicOnly}
                 />
                 <div className="max-w-3xl mx-auto py-8 px-4">
-                    <ReviewList isPublic />
+                    <ReviewList
+                        isPublic
+                        onScrollComplete={() => setScrollToId(null)}
+                    />
                 </div>
             </motion.div>
         );
@@ -84,7 +112,12 @@ function App() {
             transition={{ duration: 0.4 }}
             className="min-h-screen w-full bg-surface-100"
         >
-            <Navbar isPublic={isPublicOnly} onTogglePublic={setIsPublicOnly} />
+            <Navbar
+                isPublic={isPublicOnly}
+                onTogglePublic={setIsPublicOnly}
+                currentUserPicture={currentUserPicture}
+                onPictureUpdated={setCurrentUserPicture}
+            />
             <div className="max-w-3xl mx-auto pt-6 pb-16 px-4 sm:px-6 lg:px-0">
                 {/* Floating Write a Review Button (desktop only) */}
                 <div className="hidden lg:block">
@@ -150,6 +183,7 @@ function App() {
                         >
                             <ReviewForm
                                 onReviewSubmitted={handleReviewSubmitted}
+                                currentUserPicture={currentUserPicture}
                             />
                         </motion.div>
                     )}
@@ -164,6 +198,7 @@ function App() {
                         if (id) setScrollToId(id);
                         setRefreshTrigger((prev) => prev + 1);
                     }}
+                    onScrollComplete={() => setScrollToId(null)}
                 />
             </div>
         </motion.div>

@@ -19,40 +19,10 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
     const isDarkMode = useDarkMode();
     const themeSet = isDarkMode ? themes.dark : themes.light;
     const theme = themeSet[review.user_id] || {};
-    const themeStyle = Object.fromEntries(
-        Object.entries(theme).map(([key, value]) => [key, value]),
-    );
 
     const [editing, setEditing] = useState(false);
 
-    const {
-        editedName,
-        setEditedName,
-        editedReviewText,
-        setEditedReviewText,
-        editedFoodRating,
-        setEditedFoodRating,
-        editedDrinkRating,
-        setEditedDrinkRating,
-        editedAmbienceRating,
-        setEditedAmbienceRating,
-        editedFoodEmoji,
-        setEditedFoodEmoji,
-        editedDrinkEmoji,
-        setEditedDrinkEmoji,
-        editedAmbienceEmoji,
-        setEditedAmbienceEmoji,
-        editedVisitDate,
-        setEditedVisitDate,
-        handleSaveReview,
-        addPhotoImages,
-        setAddPhotoImages,
-        removedPhotoUrls,
-        setRemovedPhotoUrls,
-        handleRemoveExistingPhoto,
-        saving,
-        draftWasRestored,
-    } = useReviewCardEditing(review, onReviewUpdated, editing);
+    const editingState = useReviewCardEditing(review, onReviewUpdated, editing);
 
     return (
         <motion.div
@@ -71,40 +41,18 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
             }
             exit={{ opacity: 0 }}
             transition={{ duration: 0.8 }}
-            style={themeStyle}
+            style={theme}
             className="bg-surface-50 rounded-2xl shadow-sm border border-surface-200 border-l-3 border-l-secondary-400 overflow-hidden transition-transform duration-200 hover:-translate-y-0.25 hover:shadow-md"
         >
             {editing ? (
                 <EditReviewUI
-                    editedName={editedName}
-                    setEditedName={setEditedName}
-                    editedFoodRating={editedFoodRating}
-                    setEditedFoodRating={setEditedFoodRating}
-                    editedDrinkRating={editedDrinkRating}
-                    setEditedDrinkRating={setEditedDrinkRating}
-                    editedAmbienceRating={editedAmbienceRating}
-                    setEditedAmbienceRating={setEditedAmbienceRating}
-                    editedVisitDate={editedVisitDate}
-                    setEditedVisitDate={setEditedVisitDate}
-                    editedReviewText={editedReviewText}
-                    setEditedReviewText={setEditedReviewText}
-                    editedFoodEmoji={editedFoodEmoji}
-                    setEditedFoodEmoji={setEditedFoodEmoji}
-                    editedDrinkEmoji={editedDrinkEmoji}
-                    setEditedDrinkEmoji={setEditedDrinkEmoji}
-                    editedAmbienceEmoji={editedAmbienceEmoji}
-                    setEditedAmbienceEmoji={setEditedAmbienceEmoji}
-                    addPhotoImages={addPhotoImages}
-                    setAddPhotoImages={setAddPhotoImages}
-                    removedPhotoUrls={removedPhotoUrls}
-                    handleRemoveExistingPhoto={handleRemoveExistingPhoto}
+                    editingState={editingState}
                     handleSave={async (isPublic) => {
-                        await handleSaveReview(isPublic);
+                        await editingState.handleSaveReview(isPublic);
                         setEditing(false);
                     }}
                     onClose={() => setEditing(false)}
                     review={review}
-                    draftWasRestored={draftWasRestored}
                 />
             ) : (
                 <div className="py-6">
@@ -116,26 +64,31 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                                 </h3>
                                 <span className="text-xs text-text-light tracking-wide mt-0.5">
                                     {new Date(
-                                        review.visit_date,
+                                        review.visit_date + "T00:00:00",
                                     ).toLocaleDateString()}
                                 </span>
                             </div>
                             <div className="flex items-center gap-2 ml-3 shrink-0">
+                                <div className="flex items-center gap-2">
+                                    <Avatar
+                                        name={review.reviewer_name}
+                                        picture={review.reviewer_picture}
+                                        size="md"
+                                        title={review.reviewer_name}
+                                    />
+                                    {review.reviewer_name && (
+                                        <span className="text-sm text-text-mid">
+                                            {review.reviewer_name}
+                                        </span>
+                                    )}
+                                </div>
                                 {currentUserId === review.user_id && (
                                     <ReviewCardMenu
                                         review={review}
-                                        onAddPhotos={() => setEditing(true)}
                                         onEditReview={() => setEditing(true)}
-                                        onEditName={() => setEditing(true)}
                                         onReviewUpdated={onReviewUpdated}
                                     />
                                 )}
-                                <Avatar
-                                    name={review.reviewer_name}
-                                    picture={review.reviewer_picture}
-                                    size="md"
-                                    title={review.reviewer_name}
-                                />
                             </div>
                         </div>
                     </div>
@@ -184,6 +137,11 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                                                 {children}
                                             </em>
                                         ),
+                                        strong: ({ children }) => (
+                                            <strong className="font-semibold text-text-dark">
+                                                {children}
+                                            </strong>
+                                        ),
                                         blockquote: ({ children }) => (
                                             <div className="flex gap-1">
                                                 <Quote
@@ -224,7 +182,7 @@ function ReviewCard({ review, isNew, currentUserId, onReviewUpdated }) {
                     )}
                 </div>
             )}
-            <LoadingOverlay isVisible={saving} />
+            <LoadingOverlay isVisible={editingState.saving} />
         </motion.div>
     );
 }

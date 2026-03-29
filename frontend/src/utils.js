@@ -20,7 +20,13 @@ export function smoothScrollToTop(duration = 400) {
 
     requestAnimationFrame(scrollStep);
 }
+
 export const getLocalDate = () => {
     const today = new Date();
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 };
+
+export const isDefaultAvatar = (url) =>
+    !url ||
+    url.includes("gravatar.com") ||
+    url.includes("cdn.auth0.com/avatars");

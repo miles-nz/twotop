@@ -22,13 +22,13 @@ export function useReviewCardEditing(
         review.review_text || "",
     );
     const [editedFoodRating, setEditedFoodRating] = useState(
-        review.food_rating || null,
+        review.food_rating ?? null,
     );
     const [editedDrinkRating, setEditedDrinkRating] = useState(
-        review.drink_rating || null,
+        review.drink_rating ?? null,
     );
     const [editedAmbienceRating, setEditedAmbienceRating] = useState(
-        review.ambience_rating || null,
+        review.ambience_rating ?? null,
     );
     const [editedFoodEmoji, setEditedFoodEmoji] = useState(
         review.food_emoji || text.defaultFoodEmoji,
@@ -39,6 +39,8 @@ export function useReviewCardEditing(
     const [editedAmbienceEmoji, setEditedAmbienceEmoji] = useState(
         review.ambience_emoji || text.defaultAmbienceEmoji,
     );
+
+    const [saveError, setSaveError] = useState(null);
 
     // Photo editing
     const [addPhotoImages, setAddPhotoImages] = useState([]);
@@ -63,11 +65,11 @@ export function useReviewCardEditing(
                 (draft.visitDate &&
                     draft.visitDate !== (review.visit_date || "")) ||
                 (draft.foodRating &&
-                    draft.foodRating !== (review.food_rating || null)) ||
+                    draft.foodRating !== (review.food_rating ?? null)) ||
                 (draft.drinkRating &&
-                    draft.drinkRating !== (review.drink_rating || null)) ||
+                    draft.drinkRating !== (review.drink_rating ?? null)) ||
                 (draft.ambienceRating &&
-                    draft.ambienceRating !== (review.ambience_rating || null));
+                    draft.ambienceRating !== (review.ambience_rating ?? null));
             if (!hasChanges) return;
             if (draft.visitDate) setEditedVisitDate(draft.visitDate);
             if (draft.reviewText) setEditedReviewText(draft.reviewText);
@@ -102,9 +104,9 @@ export function useReviewCardEditing(
             const hasChanges =
                 draft.reviewText !== (review.review_text || "") ||
                 draft.visitDate !== (review.visit_date || "") ||
-                draft.foodRating !== (review.food_rating || null) ||
-                draft.drinkRating !== (review.drink_rating || null) ||
-                draft.ambienceRating !== (review.ambience_rating || null);
+                draft.foodRating !== (review.food_rating ?? null) ||
+                draft.drinkRating !== (review.drink_rating ?? null) ||
+                draft.ambienceRating !== (review.ambience_rating ?? null);
             if (!hasChanges) return;
             localStorage.setItem(draftKey, JSON.stringify(draft));
         } catch {}
@@ -128,20 +130,21 @@ export function useReviewCardEditing(
 
     const clearDraft = () => localStorage.removeItem(draftKey);
 
-    const hasDraft = () => {
-        try {
-            const saved = localStorage.getItem(draftKey);
-            if (!saved) return false;
-            const draft = JSON.parse(saved);
-            return !!(
-                draft.reviewText ||
-                draft.foodRating ||
-                draft.drinkRating ||
-                draft.ambienceRating
-            );
-        } catch {
-            return false;
-        }
+    const resetToSaved = () => {
+        setEditedName(review.restaurant_name);
+        setEditedVisitDate(review.visit_date || "");
+        setEditedReviewText(review.review_text || "");
+        setEditedFoodRating(review.food_rating ?? null);
+        setEditedDrinkRating(review.drink_rating ?? null);
+        setEditedAmbienceRating(review.ambience_rating ?? null);
+        setEditedFoodEmoji(review.food_emoji || text.defaultFoodEmoji);
+        setEditedDrinkEmoji(review.drink_emoji || text.defaultDrinkEmoji);
+        setEditedAmbienceEmoji(
+            review.ambience_emoji || text.defaultAmbienceEmoji,
+        );
+        setAddPhotoImages([]);
+        setRemovedPhotoUrls([]);
+        clearDraft();
     };
 
     const patchReview = async (formData) => {
@@ -164,6 +167,7 @@ export function useReviewCardEditing(
     };
 
     const handleSaveReview = async (isPublic) => {
+        setSaveError(null);
         try {
             const formData = new FormData();
             formData.append("restaurant_name", editedName);
@@ -189,27 +193,12 @@ export function useReviewCardEditing(
             setRemovedPhotoUrls([]);
         } catch (err) {
             console.error(err);
+            setSaveError(text.errorFailedSave);
         }
     };
 
     const handleRemoveExistingPhoto = (url) => {
         setRemovedPhotoUrls((prev) => [...prev, url]);
-    };
-
-    const handleSavePhotos = async () => {
-        try {
-            const formData = new FormData();
-            const updatedUrls = (review.image_urls || []).filter(
-                (url) => !removedPhotoUrls.includes(url),
-            );
-            formData.append("image_urls", JSON.stringify(updatedUrls));
-            addPhotoImages.forEach((image) => formData.append("images", image));
-            await patchReview(formData);
-            setAddPhotoImages([]);
-            setRemovedPhotoUrls([]);
-        } catch (err) {
-            console.error(err);
-        }
     };
 
     return {
@@ -237,10 +226,10 @@ export function useReviewCardEditing(
         removedPhotoUrls,
         setRemovedPhotoUrls,
         handleRemoveExistingPhoto,
-        handleSavePhotos,
         saving,
         clearDraft,
-        hasDraft,
         draftWasRestored,
+        resetToSaved,
+        saveError,
     };
 }

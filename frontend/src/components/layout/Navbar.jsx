@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Search } from "lucide-react";
@@ -7,7 +7,12 @@ import AvatarDropdown from "./AvatarDropdown";
 import { text } from "../../resources";
 import PublicToggle from "./PublicToggle";
 
-function Navbar({ isPublic = false, onTogglePublic }) {
+function Navbar({
+    isPublic = false,
+    onTogglePublic,
+    currentUserPicture,
+    onPictureUpdated,
+}) {
     const { user, logout, isAuthenticated, loginWithRedirect } = useAuth0();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [showMobileAdminButton, setShowMobileAdminButton] = useState(false);
@@ -50,6 +55,15 @@ function Navbar({ isPublic = false, onTogglePublic }) {
         window.clearTimeout(menuAdminTriggerTimer.current);
     };
 
+    useEffect(() => {
+        return () => {
+            window.clearTimeout(desktopAdminTimer.current);
+            window.clearTimeout(desktopAdminHideTimer.current);
+            window.clearTimeout(menuAdminTriggerTimer.current);
+            window.clearTimeout(menuAdminHideTimer.current);
+        };
+    }, []);
+
     // Desktop/main title click navigates home unless long-press
     const handleTitleClick = () => {
         if (ignoreNextDesktopClick.current) {
@@ -87,40 +101,14 @@ function Navbar({ isPublic = false, onTogglePublic }) {
         </h1>
     );
 
-    const publicToggle = isAuthenticated && (
-        <PublicToggle isPublic={isPublic} onToggle={onTogglePublic} />
-    );
-
-    const userProfile = user && (
-        <AvatarDropdown
-            user={user}
-            onLogout={() =>
-                logout({
-                    logoutParams: { returnTo: window.location.origin },
-                })
-            }
-            showName={true}
-        />
-    );
-
-    const authButtons = isAuthenticated ? (
-        <Button
-            variant="secondary"
-            onClick={() =>
-                logout({
-                    logoutParams: {
-                        returnTo: window.location.origin,
-                    },
-                })
-            }
-        >
-            {text.logOut}
-        </Button>
-    ) : (
-        <Button variant="surface" onClick={() => loginWithRedirect()}>
-            {text.logIn}
-        </Button>
-    );
+    const avatarDropdownProps = {
+        user,
+        onLogout: () =>
+            logout({ logoutParams: { returnTo: window.location.origin } }),
+        showName: true,
+        currentUserPicture,
+        onPictureUpdated,
+    };
 
     return (
         <nav className="bg-surface-50 border-b border-surface-200 shadow-sm sticky top-0 z-50">
@@ -128,14 +116,21 @@ function Navbar({ isPublic = false, onTogglePublic }) {
             <div className="hidden md:block">
                 <div className="max-w-2xl mx-auto px-6 py-4 grid grid-cols-[1fr_auto_1fr] items-center">
                     <div className="flex items-center gap-6">
-                        {publicToggle}
+                        {isAuthenticated && (
+                            <PublicToggle
+                                isPublic={isPublic}
+                                onToggle={onTogglePublic}
+                            />
+                        )}
                     </div>
 
                     <div className="justify-self-center">{title}</div>
 
                     <div className="flex items-center gap-6 justify-end">
-                        {userProfile && (
-                            <div className="hidden lg:block">{userProfile}</div>
+                        {user && (
+                            <div className="hidden lg:block">
+                                <AvatarDropdown {...avatarDropdownProps} />
+                            </div>
                         )}
                         {!isAuthenticated && (
                             <AnimatePresence>
@@ -147,7 +142,12 @@ function Navbar({ isPublic = false, onTogglePublic }) {
                                         transition={{ duration: 0.3 }}
                                         key="admin-desktop-btn"
                                     >
-                                        {authButtons}
+                                        <Button
+                                            variant="surface"
+                                            onClick={() => loginWithRedirect()}
+                                        >
+                                            {text.logIn}
+                                        </Button>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
@@ -172,16 +172,7 @@ function Navbar({ isPublic = false, onTogglePublic }) {
 
                     <div className="flex-1 flex justify-center">{title}</div>
                     {user ? (
-                        <AvatarDropdown
-                            user={user}
-                            onLogout={() =>
-                                logout({
-                                    logoutParams: {
-                                        returnTo: window.location.origin,
-                                    },
-                                })
-                            }
-                        />
+                        <AvatarDropdown {...avatarDropdownProps} />
                     ) : (
                         <span className="p-2 rounded-lg invisible">
                             <Search size={24} className="text-text-dark" />
@@ -230,7 +221,14 @@ function Navbar({ isPublic = false, onTogglePublic }) {
                                     <div className="px-4 py-4 flex-1 overflow-y-auto">
                                         <div className="pt-2 border-t border-surface-200 space-y-4">
                                             <div className="py-2">
-                                                {publicToggle}
+                                                {isAuthenticated && (
+                                                    <PublicToggle
+                                                        isPublic={isPublic}
+                                                        onToggle={
+                                                            onTogglePublic
+                                                        }
+                                                    />
+                                                )}
                                             </div>
                                         </div>
                                     </div>

@@ -9,34 +9,34 @@ import { getLocalDate } from "../../utils";
 import { useImageUpload } from "../../hooks/useImageUpload";
 import PublicToggle from "../layout/PublicToggle";
 
-function EditReviewUI({
-    editedName,
-    setEditedName,
-    editedFoodRating,
-    setEditedFoodRating,
-    editedDrinkRating,
-    setEditedDrinkRating,
-    editedAmbienceRating,
-    setEditedAmbienceRating,
-    editedVisitDate,
-    setEditedVisitDate,
-    editedReviewText,
-    setEditedReviewText,
-    editedFoodEmoji,
-    setEditedFoodEmoji,
-    editedDrinkEmoji,
-    setEditedDrinkEmoji,
-    editedAmbienceEmoji,
-    setEditedAmbienceEmoji,
-    addPhotoImages,
-    setAddPhotoImages,
-    removedPhotoUrls,
-    handleRemoveExistingPhoto,
-    handleSave,
-    onClose,
-    review,
-    draftWasRestored,
-}) {
+function EditReviewUI({ editingState, handleSave, onClose, review }) {
+    const {
+        editedName,
+        setEditedName,
+        editedReviewText,
+        setEditedReviewText,
+        editedFoodRating,
+        setEditedFoodRating,
+        editedDrinkRating,
+        setEditedDrinkRating,
+        editedAmbienceRating,
+        setEditedAmbienceRating,
+        editedFoodEmoji,
+        setEditedFoodEmoji,
+        editedDrinkEmoji,
+        setEditedDrinkEmoji,
+        editedAmbienceEmoji,
+        setEditedAmbienceEmoji,
+        editedVisitDate,
+        setEditedVisitDate,
+        addPhotoImages,
+        setAddPhotoImages,
+        removedPhotoUrls,
+        handleRemoveExistingPhoto,
+        draftWasRestored,
+        resetToSaved,
+        saveError,
+    } = editingState;
     const textareaRef = useRef(null);
     const [draftDismissed, setDraftDismissed] = useState(false);
 
@@ -68,12 +68,23 @@ function EditReviewUI({
             {draftWasRestored && !draftDismissed && (
                 <div className="flex items-center justify-between bg-secondary-50 border border-secondary-200 rounded-lg px-3 py-2 mb-4 text-sm text-secondary-600">
                     <span>{text.draftRestored}</span>
-                    <button
-                        onClick={() => setDraftDismissed(true)}
-                        className="text-secondary-400 hover:text-secondary-600"
-                    >
-                        <X size={14} />
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => {
+                                resetToSaved();
+                                setDraftDismissed(true);
+                            }}
+                            className="text-secondary-400 hover:text-secondary-600 text-xs"
+                        >
+                            {text.clearDraft}
+                        </button>
+                        <button
+                            onClick={() => setDraftDismissed(true)}
+                            className="text-secondary-400 hover:text-secondary-600"
+                        >
+                            <X size={14} />
+                        </button>
+                    </div>
                 </div>
             )}
 
@@ -257,6 +268,11 @@ function EditReviewUI({
                     />
                 )}
             </div>
+
+            {saveError && (
+                <p className="text-error-600 text-sm mt-3">{saveError}</p>
+            )}
+            <div className="flex items-center justify-between mt-4"></div>
 
             {/* Actions & Public Toggle at bottom */}
             <div className="flex items-center justify-between mt-4">

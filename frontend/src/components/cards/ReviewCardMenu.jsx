@@ -1,13 +1,5 @@
 import { useAuth0 } from "@auth0/auth0-react";
-import {
-    MoreHorizontal,
-    Trash2,
-    Eye,
-    EyeOff,
-    ImagePlus,
-    Pencil,
-    Store,
-} from "lucide-react";
+import { MoreHorizontal, Trash2, Eye, EyeOff, Pencil } from "lucide-react";
 import { useReviewList } from "../../contexts/ReviewListContext";
 import { text } from "../../resources";
 import { createPortal } from "react-dom";
@@ -16,13 +8,7 @@ import { useDeleteReview } from "../../hooks/useDeleteReview";
 import ConfirmModal from "../modals/ConfirmModal";
 import LoadingOverlay from "../ui/LoadingOverlay";
 
-function ReviewCardMenu({
-    review,
-    onAddPhotos,
-    onEditReview,
-    onEditName,
-    onReviewUpdated,
-}) {
+function ReviewCardMenu({ review, onEditReview, onReviewUpdated }) {
     const { getAccessTokenSilently } = useAuth0();
     const { openMenuId, handleMenuOpen, handleMenuClose } = useReviewList();
     const menuOpen = openMenuId === review.id;
