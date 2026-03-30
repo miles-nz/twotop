@@ -172,18 +172,16 @@ function Navbar({
 
                     <div className="flex-1 flex justify-center">{title}</div>
 
-                    <div className="p-2 w-6">
-                        {user ? (
-                            <AvatarDropdown
-                                {...avatarDropdownProps}
-                                mobile={true}
-                            />
-                        ) : (
-                            <span className="p-2 rounded-lg invisible">
-                                <Search size={24} className="text-text-dark" />
-                            </span>
-                        )}
-                    </div>
+                    {user ? (
+                        <AvatarDropdown
+                            {...avatarDropdownProps}
+                            mobile={true}
+                        />
+                    ) : (
+                        <span className="p-2 rounded-lg invisible">
+                            <Search size={24} className="text-text-dark" />
+                        </span>
+                    )}
                 </div>
 
                 {/* Mobile Menu */}
