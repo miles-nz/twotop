@@ -121,9 +121,6 @@ export default function AvatarDropdown({
                 onClick={() => setOpen((v) => !v)}
                 className={`flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity ${buttonClassName}`}
             >
-                {showName && (
-                    <span className="text-sm text-text-mid">{user?.name}</span>
-                )}
                 <Avatar
                     name={user?.name}
                     picture={picture}
@@ -139,6 +136,11 @@ export default function AvatarDropdown({
                         transition={{ duration: 0.15 }}
                         className={`absolute right-0 mt-2 w-40 bg-surface-50 border border-surface-200 rounded-lg shadow-lg overflow-hidden z-50 ${dropdownClassName}`}
                     >
+                        {showName && (
+                            <span className="text-sm text-text-light w-full px-4 py-2 block truncate">
+                                {user?.name}
+                            </span>
+                        )}
                         <button
                             onClick={() => {
                                 fileInputRef.current.click();
