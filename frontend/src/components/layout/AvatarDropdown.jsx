@@ -5,6 +5,7 @@ import Avatar from "../ui/Avatar";
 import ImageCropModal from "../cards/ImageCropModal";
 import { text } from "../../resources";
 import { isDefaultAvatar } from "../../utils";
+import LoadingOverlay from "../ui/LoadingOverlay";
 
 export default function AvatarDropdown({
     user,
@@ -46,16 +47,7 @@ export default function AvatarDropdown({
         const file = e.target.files[0];
         if (!file) return;
         const url = URL.createObjectURL(file);
-
-        const img = new Image();
-        img.onload = () => {
-            if (img.width === img.height) {
-                handleUpload(file);
-            } else {
-                setCropSrc(url);
-            }
-        };
-        img.src = url;
+        setCropSrc(url);
         e.target.value = "";
     };
 
@@ -154,7 +146,7 @@ export default function AvatarDropdown({
                             }}
                             className="w-full px-4 py-2 text-sm text-text-dark hover:bg-surface-100 transition-colors text-left"
                         >
-                            {uploading ? text.uploading : text.uploadPhoto}
+                            {text.uploadPhoto}
                         </button>
                         {picture && (
                             <button
@@ -183,6 +175,7 @@ export default function AvatarDropdown({
                     onCancel={handleCropCancel}
                 />
             )}
+            <LoadingOverlay isVisible={uploading} />
         </div>
     );
 }

@@ -116,7 +116,10 @@ function App() {
                 isPublic={isPublicOnly}
                 onTogglePublic={setIsPublicOnly}
                 currentUserPicture={currentUserPicture}
-                onPictureUpdated={setCurrentUserPicture}
+                onPictureUpdated={(picture) => {
+                    setCurrentUserPicture(picture);
+                    setRefreshTrigger((prev) => prev + 1);
+                }}
             />
             <div className="max-w-3xl mx-auto pt-6 pb-16 px-4 sm:px-6 lg:px-0">
                 {/* Floating Write a Review Button (desktop only) */}
