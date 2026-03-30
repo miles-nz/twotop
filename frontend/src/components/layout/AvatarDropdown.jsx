@@ -121,14 +121,14 @@ export default function AvatarDropdown({
                 onClick={() => setOpen((v) => !v)}
                 className={`flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity ${buttonClassName}`}
             >
+                {showName && (
+                    <span className="text-sm text-text-mid">{user?.name}</span>
+                )}
                 <Avatar
                     name={user?.name}
                     picture={picture}
                     loading={uploading}
                 />
-                {showName && (
-                    <span className="text-sm text-text-mid">{user?.name}</span>
-                )}
             </button>
             <AnimatePresence>
                 {open && (

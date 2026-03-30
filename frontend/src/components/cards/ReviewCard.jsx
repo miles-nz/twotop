@@ -60,17 +60,17 @@ function ReviewCard({ review, currentUserId, onReviewUpdated }) {
                             </div>
                             <div className="flex items-center gap-2 ml-3 shrink-0">
                                 <div className="flex items-center gap-2">
+                                    {review.reviewer_name && (
+                                        <span className="text-sm text-text-mid">
+                                            {review.reviewer_name}
+                                        </span>
+                                    )}
                                     <Avatar
                                         name={review.reviewer_name}
                                         picture={review.reviewer_picture}
                                         size="md"
                                         title={review.reviewer_name}
                                     />
-                                    {review.reviewer_name && (
-                                        <span className="text-sm text-text-mid">
-                                            {review.reviewer_name}
-                                        </span>
-                                    )}
                                 </div>
                                 {currentUserId === review.user_id && (
                                     <ReviewCardMenu
