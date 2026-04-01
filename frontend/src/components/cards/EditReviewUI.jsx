@@ -8,6 +8,7 @@ import { text } from "../../resources";
 import { getLocalDate } from "../../utils";
 import { useImageUpload } from "../../hooks/useImageUpload";
 import PublicToggle from "../layout/PublicToggle";
+import { useAutoResize } from "../../hooks/useAutoResize";
 
 function EditReviewUI({ editingState, handleSave, onClose, review }) {
     const {
@@ -38,6 +39,7 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
         saveError,
     } = editingState;
     const textareaRef = useRef(null);
+    const [isPublic, setIsPublic] = useState(review.is_public);
     const [draftDismissed, setDraftDismissed] = useState(false);
 
     const {
@@ -56,7 +58,7 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
         setAddPhotoImages,
     );
 
-    const [isPublic, setIsPublic] = useState(review.is_public);
+    useAutoResize(textareaRef, editedReviewText);
 
     const handleSaveWithPublic = async () => {
         await handleSave(isPublic);
@@ -170,7 +172,7 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
                 value={editedReviewText}
                 onChange={(e) => setEditedReviewText(e.target.value)}
                 maxLength={2000}
-                className="w-full border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 h-28 resize-none text-text-dark"
+                className="w-full border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 overflow-hidden text-text-dark"
             />
 
             {/* Photos */}

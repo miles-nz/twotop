@@ -4,15 +4,17 @@ import { motion } from "framer-motion";
 import { ImagePlus, X } from "lucide-react";
 import ImageCropModal from "../cards/ImageCropModal";
 import Button from "../ui/Button";
-import LoadingOverlay from "../ui/LoadingOverlay";
-import RatingField from "../ui/RatingField";
 import EmojiPicker from "../ui/EmojiPicker";
+import LoadingOverlay from "../ui/LoadingOverlay";
+import MarkdownToolbar from "../ui/MarkdownToolbar";
+import RatingField from "../ui/RatingField";
+import { useAutoResize } from "../../hooks/useAutoResize";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
 import { useImageUpload } from "../../hooks/useImageUpload";
 import { useReviewDraft } from "../../hooks/useReviewDraft";
+
 import { text, placeholders, preferences, draftKeys } from "../../resources";
 import { getLocalDate } from "../../utils";
-import MarkdownToolbar from "../ui/MarkdownToolbar";
 
 const DRAFT_KEY = draftKeys.newReview;
 
@@ -61,11 +63,7 @@ function ReviewForm({ onReviewSubmitted }) {
 
     const textareaRef = useRef(null);
 
-    const handleTextareaInput = (e) => {
-        const ta = e.target;
-        ta.style.height = "auto";
-        ta.style.height = ta.scrollHeight + "px";
-    };
+    useAutoResize(textareaRef, reviewText);
 
     const {
         images,
@@ -329,11 +327,9 @@ function ReviewForm({ onReviewSubmitted }) {
                         ref={textareaRef}
                         value={reviewText}
                         onChange={(e) => setReviewText(e.target.value)}
-                        onInput={handleTextareaInput}
                         maxLength={2000}
-                        className="w-full resize-none placeholder-text-light bg-transparent focus:outline-none pb-10"
+                        className="w-full overflow-hidden placeholder-text-light bg-transparent focus:outline-none pb-10 min-h-24"
                         placeholder={text.reviewNotesPlaceholder}
-                        rows={4}
                         aria-label={text.reviewNotesLabel}
                     />
                     <input
