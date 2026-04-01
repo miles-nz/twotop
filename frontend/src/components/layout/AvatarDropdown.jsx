@@ -3,9 +3,10 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Avatar from "../ui/Avatar";
 import ImageCropModal from "../cards/ImageCropModal";
-import { text } from "../../resources";
+import { text, enums } from "../../resources";
 import { isDefaultAvatar } from "../../utils";
 import LoadingOverlay from "../ui/LoadingOverlay";
+import InlineEdit from "../ui/InlineEdit";
 
 export default function AvatarDropdown({
     user,
@@ -13,20 +14,25 @@ export default function AvatarDropdown({
     showName = false,
     buttonClassName = "",
     dropdownClassName = "",
+    currentUserName,
     currentUserPicture,
     onPictureUpdated,
+    onNameUpdated,
     mobile = false,
 }) {
     const { getAccessTokenSilently } = useAuth0();
     const [open, setOpen] = useState(false);
     const [cropSrc, setCropSrc] = useState(null);
     const [uploading, setUploading] = useState(false);
+    const [savingName, setSavingName] = useState(false);
     const dropdownRef = useRef(null);
     const fileInputRef = useRef(null);
 
     const picture = isDefaultAvatar(currentUserPicture)
         ? null
         : currentUserPicture;
+
+    const displayName = currentUserName ?? user?.name;
 
     useEffect(() => {
         if (!open) return;
@@ -109,6 +115,31 @@ export default function AvatarDropdown({
         }
     };
 
+    const handleSaveName = async (newName) => {
+        setSavingName(true);
+        try {
+            const token = await getAccessTokenSilently();
+            const response = await fetch(
+                `${import.meta.env.VITE_API_URL}/user/name`,
+                {
+                    method: "PATCH",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ name: newName }),
+                },
+            );
+            if (!response.ok) throw new Error("Failed to update name");
+            onNameUpdated?.(newName);
+            await getAccessTokenSilently({ ignoreCache: true });
+        } catch (err) {
+            console.error("Failed to update name:", err);
+        } finally {
+            setSavingName(false);
+        }
+    };
+
     return (
         <div className={`relative ${mobile ? "p-1.5" : ""}`} ref={dropdownRef}>
             <input
@@ -123,10 +154,12 @@ export default function AvatarDropdown({
                 className={`flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity ${buttonClassName}`}
             >
                 {!mobile && showName && (
-                    <span className="text-sm text-text-dark">{user?.name}</span>
+                    <span className="text-sm text-text-dark">
+                        {displayName}
+                    </span>
                 )}
                 <Avatar
-                    name={user?.name}
+                    name={displayName}
                     picture={picture}
                     loading={uploading}
                 />
@@ -140,10 +173,26 @@ export default function AvatarDropdown({
                         transition={{ duration: 0.15 }}
                         className={`absolute right-0 mt-2 w-40 bg-surface-50 border border-surface-200 rounded-lg shadow-lg overflow-hidden z-50 ${dropdownClassName}`}
                     >
-                        {mobile && showName && (
-                            <span className="text-sm text-text-light w-full px-4 py-2 block truncate">
-                                {user?.name}
-                            </span>
+                        {showName && (
+                            <div className="w-full px-4 py-2 hover:bg-surface-100 transition-colors text-left">
+                                <InlineEdit
+                                    value={displayName || ""}
+                                    onSave={handleSaveName}
+                                    className="text-sm text-text-dark w-full truncate"
+                                    inputClassName="text-sm text-text-dark w-full"
+                                    displayMode={
+                                        mobile
+                                            ? enums.inlineEditDisplayMode
+                                                  .valueWithPencil
+                                            : enums.inlineEditDisplayMode
+                                                  .editWithValueName
+                                    }
+                                    valueName="name"
+                                    hoverEffects={false}
+                                    showConfirmButton={mobile}
+                                    onSaveComplete={() => setOpen(false)}
+                                />
+                            </div>
                         )}
                         <button
                             onClick={() => {
@@ -181,7 +230,7 @@ export default function AvatarDropdown({
                     onCancel={handleCropCancel}
                 />
             )}
-            <LoadingOverlay isVisible={uploading} />
+            <LoadingOverlay isVisible={uploading || savingName} />
         </div>
     );
 }

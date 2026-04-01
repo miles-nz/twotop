@@ -22,6 +22,8 @@ const ALLOWED_IMAGE_TYPES = [
     "image/avif",
 ];
 const REVIEW_IMAGE_BUCKET = "review-images";
+const PROFILE_PICTURE_BUCKET = "profile-pictures";
+const MAX_USER_NAME_LENGTH = 20;
 const MAX_RESTAURANT_NAME_LENGTH = 100;
 const MAX_REVIEW_TEXT_LENGTH = 10000;
 const RATING_MIN = 0.5;
@@ -37,16 +39,19 @@ const ERRORS = {
     invalidRestaurantName: "Invalid restaurant name",
     maxPhotos: `Maximum ${MAX_IMAGES_PER_REVIEW} photos per review`,
     invalidRating: (field) => `Invalid ${field}`,
+    missingImage: "Image file is required",
     invalidImageType:
         "Only JPEG, PNG, WebP, HEIC, GIF and AVIF images are allowed",
     restaurantNameRequired: "Restaurant name is required.",
     restaurantNameInvalid: "Restaurant name must be a non-empty string.",
     reviewTextInvalid: "Review text must be a string.",
-    reviewTextTooLong: `Review text must be less than ${MAX_REVIEW_TEXT_LENGTH} characters.`,
+    reviewTextTooLong: `Review text must be ${MAX_REVIEW_TEXT_LENGTH} characters or less.`,
     ratingInvalid: (name) =>
         `${name} must be a number between ${RATING_MIN} and ${RATING_MAX}.`,
     missingRequiredFields: "Review notes or all ratings are required.",
-    restaurantNameTooLong: `Restaurant name must be less than ${MAX_RESTAURANT_NAME_LENGTH} characters.`,
+    restaurantNameTooLong: `Restaurant name must be ${MAX_RESTAURANT_NAME_LENGTH} characters or less.`,
+    userNameTooLong: `Name must be ${MAX_USER_NAME_LENGTH} characters or less.`,
+    userNameRequired: "Name is required.",
 };
 
 // Multer setup
@@ -434,7 +439,7 @@ app.patch(
     },
     async (req, res) => {
         if (!req.file)
-            return res.status(400).json({ error: "No image provided" });
+            return res.status(400).json({ error: ERRORS.missingImage });
         const user_id = req.auth.payload.sub;
 
         try {
@@ -454,7 +459,7 @@ app.patch(
             const publicUrl = await uploadImage(
                 req.file,
                 user_id,
-                "profile-pictures",
+                PROFILE_PICTURE_BUCKET,
             );
 
             // Update Auth0 user picture
@@ -488,12 +493,15 @@ app.patch(
                 );
 
             // Delete old picture from Supabase if it was uploaded by us
-            if (oldPictureUrl && oldPictureUrl.includes("profile-pictures")) {
+            if (
+                oldPictureUrl &&
+                oldPictureUrl.includes(PROFILE_PICTURE_BUCKET)
+            ) {
                 const oldPath = decodeURIComponent(
-                    oldPictureUrl.split("/profile-pictures/")[1],
+                    oldPictureUrl.split(`/${PROFILE_PICTURE_BUCKET}/`)[1],
                 );
                 await supabase.storage
-                    .from("profile-pictures")
+                    .from(PROFILE_PICTURE_BUCKET)
                     .remove([oldPath]);
             }
 
@@ -553,11 +561,13 @@ app.delete("/user/picture", checkJwt, async (req, res) => {
         }
 
         // Delete from Supabase if it was uploaded by us
-        if (oldPictureUrl && oldPictureUrl.includes("profile-pictures")) {
+        if (oldPictureUrl && oldPictureUrl.includes(PROFILE_PICTURE_BUCKET)) {
             const oldPath = decodeURIComponent(
-                oldPictureUrl.split("/profile-pictures/")[1],
+                oldPictureUrl.split(`/${PROFILE_PICTURE_BUCKET}/`)[1],
             );
-            await supabase.storage.from("profile-pictures").remove([oldPath]);
+            await supabase.storage
+                .from(PROFILE_PICTURE_BUCKET)
+                .remove([oldPath]);
         }
 
         // Update reviewer_picture on all existing reviews
@@ -569,6 +579,57 @@ app.delete("/user/picture", checkJwt, async (req, res) => {
         res.status(200).json({ success: true });
     } catch (err) {
         console.error("Delete picture error:", err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.patch("/user/name", checkJwt, async (req, res) => {
+    const user_id = req.auth.payload.sub;
+    const { name } = req.body;
+
+    if (!name || typeof name !== "string" || name.trim().length === 0) {
+        return res.status(400).json({ error: ERRORS.userNameRequired });
+    }
+
+    if (name.trim().length > MAX_USER_NAME_LENGTH) {
+        return res.status(400).json({
+            error: ERRORS.userNameTooLong,
+        });
+    }
+
+    try {
+        const token = await getMgmtToken();
+        const mgmtResponse = await fetch(
+            `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(user_id)}`,
+            {
+                method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ name: name.trim() }),
+            },
+        );
+
+        if (!mgmtResponse.ok) {
+            const err = await mgmtResponse.json();
+            throw new Error(err.message);
+        }
+
+        // Update reviewer_name on all existing reviews
+        const { error: reviewsError } = await supabase
+            .from("reviews")
+            .update({ reviewer_name: name.trim() })
+            .eq("user_id", user_id);
+
+        if (reviewsError)
+            console.error(
+                "Failed to update reviewer names:",
+                reviewsError.message,
+            );
+
+        res.status(200).json({ name: name.trim() });
+    } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });

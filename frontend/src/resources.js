@@ -67,6 +67,7 @@ export const text = {
     submitReview: "Submit Review",
     submitting: "Submitting...",
     edit: "Edit",
+    editLabel: (valueName) => `Edit ${valueName}`,
     draftRestored: "Draft restored",
     clearDraft: "Clear draft",
 
@@ -141,4 +142,12 @@ export const emojiOptions = {
         "🌅",
         "🏙️",
     ],
+};
+
+export const enums = {
+    inlineEditDisplayMode: {
+        valueWithPencil: "valueWithPencil",
+        valueOnly: "valueOnly",
+        editWithValueName: "editWithValueName",
+    },
 };

@@ -10,6 +10,8 @@ import PublicToggle from "./PublicToggle";
 function Navbar({
     isPublic = false,
     onTogglePublic,
+    currentUserName,
+    onNameUpdated,
     currentUserPicture,
     onPictureUpdated,
 }) {
@@ -106,6 +108,8 @@ function Navbar({
         onLogout: () =>
             logout({ logoutParams: { returnTo: window.location.origin } }),
         showName: true,
+        currentUserName,
+        onNameUpdated,
         currentUserPicture,
         onPictureUpdated,
     };

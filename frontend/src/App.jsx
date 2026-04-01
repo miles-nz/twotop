@@ -21,6 +21,7 @@ function App() {
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [scrollToId, setScrollToId] = useState(null);
 
+    const [currentUserName, setCurrentUserName] = useState(undefined);
     const [currentUserPicture, setCurrentUserPicture] = useState(undefined);
 
     const handleReviewSubmitted = (newId) => {
@@ -62,6 +63,7 @@ function App() {
 
     useEffect(() => {
         if (!user) return;
+        if (currentUserName === undefined) setCurrentUserName(user.name);
         const fetchCurrentPicture = async () => {
             try {
                 const token = await getAccessTokenSilently();
@@ -118,6 +120,11 @@ function App() {
                 currentUserPicture={currentUserPicture}
                 onPictureUpdated={(picture) => {
                     setCurrentUserPicture(picture);
+                    setRefreshTrigger((prev) => prev + 1);
+                }}
+                currentUserName={currentUserName}
+                onNameUpdated={(name) => {
+                    setCurrentUserName(name);
                     setRefreshTrigger((prev) => prev + 1);
                 }}
             />
