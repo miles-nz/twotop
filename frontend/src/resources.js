@@ -72,6 +72,7 @@ export const text = {
     clearDraft: "Clear draft",
 
     // Photos
+    photo: "Photo",
     addPhotos: "Add Photos",
     editPhotos: "Edit Photos",
     reviewPhoto: "Review photo",
@@ -83,6 +84,8 @@ export const text = {
     uploading: "Uploading...",
     uploadPhoto: "Upload photo",
     removePhoto: "Remove photo",
+    nextImage: "Next image",
+    previousImage: "Previous image",
 
     // Review card menu
     updateRestaurant: "Update Restaurant",
