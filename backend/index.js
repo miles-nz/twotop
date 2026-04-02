@@ -1,8 +1,4 @@
 require("dotenv").config();
-console.log(
-    "All env keys:",
-    Object.keys(process.env).filter((k) => k.includes("GOOGLE")),
-);
 const express = require("express");
 const cors = require("cors");
 const { auth } = require("express-oauth2-jwt-bearer");
@@ -715,12 +711,6 @@ app.get("/places/search", checkJwt, placesRateLimit, async (req, res) => {
             },
         );
         const data = await response.json();
-        console.log("Places API response:", JSON.stringify(data));
-        console.log("API key present:", !!process.env.GOOGLE_PLACES_API_KEY);
-        console.log(
-            "API key length:",
-            process.env.GOOGLE_PLACES_API_KEY?.length,
-        );
         const suggestions = (data.suggestions || []).map((s) => ({
             place_id: s.placePrediction.placeId,
             name: s.placePrediction.structuredFormat.mainText.text,
@@ -758,4 +748,4 @@ app.get("/places/details", checkJwt, placesRateLimit, async (req, res) => {
     }
 });
 
-app.listen(3000, () => console.log("Server running on http://localhost:3000"));
+app.listen(3000, () => console.log("Server running"));
