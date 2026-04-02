@@ -76,9 +76,11 @@ const placesRateLimit = rateLimit({
     message: { error: "Too many searches, please try again shortly." },
     standardHeaders: true,
     legacyHeaders: false,
+    validate: { xForwardedForHeader: false },
 });
 
 const app = express();
+app.set("trust proxy", 1);
 
 app.use(cors({ origin: ALLOWED_ORIGINS }));
 app.use(express.json());
