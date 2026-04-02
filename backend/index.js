@@ -79,11 +79,21 @@ const placesRateLimit = rateLimit({
     validate: { xForwardedForHeader: false },
 });
 
+const generalRateLimit = rateLimit({
+    windowMs: 60 * 1000,
+    max: 300,
+    message: { error: "Too many requests, please try again shortly." },
+    standardHeaders: true,
+    legacyHeaders: false,
+    validate: { xForwardedForHeader: false },
+});
+
 const app = express();
 app.set("trust proxy", 1);
 
 app.use(cors({ origin: ALLOWED_ORIGINS }));
 app.use(express.json());
+app.use(generalRateLimit);
 
 const checkJwt = auth({
     audience: process.env.AUTH0_AUDIENCE,
@@ -701,6 +711,7 @@ app.get("/places/search", checkJwt, placesRateLimit, async (req, res) => {
             },
         );
         const data = await response.json();
+        console.log("Places API response:", JSON.stringify(data));
         const suggestions = (data.suggestions || []).map((s) => ({
             place_id: s.placePrediction.placeId,
             name: s.placePrediction.structuredFormat.mainText.text,
