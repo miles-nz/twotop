@@ -13,6 +13,7 @@ import ReactMarkdown from "react-markdown";
 import { Quote } from "lucide-react";
 import rehypeRaw from "rehype-raw";
 import { formatVisitDate, formatHoverDate } from "../../utils";
+import { text } from "../../resources";
 
 function ReviewCard({ review, currentUserId, onReviewUpdated }) {
     const isDarkMode = useDarkMode();
@@ -55,7 +56,22 @@ function ReviewCard({ review, currentUserId, onReviewUpdated }) {
                                 </h3>
                                 {review.restaurant_address ? (
                                     <span className="text-xs text-text-light wrap-break-word">
-                                        <span>{review.restaurant_address}</span>
+                                        <span>
+                                            {review.place_id ? (
+                                                <a
+                                                    href={text.makeGoogleMapsLink(
+                                                        review.place_id,
+                                                    )}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="hover:text-text-mid transition-colors"
+                                                >
+                                                    {review.restaurant_address}
+                                                </a>
+                                            ) : (
+                                                review.restaurant_address
+                                            )}
+                                        </span>
                                         <span className="mx-1 text-text-light/35">
                                             |
                                         </span>

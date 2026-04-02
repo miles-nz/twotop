@@ -53,7 +53,7 @@ export const text = {
     restaurantNameLabel: "Restaurant",
     restaurantNamePlaceholder: (name) => `e.g. ${name}`,
     restaurantAddressLabel: "Address (optional)",
-    restaurantAddressPlaceholder: "e.g. 123 Queen St, Auckland",
+    restaurantAddressPlaceholder: "e.g. 123 Queen St, Auckland CBD, Auckland",
     restaurantSearchPlaceholder: "Search for a restaurant...",
     searchingPlaces: "Searching...",
     noPlacesFound: "No results found",
@@ -100,6 +100,8 @@ export const text = {
 
     // Review list
     noReviews: "No reviews yet.",
+    makeGoogleMapsLink: (place_id) =>
+        `https://www.google.com/maps/place/?q=place_id:${place_id}`,
 
     // Errors
     errorFormatted: (error) => `Error: ${error}`,

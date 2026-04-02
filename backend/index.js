@@ -135,16 +135,6 @@ const deleteImages = async (urls) => {
     if (error) throw new Error(error.message);
 };
 
-const formatAddress = (address) => {
-    if (!address) return null;
-    return address
-        .split(",")
-        .map((part) => part.trim())
-        .filter((part) => part !== "New Zealand")
-        .map((part) => part.replace(/\s\d{4}$/, "").trim())
-        .join(", ");
-};
-
 // Validation
 const validateReview = (body) => {
     const {
@@ -723,7 +713,7 @@ app.get("/places/search", checkJwt, placesRateLimit, async (req, res) => {
     }
 });
 
-app.get("/places/details", checkJwt, placesRateLimit, async (req, res) => {
+app.get("/places/details", checkJwt, async (req, res) => {
     const { place_id } = req.query;
     if (!place_id)
         return res.status(400).json({ error: "place_id is required" });
@@ -733,15 +723,60 @@ app.get("/places/details", checkJwt, placesRateLimit, async (req, res) => {
             {
                 headers: {
                     "X-Goog-Api-Key": process.env.GOOGLE_PLACES_API_KEY,
-                    "X-Goog-FieldMask": "id,displayName,formattedAddress",
+                    "X-Goog-FieldMask": "id,displayName,addressComponents",
                 },
             },
         );
         const data = await response.json();
+
+        console.log("Place details response:", JSON.stringify(data));
+
+        const getComponent = (types) =>
+            data.addressComponents?.find(
+                (c) => c.types && types.some((t) => c.types.includes(t)),
+            )?.longText || "";
+
+        const subpremise = getComponent(["subpremise"]);
+        const streetNumber = getComponent(["street_number"]);
+        const route = getComponent(["route"]);
+
+        const suburb = getComponent([
+            "sublocality",
+            "sublocality_level_1",
+            "neighborhood",
+        ]);
+        let city = getComponent(["locality"]);
+        if (city === "Westfield") {
+            city = getComponent(["administrative_area_level_1"]);
+        }
+        // Only include country if it's not New Zealand
+        const country =
+            getComponent(["country"]) === "New Zealand"
+                ? ""
+                : getComponent(["country"]);
+
+        /*
+        Westfield is sometimes in the city field in NZ,
+        so replace that with the administrative area,
+        which should be the actual city for those addresses
+        */
+        if (country === "" && city === "Westfield") {
+            city = getComponent(["administrative_area_level_1"]);
+        }
+
+        const streetAddress = [
+            subpremise,
+            streetNumber && route ? `${streetNumber} ${route}` : route,
+        ]
+            .filter(Boolean)
+            .join("/");
+
+        const parts = [streetAddress, suburb, city, country].filter(Boolean);
+
         res.status(200).json({
             place_id: data.id,
             name: data.displayName?.text || "",
-            address: formatAddress(data.formattedAddress) || "",
+            address: parts.join(", "),
         });
     } catch (err) {
         res.status(500).json({ error: err.message });
