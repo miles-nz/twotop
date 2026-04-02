@@ -10,7 +10,7 @@ import ReviewCardRatings from "./ReviewCardRatings";
 import ReviewCardCarousel from "./ReviewCardCarousel";
 import { themes } from "../../themes";
 import ReactMarkdown from "react-markdown";
-import { Quote } from "lucide-react";
+import { Quote, MapPin } from "lucide-react";
 import rehypeRaw from "rehype-raw";
 import {
     formatVisitDate,
@@ -72,11 +72,19 @@ function ReviewCard({ review, currentUserId, onReviewUpdated }) {
                                                     className="hover:text-text-mid transition-colors"
                                                 >
                                                     <span className="hidden sm:inline">
+                                                        <MapPin
+                                                            size={11}
+                                                            className="inline mr-0.5 mb-0.5"
+                                                        />
                                                         {
                                                             review.restaurant_address
                                                         }
                                                     </span>
                                                     <span className="sm:hidden">
+                                                        <MapPin
+                                                            size={11}
+                                                            className="inline mr-0.5 mb-0.5"
+                                                        />
                                                         {formatShortAddress(
                                                             review.restaurant_address,
                                                         )}
