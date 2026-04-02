@@ -168,9 +168,6 @@ function ReviewCard({ review, currentUserId, onReviewUpdated }) {
                                 foodRating={review.food_rating}
                                 drinkRating={review.drink_rating}
                                 ambienceRating={review.ambience_rating}
-                                foodEmoji={review.food_emoji}
-                                drinkEmoji={review.drink_emoji}
-                                ambienceEmoji={review.ambience_emoji}
                             />
                         </div>
                     )}

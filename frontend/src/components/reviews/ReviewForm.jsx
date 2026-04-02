@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { ImagePlus, X } from "lucide-react";
 import ImageCropModal from "../cards/ImageCropModal";
 import Button from "../ui/Button";
-import EmojiPicker from "../ui/EmojiPicker";
 import LoadingOverlay from "../ui/LoadingOverlay";
 import MarkdownToolbar from "../ui/MarkdownToolbar";
 import PlacesSearch from "../ui/PlacesSearch";
@@ -14,7 +13,7 @@ import { useBreakpoint } from "../../hooks/useBreakpoint";
 import { useImageUpload } from "../../hooks/useImageUpload";
 import { useReviewDraft } from "../../hooks/useReviewDraft";
 
-import { text, preferences, draftKeys } from "../../resources";
+import { text, draftKeys } from "../../resources";
 import { getLocalDate } from "../../utils";
 
 const DRAFT_KEY = draftKeys.newReview;
@@ -38,11 +37,6 @@ function ReviewForm({
     const [ambienceRating, setAmbienceRating] = useState(null);
     const [reviewText, setReviewText] = useState("");
     const [isPublic, setIsPublic] = useState(false);
-    const [foodEmoji, setFoodEmoji] = useState(text.defaultFoodEmoji);
-    const [drinkEmoji, setDrinkEmoji] = useState(text.defaultDrinkEmoji);
-    const [ambienceEmoji, setAmbienceEmoji] = useState(
-        text.defaultAmbienceEmoji,
-    );
 
     const [draftRestored, setDraftRestored] = useState(() => {
         try {
@@ -94,9 +88,6 @@ function ReviewForm({
         foodRating,
         drinkRating,
         ambienceRating,
-        foodEmoji,
-        drinkEmoji,
-        ambienceEmoji,
         isPublic,
         setRestaurantName,
         setRestaurantAddress,
@@ -106,9 +97,6 @@ function ReviewForm({
         setFoodRating,
         setDrinkRating,
         setAmbienceRating,
-        setFoodEmoji,
-        setDrinkEmoji,
-        setAmbienceEmoji,
         setIsPublic,
     });
 
@@ -121,9 +109,6 @@ function ReviewForm({
         setDrinkRating(null);
         setAmbienceRating(null);
         setvisitDate("");
-        setFoodEmoji(text.defaultFoodEmoji);
-        setDrinkEmoji(text.defaultDrinkEmoji);
-        setAmbienceEmoji(text.defaultAmbienceEmoji);
         setIsPublic(false);
         resetImages();
     };
@@ -156,9 +141,6 @@ function ReviewForm({
             formData.append("reviewer_picture", currentUserPicture || "");
             formData.append("is_public", isPublic);
             images.forEach((image) => formData.append("images", image));
-            formData.append("food_emoji", foodEmoji);
-            formData.append("drink_emoji", drinkEmoji);
-            formData.append("ambience_emoji", ambienceEmoji);
 
             const response = await fetch(
                 `${import.meta.env.VITE_API_URL}/reviews`,
@@ -283,58 +265,19 @@ function ReviewForm({
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <RatingField
-                        label={
-                            preferences.enableEmojis ? (
-                                <span className="flex items-center justify-center gap-1">
-                                    <EmojiPicker
-                                        type="food"
-                                        value={foodEmoji}
-                                        onChange={setFoodEmoji}
-                                    />
-                                    {text.foodLabel}
-                                </span>
-                            ) : (
-                                <span>{text.foodLabel}</span>
-                            )
-                        }
+                        label={<span>{text.foodLabel}</span>}
                         value={foodRating}
                         onChange={setFoodRating}
                         size={isDesktop ? "sm" : "md"}
                     />
                     <RatingField
-                        label={
-                            preferences.enableEmojis ? (
-                                <span className="flex items-center justify-center gap-1">
-                                    <EmojiPicker
-                                        type="drink"
-                                        value={drinkEmoji}
-                                        onChange={setDrinkEmoji}
-                                    />
-                                    {text.drinksLabel}
-                                </span>
-                            ) : (
-                                <span>{text.drinksLabel}</span>
-                            )
-                        }
+                        label={<span>{text.drinksLabel}</span>}
                         value={drinkRating}
                         onChange={setDrinkRating}
                         size={isDesktop ? "sm" : "md"}
                     />
                     <RatingField
-                        label={
-                            preferences.enableEmojis ? (
-                                <span className="flex items-center justify-center gap-1">
-                                    <EmojiPicker
-                                        type="ambience"
-                                        value={ambienceEmoji}
-                                        onChange={setAmbienceEmoji}
-                                    />
-                                    {text.ambienceLabel}
-                                </span>
-                            ) : (
-                                <span>{text.ambienceLabel}</span>
-                            )
-                        }
+                        label={<span>{text.ambienceLabel}</span>}
                         value={ambienceRating}
                         onChange={setAmbienceRating}
                         size={isDesktop ? "sm" : "md"}

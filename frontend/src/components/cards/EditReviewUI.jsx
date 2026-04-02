@@ -1,6 +1,5 @@
 import { useRef, useState } from "react";
 import { Check, X, ImagePlus } from "lucide-react";
-import EmojiPicker from "../ui/EmojiPicker";
 import MarkdownToolbar from "../ui/MarkdownToolbar";
 import PlacesSearch from "../ui/PlacesSearch";
 import RatingField from "../ui/RatingField";
@@ -28,12 +27,6 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
         setEditedDrinkRating,
         editedAmbienceRating,
         setEditedAmbienceRating,
-        editedFoodEmoji,
-        setEditedFoodEmoji,
-        editedDrinkEmoji,
-        setEditedDrinkEmoji,
-        editedAmbienceEmoji,
-        setEditedAmbienceEmoji,
         editedVisitDate,
         setEditedVisitDate,
         addPhotoImages,
@@ -119,16 +112,11 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
                 />
             </div>
 
-            {/* Ratings & Emojis */}
+            {/* Ratings */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
                 <RatingField
                     label={
                         <span className="flex items-center justify-center gap-1">
-                            <EmojiPicker
-                                type="food"
-                                value={editedFoodEmoji}
-                                onChange={setEditedFoodEmoji}
-                            />
                             {text.foodLabel}
                         </span>
                     }
@@ -139,11 +127,6 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
                 <RatingField
                     label={
                         <span className="flex items-center justify-center gap-1">
-                            <EmojiPicker
-                                type="drink"
-                                value={editedDrinkEmoji}
-                                onChange={setEditedDrinkEmoji}
-                            />
                             {text.drinksLabel}
                         </span>
                     }
@@ -154,11 +137,6 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
                 <RatingField
                     label={
                         <span className="flex items-center justify-center gap-1">
-                            <EmojiPicker
-                                type="ambience"
-                                value={editedAmbienceEmoji}
-                                onChange={setEditedAmbienceEmoji}
-                            />
                             {text.ambienceLabel}
                         </span>
                     }

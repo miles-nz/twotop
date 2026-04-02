@@ -30,9 +30,6 @@ const MAX_RESTAURANT_NAME_LENGTH = 100;
 const MAX_REVIEW_TEXT_LENGTH = 10000;
 const RATING_MIN = 0.5;
 const RATING_MAX = 5;
-const DEFAULT_FOOD_EMOJI = "🍽️";
-const DEFAULT_DRINK_EMOJI = "☕️";
-const DEFAULT_AMBIENCE_EMOJI = "✨";
 
 // Errors
 const ERRORS = {
@@ -260,9 +257,6 @@ app.post(
             reviewer_picture,
             visit_date,
             is_public,
-            food_emoji,
-            drink_emoji,
-            ambience_emoji,
         } = req.body;
         const user_id = req.auth.payload.sub;
 
@@ -296,10 +290,6 @@ app.post(
                             new Date().toISOString().split("T")[0],
                         is_public: is_public === "true",
                         image_urls,
-                        food_emoji: food_emoji || DEFAULT_FOOD_EMOJI,
-                        drink_emoji: drink_emoji || DEFAULT_DRINK_EMOJI,
-                        ambience_emoji:
-                            ambience_emoji || DEFAULT_AMBIENCE_EMOJI,
                     },
                 ])
                 .select();
@@ -387,10 +377,6 @@ app.patch(
 
         if (req.body.visit_date !== undefined) {
             updates.visit_date = req.body.visit_date || null;
-        }
-
-        for (const field of ["food_emoji", "drink_emoji", "ambience_emoji"]) {
-            if (req.body[field] !== undefined) updates[field] = req.body[field];
         }
 
         try {
@@ -728,8 +714,6 @@ app.get("/places/details", checkJwt, async (req, res) => {
             },
         );
         const data = await response.json();
-
-        console.log("Place details response:", JSON.stringify(data));
 
         const getComponent = (types) =>
             data.addressComponents?.find(

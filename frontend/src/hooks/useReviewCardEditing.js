@@ -31,15 +31,6 @@ export function useReviewCardEditing(
     const [editedAmbienceRating, setEditedAmbienceRating] = useState(
         review.ambience_rating ?? null,
     );
-    const [editedFoodEmoji, setEditedFoodEmoji] = useState(
-        review.food_emoji || text.defaultFoodEmoji,
-    );
-    const [editedDrinkEmoji, setEditedDrinkEmoji] = useState(
-        review.drink_emoji || text.defaultDrinkEmoji,
-    );
-    const [editedAmbienceEmoji, setEditedAmbienceEmoji] = useState(
-        review.ambience_emoji || text.defaultAmbienceEmoji,
-    );
 
     const [saveError, setSaveError] = useState(null);
 
@@ -87,10 +78,6 @@ export function useReviewCardEditing(
             if (draft.drinkRating) setEditedDrinkRating(draft.drinkRating);
             if (draft.ambienceRating)
                 setEditedAmbienceRating(draft.ambienceRating);
-            if (draft.foodEmoji) setEditedFoodEmoji(draft.foodEmoji);
-            if (draft.drinkEmoji) setEditedDrinkEmoji(draft.drinkEmoji);
-            if (draft.ambienceEmoji)
-                setEditedAmbienceEmoji(draft.ambienceEmoji);
             setDraftWasRestored(true);
         } catch {
             localStorage.removeItem(draftKey);
@@ -107,9 +94,6 @@ export function useReviewCardEditing(
                 foodRating: editedFoodRating,
                 drinkRating: editedDrinkRating,
                 ambienceRating: editedAmbienceRating,
-                foodEmoji: editedFoodEmoji,
-                drinkEmoji: editedDrinkEmoji,
-                ambienceEmoji: editedAmbienceEmoji,
                 restaurantAddress: editedAddress,
                 selectedPlaceId: editedPlaceId,
             };
@@ -134,9 +118,6 @@ export function useReviewCardEditing(
         editedFoodRating,
         editedDrinkRating,
         editedAmbienceRating,
-        editedFoodEmoji,
-        editedDrinkEmoji,
-        editedAmbienceEmoji,
         review.restaurant_address,
         review.place_id,
         review.review_text,
@@ -168,11 +149,6 @@ export function useReviewCardEditing(
         setEditedFoodRating(review.food_rating ?? null);
         setEditedDrinkRating(review.drink_rating ?? null);
         setEditedAmbienceRating(review.ambience_rating ?? null);
-        setEditedFoodEmoji(review.food_emoji || text.defaultFoodEmoji);
-        setEditedDrinkEmoji(review.drink_emoji || text.defaultDrinkEmoji);
-        setEditedAmbienceEmoji(
-            review.ambience_emoji || text.defaultAmbienceEmoji,
-        );
         setAddPhotoImages([]);
         setRemovedPhotoUrls([]);
         clearDraft();
@@ -209,9 +185,6 @@ export function useReviewCardEditing(
             formData.append("drink_rating", editedDrinkRating || "");
             formData.append("ambience_rating", editedAmbienceRating || "");
             formData.append("visit_date", editedVisitDate);
-            formData.append("food_emoji", editedFoodEmoji);
-            formData.append("drink_emoji", editedDrinkEmoji);
-            formData.append("ambience_emoji", editedAmbienceEmoji);
             if (typeof isPublic === "boolean") {
                 formData.append("is_public", isPublic);
             }
@@ -253,12 +226,6 @@ export function useReviewCardEditing(
         setEditedDrinkRating,
         editedAmbienceRating,
         setEditedAmbienceRating,
-        editedFoodEmoji,
-        setEditedFoodEmoji,
-        editedDrinkEmoji,
-        setEditedDrinkEmoji,
-        editedAmbienceEmoji,
-        setEditedAmbienceEmoji,
         handleSaveReview,
         addPhotoImages,
         setAddPhotoImages,

@@ -5,7 +5,6 @@ export const draftKeys = {
 export const preferences = {
     collapseReviewImages: false,
     maxImageSize: 20 * 1024 * 1024,
-    enableEmojis: false,
 };
 
 export const placeholders = [
@@ -54,7 +53,6 @@ export const text = {
     restaurantNamePlaceholder: (name) => `e.g. ${name}`,
     restaurantAddressLabel: "Address (optional)",
     restaurantAddressPlaceholder: "e.g. 123 Queen St, Auckland CBD, Auckland",
-    restaurantSearchPlaceholder: "Search for a restaurant...",
     searchingPlaces: "Searching...",
     noPlacesFound: "No results found",
     clearPlace: "Clear selection",
@@ -63,9 +61,6 @@ export const text = {
     foodLabel: "Food",
     drinksLabel: "Drinks",
     ambienceLabel: "Ambience",
-    defaultFoodEmoji: "🍽️",
-    defaultDrinkEmoji: "☕️",
-    defaultAmbienceEmoji: "✨",
     reviewNotesLabel: "Review notes",
     reviewNotesPlaceholder: "Write your review here...",
     markAsPublic: "Mark as Public",
@@ -113,42 +108,6 @@ export const text = {
     errorImageSize: "Images must be 20MB or less",
     searchError:
         "Search unavailable. You can still enter the restaurant name and address manually.",
-};
-
-export const emojiOptions = {
-    food: [
-        text.defaultFoodEmoji,
-        "🍳",
-        "🧇",
-        "🥪",
-        "🥗",
-        "🍔",
-        "🍕",
-        "🥘",
-        "🍛",
-    ],
-    drink: [
-        text.defaultDrinkEmoji,
-        "🫖",
-        "🥤",
-        "🧋",
-        "🥂",
-        "🍻",
-        "🍹",
-        "🍷",
-        "🍸",
-    ],
-    ambience: [
-        text.defaultAmbienceEmoji,
-        "🕯️",
-        "🪴",
-        "🌸",
-        "🎵",
-        "🎭",
-        "🎨",
-        "🌅",
-        "🏙️",
-    ],
 };
 
 export const enums = {

@@ -11,9 +11,6 @@ export function useReviewDraft({
     foodRating,
     drinkRating,
     ambienceRating,
-    foodEmoji,
-    drinkEmoji,
-    ambienceEmoji,
     isPublic,
     setRestaurantName,
     setRestaurantAddress,
@@ -23,9 +20,6 @@ export function useReviewDraft({
     setFoodRating,
     setDrinkRating,
     setAmbienceRating,
-    setFoodEmoji,
-    setDrinkEmoji,
-    setAmbienceEmoji,
     setIsPublic,
 }) {
     // Restore draft on mount
@@ -44,9 +38,6 @@ export function useReviewDraft({
             if (draft.foodRating) setFoodRating?.(draft.foodRating);
             if (draft.drinkRating) setDrinkRating?.(draft.drinkRating);
             if (draft.ambienceRating) setAmbienceRating?.(draft.ambienceRating);
-            if (draft.foodEmoji) setFoodEmoji?.(draft.foodEmoji);
-            if (draft.drinkEmoji) setDrinkEmoji?.(draft.drinkEmoji);
-            if (draft.ambienceEmoji) setAmbienceEmoji?.(draft.ambienceEmoji);
             if (draft.isPublic !== undefined) setIsPublic?.(draft.isPublic);
         } catch {
             localStorage.removeItem(draftKey);
@@ -65,9 +56,6 @@ export function useReviewDraft({
                 foodRating,
                 drinkRating,
                 ambienceRating,
-                foodEmoji,
-                drinkEmoji,
-                ambienceEmoji,
                 isPublic,
             };
             localStorage.setItem(draftKey, JSON.stringify(draft));
@@ -84,9 +72,6 @@ export function useReviewDraft({
         foodRating,
         drinkRating,
         ambienceRating,
-        foodEmoji,
-        drinkEmoji,
-        ambienceEmoji,
         isPublic,
     ]);
 

@@ -1,15 +1,7 @@
 import StarRating from "../ui/StarRating";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
-import { text, preferences } from "../../resources";
 
-function ReviewCardRatings({
-    foodRating,
-    drinkRating,
-    ambienceRating,
-    foodEmoji,
-    drinkEmoji,
-    ambienceEmoji,
-}) {
+function ReviewCardRatings({ foodRating, drinkRating, ambienceRating }) {
     const isDesktop = useBreakpoint();
 
     if (!foodRating && !drinkRating && !ambienceRating) return null;
@@ -41,9 +33,6 @@ function ReviewCardRatings({
                             }
                         >
                             Food
-                            {preferences.enableEmojis
-                                ? ` ${foodEmoji || text.defaultFoodEmoji}`
-                                : ""}
                         </span>
                         <div
                             className={
@@ -84,9 +73,6 @@ function ReviewCardRatings({
                             }
                         >
                             Drink
-                            {preferences.enableEmojis
-                                ? ` ${drinkEmoji || text.defaultDrinkEmoji}`
-                                : ""}
                         </span>
                         <div
                             className={
@@ -127,9 +113,6 @@ function ReviewCardRatings({
                             }
                         >
                             Ambience
-                            {preferences.enableEmojis
-                                ? ` ${ambienceEmoji || text.defaultAmbienceEmoji}`
-                                : ""}
                         </span>
                         <div
                             className={
