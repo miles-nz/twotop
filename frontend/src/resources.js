@@ -39,7 +39,6 @@ export const placeholders = [
 export const text = {
     // App
     appName: "MIMU",
-    tagline: "Log in to view and write reviews",
 
     // Auth
     logIn: "Admin",
@@ -51,8 +50,14 @@ export const text = {
     publicOnly: "Public Only",
 
     // Review form
-    restaurantNameLabel: "Restaurant Name",
+    restaurantNameLabel: "Restaurant",
     restaurantNamePlaceholder: (name) => `e.g. ${name}`,
+    restaurantAddressLabel: "Address (optional)",
+    restaurantAddressPlaceholder: "e.g. 123 Queen St, Auckland",
+    restaurantSearchPlaceholder: "Search for a restaurant...",
+    searchingPlaces: "Searching...",
+    noPlacesFound: "No results found",
+    clearPlace: "Clear selection",
     dateVisitedLabel: "Date Visited",
     ratingsLabel: "Ratings",
     foodLabel: "Food",
@@ -70,17 +75,15 @@ export const text = {
     editLabel: (valueName) => `Edit ${valueName}`,
     draftRestored: "Draft restored",
     clearDraft: "Clear draft",
+    clearDraftConfirm: "Clear draft?",
+    yes: "Yes",
+    no: "No",
 
     // Photos
     photo: "Photo",
-    addPhotos: "Add Photos",
-    editPhotos: "Edit Photos",
-    reviewPhoto: "Review photo",
-    reviewPhotoIndex: (index) => `Review photo ${index + 1}`,
     photoCount: (count) =>
         `${count} ${count === 1 ? "photo" : "photos"} - tap to view`,
     cropPhoto: "Crop Photo",
-    crop: "Crop",
     uploading: "Uploading...",
     uploadPhoto: "Upload photo",
     removePhoto: "Remove photo",
@@ -88,8 +91,6 @@ export const text = {
     previousImage: "Previous image",
 
     // Review card menu
-    updateRestaurant: "Update Restaurant",
-    editReview: "Edit Review",
     makePublic: "Make Public",
     makePrivate: "Make Private",
     delete: "Delete",
@@ -99,7 +100,6 @@ export const text = {
 
     // Review list
     noReviews: "No reviews yet.",
-    loading: "Loading...",
 
     // Errors
     errorFormatted: (error) => `Error: ${error}`,
@@ -109,6 +109,8 @@ export const text = {
     errorFailedFetch: "Failed to fetch reviews.",
     errorMaxImages: "You can upload a maximum of 5 images",
     errorImageSize: "Images must be 20MB or less",
+    searchError:
+        "Search unavailable. You can still enter the restaurant name and address manually.",
 };
 
 export const emojiOptions = {

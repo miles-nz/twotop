@@ -1,9 +1,11 @@
-import { useEffect, useRef } from "react";
-import { text, draftKeys } from "../resources";
+import { useEffect } from "react";
+import { draftKeys } from "../resources";
 
 export function useReviewDraft({
     draftKey = draftKeys.newReview,
     restaurantName,
+    restaurantAddress,
+    selectedPlaceId,
     visitDate,
     reviewText,
     foodRating,
@@ -14,6 +16,8 @@ export function useReviewDraft({
     ambienceEmoji,
     isPublic,
     setRestaurantName,
+    setRestaurantAddress,
+    setSelectedPlaceId,
     setvisitDate,
     setReviewText,
     setFoodRating,
@@ -31,6 +35,10 @@ export function useReviewDraft({
             if (!saved) return;
             const draft = JSON.parse(saved);
             if (draft.restaurantName) setRestaurantName?.(draft.restaurantName);
+            if (draft.restaurantAddress)
+                setRestaurantAddress?.(draft.restaurantAddress);
+            if (draft.selectedPlaceId)
+                setSelectedPlaceId?.(draft.selectedPlaceId);
             if (draft.visitDate) setvisitDate?.(draft.visitDate);
             if (draft.reviewText) setReviewText?.(draft.reviewText);
             if (draft.foodRating) setFoodRating?.(draft.foodRating);
@@ -50,6 +58,8 @@ export function useReviewDraft({
         try {
             const draft = {
                 restaurantName,
+                restaurantAddress,
+                selectedPlaceId,
                 visitDate,
                 reviewText,
                 foodRating,
@@ -67,6 +77,8 @@ export function useReviewDraft({
     }, [
         draftKey,
         restaurantName,
+        restaurantAddress,
+        selectedPlaceId,
         visitDate,
         reviewText,
         foodRating,
@@ -80,22 +92,5 @@ export function useReviewDraft({
 
     const clearDraft = () => localStorage.removeItem(draftKey);
 
-    const hasDraft = () => {
-        try {
-            const saved = localStorage.getItem(draftKey);
-            if (!saved) return false;
-            const draft = JSON.parse(saved);
-            return !!(
-                draft.restaurantName ||
-                draft.reviewText ||
-                draft.foodRating ||
-                draft.drinkRating ||
-                draft.ambienceRating
-            );
-        } catch {
-            return false;
-        }
-    };
-
-    return { clearDraft, hasDraft };
+    return { clearDraft };
 }

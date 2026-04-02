@@ -11,10 +11,11 @@ export function useReviewCardEditing(
 
     const draftKey = `${draftKeys.editReviewPrefix}${review.id}`;
 
-    // Name editing
     const [editedName, setEditedName] = useState(review.restaurant_name);
-
-    // Review editing
+    const [editedAddress, setEditedAddress] = useState(
+        review.restaurant_address || "",
+    );
+    const [editedPlaceId, setEditedPlaceId] = useState(review.place_id || null);
     const [editedVisitDate, setEditedVisitDate] = useState(
         review.visit_date || "",
     );
@@ -60,6 +61,11 @@ export function useReviewCardEditing(
             if (!saved) return;
             const draft = JSON.parse(saved);
             const hasChanges =
+                (draft.restaurantAddress &&
+                    draft.restaurantAddress !==
+                        (review.restaurant_address || "")) ||
+                (draft.selectedPlaceId &&
+                    draft.selectedPlaceId !== (review.place_id || null)) ||
                 (draft.reviewText &&
                     draft.reviewText !== (review.review_text || "")) ||
                 (draft.visitDate &&
@@ -71,6 +77,10 @@ export function useReviewCardEditing(
                 (draft.ambienceRating &&
                     draft.ambienceRating !== (review.ambience_rating ?? null));
             if (!hasChanges) return;
+            if (draft.restaurantName) setEditedName(draft.restaurantName);
+            if (draft.restaurantAddress)
+                setEditedAddress(draft.restaurantAddress);
+            if (draft.selectedPlaceId) setEditedPlaceId(draft.selectedPlaceId);
             if (draft.visitDate) setEditedVisitDate(draft.visitDate);
             if (draft.reviewText) setEditedReviewText(draft.reviewText);
             if (draft.foodRating) setEditedFoodRating(draft.foodRating);
@@ -100,19 +110,25 @@ export function useReviewCardEditing(
                 foodEmoji: editedFoodEmoji,
                 drinkEmoji: editedDrinkEmoji,
                 ambienceEmoji: editedAmbienceEmoji,
+                restaurantAddress: editedAddress,
+                selectedPlaceId: editedPlaceId,
             };
             const hasChanges =
                 draft.reviewText !== (review.review_text || "") ||
                 draft.visitDate !== (review.visit_date || "") ||
                 draft.foodRating !== (review.food_rating ?? null) ||
                 draft.drinkRating !== (review.drink_rating ?? null) ||
-                draft.ambienceRating !== (review.ambience_rating ?? null);
+                draft.ambienceRating !== (review.ambience_rating ?? null) ||
+                draft.restaurantAddress !== (review.restaurant_address || "") ||
+                draft.selectedPlaceId !== (review.place_id || null);
             if (!hasChanges) return;
             localStorage.setItem(draftKey, JSON.stringify(draft));
         } catch {}
     }, [
         isEditing,
         draftKey,
+        editedAddress,
+        editedPlaceId,
         editedVisitDate,
         editedReviewText,
         editedFoodRating,
@@ -121,6 +137,8 @@ export function useReviewCardEditing(
         editedFoodEmoji,
         editedDrinkEmoji,
         editedAmbienceEmoji,
+        review.restaurant_address,
+        review.place_id,
         review.review_text,
         review.visit_date,
         review.food_rating,
@@ -130,8 +148,21 @@ export function useReviewCardEditing(
 
     const clearDraft = () => localStorage.removeItem(draftKey);
 
+    const handlePlaceSelected = (name, address, place_id) => {
+        setEditedName(name);
+        setEditedAddress(address);
+        setEditedPlaceId(place_id);
+    };
+
+    const handleClearPlace = () => {
+        setEditedPlaceId(null);
+        setEditedAddress("");
+    };
+
     const resetToSaved = () => {
         setEditedName(review.restaurant_name);
+        setEditedAddress(review.restaurant_address || "");
+        setEditedPlaceId(review.place_id || null);
         setEditedVisitDate(review.visit_date || "");
         setEditedReviewText(review.review_text || "");
         setEditedFoodRating(review.food_rating ?? null);
@@ -171,6 +202,8 @@ export function useReviewCardEditing(
         try {
             const formData = new FormData();
             formData.append("restaurant_name", editedName);
+            formData.append("restaurant_address", editedAddress);
+            formData.append("place_id", editedPlaceId || "");
             formData.append("review_text", editedReviewText);
             formData.append("food_rating", editedFoodRating || "");
             formData.append("drink_rating", editedDrinkRating || "");
@@ -204,6 +237,12 @@ export function useReviewCardEditing(
     return {
         editedName,
         setEditedName,
+        editedAddress,
+        setEditedAddress,
+        editedPlaceId,
+        setEditedPlaceId,
+        handlePlaceSelected,
+        handleClearPlace,
         editedVisitDate,
         setEditedVisitDate,
         editedReviewText,

@@ -30,3 +30,30 @@ export const isDefaultAvatar = (url) =>
     !url ||
     url.includes("gravatar.com") ||
     url.includes("cdn.auth0.com/avatars");
+
+export const formatVisitDate = (dateString) => {
+    const date = new Date(dateString + "T00:00:00");
+    const now = new Date();
+
+    const diffMs = now - date;
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0 || diffDays === -1) return "Today";
+
+    return date.toLocaleDateString(undefined, {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+    });
+};
+
+export const formatHoverDate = (dateString) => {
+    const date = new Date(dateString + "T00:00:00");
+    const weekday = date.toLocaleDateString(undefined, { weekday: "long" });
+    const dayMonthYear = date.toLocaleDateString(undefined, {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+    });
+    return `${weekday} ${dayMonthYear}`;
+};

@@ -7,13 +7,14 @@ import Button from "../ui/Button";
 import EmojiPicker from "../ui/EmojiPicker";
 import LoadingOverlay from "../ui/LoadingOverlay";
 import MarkdownToolbar from "../ui/MarkdownToolbar";
+import PlacesSearch from "../ui/PlacesSearch";
 import RatingField from "../ui/RatingField";
 import { useAutoResize } from "../../hooks/useAutoResize";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
 import { useImageUpload } from "../../hooks/useImageUpload";
 import { useReviewDraft } from "../../hooks/useReviewDraft";
 
-import { text, placeholders, preferences, draftKeys } from "../../resources";
+import { text, preferences, draftKeys } from "../../resources";
 import { getLocalDate } from "../../utils";
 
 const DRAFT_KEY = draftKeys.newReview;
@@ -21,16 +22,16 @@ const DRAFT_KEY = draftKeys.newReview;
 const inputClass =
     "w-full border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400";
 
-const getRandomPlaceholder = () => {
-    return placeholders[Math.floor(Math.random() * placeholders.length)];
-};
-
-function ReviewForm({ onReviewSubmitted }) {
+function ReviewForm({
+    onReviewSubmitted,
+    currentUserName,
+    currentUserPicture,
+}) {
     const { getAccessTokenSilently, user } = useAuth0();
 
-    const [placeholder] = useState(getRandomPlaceholder());
-
     const [restaurantName, setRestaurantName] = useState("");
+    const [restaurantAddress, setRestaurantAddress] = useState("");
+    const [selectedPlaceId, setSelectedPlaceId] = useState(null);
     const [visitDate, setvisitDate] = useState("");
     const [foodRating, setFoodRating] = useState(null);
     const [drinkRating, setDrinkRating] = useState(null);
@@ -50,6 +51,7 @@ function ReviewForm({ onReviewSubmitted }) {
             const draft = JSON.parse(saved);
             return !!(
                 draft.restaurantName ||
+                draft.restaurantAddress ||
                 draft.reviewText ||
                 draft.foodRating ||
                 draft.drinkRating ||
@@ -85,6 +87,8 @@ function ReviewForm({ onReviewSubmitted }) {
     const { clearDraft } = useReviewDraft({
         draftKey: DRAFT_KEY,
         restaurantName,
+        restaurantAddress,
+        selectedPlaceId,
         visitDate,
         reviewText,
         foodRating,
@@ -95,6 +99,8 @@ function ReviewForm({ onReviewSubmitted }) {
         ambienceEmoji,
         isPublic,
         setRestaurantName,
+        setRestaurantAddress,
+        setSelectedPlaceId,
         setvisitDate,
         setReviewText,
         setFoodRating,
@@ -108,6 +114,8 @@ function ReviewForm({ onReviewSubmitted }) {
 
     const resetForm = () => {
         setRestaurantName("");
+        setRestaurantAddress("");
+        setSelectedPlaceId(null);
         setReviewText("");
         setFoodRating(null);
         setDrinkRating(null);
@@ -128,6 +136,8 @@ function ReviewForm({ onReviewSubmitted }) {
             const token = await getAccessTokenSilently();
             const formData = new FormData();
             formData.append("restaurant_name", restaurantName);
+            formData.append("restaurant_address", restaurantAddress);
+            formData.append("place_id", selectedPlaceId || "");
             formData.append("review_text", reviewText);
             formData.append(
                 "food_rating",
@@ -142,8 +152,8 @@ function ReviewForm({ onReviewSubmitted }) {
                 ambienceRating ? parseFloat(ambienceRating) : "",
             );
             formData.append("visit_date", visitDate || getLocalDate());
-            formData.append("reviewer_name", user?.name || "");
-            formData.append("reviewer_picture", user?.picture || "");
+            formData.append("reviewer_name", currentUserName || "");
+            formData.append("reviewer_picture", currentUserPicture || "");
             formData.append("is_public", isPublic);
             images.forEach((image) => formData.append("images", image));
             formData.append("food_emoji", foodEmoji);
@@ -178,6 +188,17 @@ function ReviewForm({ onReviewSubmitted }) {
         }
     };
 
+    const handlePlaceSelected = (name, address, place_id) => {
+        setRestaurantName(name);
+        setRestaurantAddress(address);
+        setSelectedPlaceId(place_id);
+    };
+
+    const handleClearPlace = () => {
+        setSelectedPlaceId(null);
+        setRestaurantAddress("");
+    };
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -202,21 +223,33 @@ function ReviewForm({ onReviewSubmitted }) {
             )}
 
             <div className="mb-4">
-                <label
-                    htmlFor="restaurantName"
-                    className="block text-sm font-medium text-text-mid mb-1"
-                >
+                <label className="block text-sm font-medium text-text-mid mb-1">
                     {text.restaurantNameLabel}
                 </label>
-                <input
-                    id="restaurantName"
-                    type="text"
+                <PlacesSearch
                     value={restaurantName}
-                    onChange={(e) => setRestaurantName(e.target.value)}
-                    maxLength={100}
+                    onChange={setRestaurantName}
+                    onPlaceSelected={handlePlaceSelected}
+                    onClearPlace={handleClearPlace}
+                    selectedPlaceId={selectedPlaceId}
                     className={`${inputClass} placeholder-text-light`}
-                    placeholder={text.restaurantNamePlaceholder(placeholder)}
-                    aria-label={text.restaurantNameLabel}
+                />
+            </div>
+
+            <div className="mb-4">
+                <label
+                    htmlFor="restaurantAddress"
+                    className="block text-sm font-medium text-text-mid mb-1"
+                >
+                    {text.restaurantAddressLabel}
+                </label>
+                <input
+                    id="restaurantAddress"
+                    type="text"
+                    value={restaurantAddress}
+                    onChange={(e) => setRestaurantAddress(e.target.value)}
+                    className={`${inputClass} placeholder-text-light`}
+                    placeholder={text.restaurantAddressPlaceholder}
                 />
             </div>
 
@@ -424,7 +457,7 @@ function ReviewForm({ onReviewSubmitted }) {
                 </Button>
                 {showClearConfirm ? (
                     <div className="flex items-center gap-2 text-sm text-text-light">
-                        <span>Clear draft?</span>
+                        <span>{text.clearDraftConfirm}</span>
                         <button
                             onClick={() => {
                                 clearDraft();
@@ -434,13 +467,13 @@ function ReviewForm({ onReviewSubmitted }) {
                             }}
                             className="text-error-500 hover:text-error-600 font-medium"
                         >
-                            Yes
+                            {text.yes}
                         </button>
                         <button
                             onClick={() => setShowClearConfirm(false)}
                             className="text-text-light hover:text-text-mid"
                         >
-                            No
+                            {text.no}
                         </button>
                     </div>
                 ) : (
@@ -448,7 +481,7 @@ function ReviewForm({ onReviewSubmitted }) {
                         onClick={() => setShowClearConfirm(true)}
                         className="text-xs text-text-light hover:text-text-mid transition-colors"
                     >
-                        Clear draft
+                        {text.clearDraft}
                     </button>
                 )}
             </div>

@@ -1,19 +1,25 @@
 import { useRef, useState } from "react";
 import { Check, X, ImagePlus } from "lucide-react";
-import RatingField from "../ui/RatingField";
 import EmojiPicker from "../ui/EmojiPicker";
 import MarkdownToolbar from "../ui/MarkdownToolbar";
+import PlacesSearch from "../ui/PlacesSearch";
+import RatingField from "../ui/RatingField";
 import ImageCropModal from "./ImageCropModal";
-import { text } from "../../resources";
+import PublicToggle from "../layout/PublicToggle";
 import { getLocalDate } from "../../utils";
 import { useImageUpload } from "../../hooks/useImageUpload";
-import PublicToggle from "../layout/PublicToggle";
 import { useAutoResize } from "../../hooks/useAutoResize";
+import { text } from "../../resources";
 
 function EditReviewUI({ editingState, handleSave, onClose, review }) {
     const {
         editedName,
         setEditedName,
+        editedAddress,
+        setEditedAddress,
+        editedPlaceId,
+        handlePlaceSelected,
+        handleClearPlace,
         editedReviewText,
         setEditedReviewText,
         editedFoodRating,
@@ -91,13 +97,25 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
             )}
 
             {/* Restaurant Name */}
-            <div className="flex items-center gap-2 mb-4">
+            <div className="mb-4">
+                <PlacesSearch
+                    value={editedName}
+                    onChange={setEditedName}
+                    onPlaceSelected={handlePlaceSelected}
+                    onClearPlace={handleClearPlace}
+                    selectedPlaceId={editedPlaceId}
+                    className="text-2xl font-bold text-text-dark bg-transparent border-b border-secondary-400 focus:outline-none w-full"
+                />
+            </div>
+
+            {/* Address */}
+            <div className="mb-4">
                 <input
                     type="text"
-                    value={editedName}
-                    onChange={(e) => setEditedName(e.target.value)}
-                    maxLength={100}
-                    className="text-2xl font-bold text-text-dark bg-transparent border-b border-secondary-400 focus:outline-none w-full"
+                    value={editedAddress}
+                    onChange={(e) => setEditedAddress(e.target.value)}
+                    placeholder={text.restaurantAddressPlaceholder}
+                    className="w-full border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-dark text-sm placeholder-text-light"
                 />
             </div>
 
@@ -274,7 +292,6 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
             {saveError && (
                 <p className="text-error-600 text-sm mt-3">{saveError}</p>
             )}
-            <div className="flex items-center justify-between mt-4"></div>
 
             {/* Actions & Public Toggle at bottom */}
             <div className="flex items-center justify-between mt-4">

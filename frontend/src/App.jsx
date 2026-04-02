@@ -193,6 +193,7 @@ function App() {
                         >
                             <ReviewForm
                                 onReviewSubmitted={handleReviewSubmitted}
+                                currentUserName={currentUserName}
                                 currentUserPicture={currentUserPicture}
                             />
                         </motion.div>

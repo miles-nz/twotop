@@ -1,0 +1,167 @@
+import { useState, useRef, useEffect } from "react";
+import { useAuth0 } from "@auth0/auth0-react";
+import { X } from "lucide-react";
+import { text, placeholders } from "../../resources";
+
+const DEBOUNCE_MS = 300;
+
+function PlacesSearch({
+    value,
+    onChange,
+    onPlaceSelected,
+    onClearPlace,
+    selectedPlaceId,
+    className = "",
+}) {
+    const { getAccessTokenSilently } = useAuth0();
+    const [suggestions, setSuggestions] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [open, setOpen] = useState(false);
+    const [searchError, setSearchError] = useState(false);
+    const debounceRef = useRef(null);
+    const containerRef = useRef(null);
+
+    const [placeholder] = useState(
+        () => placeholders[Math.floor(Math.random() * placeholders.length)],
+    );
+
+    useEffect(() => {
+        if (!open) return;
+        const handleClickOutside = (e) => {
+            if (
+                containerRef.current &&
+                !containerRef.current.contains(e.target)
+            ) {
+                setOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () =>
+            document.removeEventListener("mousedown", handleClickOutside);
+    }, [open]);
+
+    const handleChange = (e) => {
+        const val = e.target.value;
+        onChange(val);
+
+        clearTimeout(debounceRef.current);
+
+        if (!val.trim()) {
+            setSuggestions([]);
+            setOpen(false);
+            return;
+        }
+
+        debounceRef.current = setTimeout(async () => {
+            setLoading(true);
+            setOpen(true);
+            setSearchError(false);
+            try {
+                const token = await getAccessTokenSilently();
+                const response = await fetch(
+                    `${import.meta.env.VITE_API_URL}/places/search?q=${encodeURIComponent(val)}`,
+                    { headers: { Authorization: `Bearer ${token}` } },
+                );
+                const data = await response.json();
+                if (!response.ok) throw new Error();
+                setSuggestions(data);
+                setOpen(data.length > 0);
+            } catch (err) {
+                setSearchError(true);
+                setOpen(true);
+            } finally {
+                setLoading(false);
+            }
+        }, DEBOUNCE_MS);
+    };
+
+    const handleSelect = async (suggestion) => {
+        setOpen(false);
+        setSuggestions([]);
+        try {
+            const token = await getAccessTokenSilently();
+            const response = await fetch(
+                `${import.meta.env.VITE_API_URL}/places/details?place_id=${suggestion.place_id}`,
+                { headers: { Authorization: `Bearer ${token}` } },
+            );
+            const data = await response.json();
+            onPlaceSelected(data.name, data.address, data.place_id);
+        } catch (err) {
+            console.error("Places details error:", err);
+            onPlaceSelected(
+                suggestion.name,
+                suggestion.address,
+                suggestion.place_id,
+            );
+        }
+    };
+
+    const handleClear = () => {
+        onClearPlace();
+        setSuggestions([]);
+        setOpen(false);
+    };
+
+    return (
+        <div className="relative" ref={containerRef}>
+            <div className="relative">
+                <input
+                    type="text"
+                    value={value}
+                    onChange={handleChange}
+                    maxLength={100}
+                    className={className}
+                    placeholder={text.restaurantNamePlaceholder(placeholder)}
+                    autoComplete="off"
+                />
+                {selectedPlaceId && (
+                    <button
+                        type="button"
+                        onClick={handleClear}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-text-light hover:text-text-mid transition-colors"
+                        aria-label={text.clearPlace}
+                    >
+                        <X size={14} />
+                    </button>
+                )}
+            </div>
+            {open && (
+                <ul className="absolute z-50 w-full bg-surface-50 border border-surface-200 rounded-lg shadow-lg mt-1 max-h-60 overflow-y-auto">
+                    {searchError ? (
+                        <li className="px-4 py-2 text-sm text-text-light">
+                            {text.searchError}
+                        </li>
+                    ) : loading ? (
+                        <li className="px-4 py-2 text-sm text-text-light">
+                            {text.searchingPlaces}
+                        </li>
+                    ) : suggestions.length === 0 ? (
+                        <li className="px-4 py-2 text-sm text-text-light">
+                            {text.noPlacesFound}
+                        </li>
+                    ) : (
+                        suggestions.map((s) => (
+                            <li key={s.place_id}>
+                                <button
+                                    type="button"
+                                    onMouseDown={(e) => e.preventDefault()}
+                                    onClick={() => handleSelect(s)}
+                                    className="w-full text-left px-4 py-2 hover:bg-surface-100 transition-colors"
+                                >
+                                    <span className="block text-sm text-text-dark">
+                                        {s.name}
+                                    </span>
+                                    <span className="block text-xs text-text-light">
+                                        {s.address}
+                                    </span>
+                                </button>
+                            </li>
+                        ))
+                    )}
+                </ul>
+            )}
+        </div>
+    );
+}
+
+export default PlacesSearch;

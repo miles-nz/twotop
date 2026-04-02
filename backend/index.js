@@ -4,12 +4,14 @@ const cors = require("cors");
 const { auth } = require("express-oauth2-jwt-bearer");
 const supabase = require("./supabase");
 const multer = require("multer");
+const rateLimit = require("express-rate-limit");
 
 // Config
 const ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "https://mimu-reviews.vercel.app",
 ];
+const GOOGLE_PLACES_API_URL = "https://places.googleapis.com/v1";
 const MAX_FILE_SIZE = 20 * 1024 * 1024;
 const MAX_IMAGES_PER_REVIEW = 5;
 const ALLOWED_IMAGE_TYPES = [
@@ -67,6 +69,15 @@ const upload = multer({
     },
 });
 
+// Rate limiter for Google Places API routes
+const placesRateLimit = rateLimit({
+    windowMs: 60 * 1000,
+    max: 100,
+    message: { error: "Too many searches, please try again shortly." },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
 const app = express();
 
 app.use(cors({ origin: ALLOWED_ORIGINS }));
@@ -110,6 +121,16 @@ const deleteImages = async (urls) => {
         .from(REVIEW_IMAGE_BUCKET)
         .remove(paths);
     if (error) throw new Error(error.message);
+};
+
+const formatAddress = (address) => {
+    if (!address) return null;
+    return address
+        .split(",")
+        .map((part) => part.trim())
+        .filter((part) => part !== "New Zealand")
+        .map((part) => part.replace(/\s\d{4}$/, "").trim())
+        .join(", ");
 };
 
 // Validation
@@ -227,6 +248,8 @@ app.post(
 
         const {
             restaurant_name,
+            restaurant_address,
+            place_id,
             review_text,
             food_rating,
             drink_rating,
@@ -252,6 +275,8 @@ app.post(
                     {
                         user_id,
                         restaurant_name: restaurant_name.trim(),
+                        restaurant_address: restaurant_address || null,
+                        place_id: place_id || null,
                         review_text: review_text ? review_text.trim() : null,
                         food_rating: food_rating
                             ? parseFloat(food_rating)
@@ -324,6 +349,14 @@ app.patch(
                     .json({ error: ERRORS.invalidRestaurantName });
             }
             updates.restaurant_name = name;
+        }
+
+        if (req.body.restaurant_address !== undefined) {
+            updates.restaurant_address = req.body.restaurant_address || null;
+        }
+
+        if (req.body.place_id !== undefined) {
+            updates.place_id = req.body.place_id || null;
         }
 
         if (req.body.review_text !== undefined) {
@@ -629,6 +662,75 @@ app.patch("/user/name", checkJwt, async (req, res) => {
             );
 
         res.status(200).json({ name: name.trim() });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get("/places/search", checkJwt, placesRateLimit, async (req, res) => {
+    const { q } = req.query;
+    if (!q) return res.status(400).json({ error: "Query is required" });
+    try {
+        const response = await fetch(
+            `${GOOGLE_PLACES_API_URL}/places:autocomplete`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Goog-Api-Key": process.env.GOOGLE_PLACES_API_KEY,
+                },
+                body: JSON.stringify({
+                    input: q,
+                    includedPrimaryTypes: [
+                        "restaurant",
+                        "cafe",
+                        "bar",
+                        "bakery",
+                        "food_court",
+                    ],
+                    locationBias: {
+                        rectangle: {
+                            low: { latitude: -47.5, longitude: 166.0 },
+                            high: { latitude: -34.0, longitude: 178.5 },
+                        },
+                    },
+                    includedRegionCodes: ["nz"],
+                }),
+            },
+        );
+        const data = await response.json();
+        const suggestions = (data.suggestions || []).map((s) => ({
+            place_id: s.placePrediction.placeId,
+            name: s.placePrediction.structuredFormat.mainText.text,
+            address:
+                s.placePrediction.structuredFormat.secondaryText?.text || "",
+        }));
+        res.status(200).json(suggestions);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get("/places/details", checkJwt, placesRateLimit, async (req, res) => {
+    const { place_id } = req.query;
+    if (!place_id)
+        return res.status(400).json({ error: "place_id is required" });
+    try {
+        const response = await fetch(
+            `${GOOGLE_PLACES_API_URL}/places/${place_id}`,
+            {
+                headers: {
+                    "X-Goog-Api-Key": process.env.GOOGLE_PLACES_API_KEY,
+                    "X-Goog-FieldMask": "id,displayName,formattedAddress",
+                },
+            },
+        );
+        const data = await response.json();
+        res.status(200).json({
+            place_id: data.id,
+            name: data.displayName?.text || "",
+            address: formatAddress(data.formattedAddress) || "",
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

@@ -12,6 +12,7 @@ import { themes } from "../../themes";
 import ReactMarkdown from "react-markdown";
 import { Quote } from "lucide-react";
 import rehypeRaw from "rehype-raw";
+import { formatVisitDate, formatHoverDate } from "../../utils";
 
 function ReviewCard({ review, currentUserId, onReviewUpdated }) {
     const isDarkMode = useDarkMode();
@@ -52,11 +53,31 @@ function ReviewCard({ review, currentUserId, onReviewUpdated }) {
                                 <h3 className="text-2xl font-bold text-text-dark wrap-break-word leading-tight">
                                     {review.restaurant_name}
                                 </h3>
-                                <span className="text-xs text-text-light tracking-wide mt-0.5">
-                                    {new Date(
-                                        review.visit_date + "T00:00:00",
-                                    ).toLocaleDateString()}
-                                </span>
+                                {review.restaurant_address ? (
+                                    <span className="text-xs text-text-light wrap-break-word">
+                                        <span>{review.restaurant_address}</span>
+                                        <span className="mx-1 text-text-light/35">
+                                            |
+                                        </span>
+                                        <span
+                                            title={formatHoverDate(
+                                                review.visit_date,
+                                            )}
+                                            className="text-text-light"
+                                        >
+                                            {formatVisitDate(review.visit_date)}
+                                        </span>
+                                    </span>
+                                ) : (
+                                    <span
+                                        title={formatHoverDate(
+                                            review.visit_date,
+                                        )}
+                                        className="text-xs text-text-light tracking-wide mt-0.5"
+                                    >
+                                        {formatVisitDate(review.visit_date)}
+                                    </span>
+                                )}
                             </div>
                             <div className="flex items-center gap-2 ml-3 shrink-0">
                                 <div className="flex items-center gap-2">
