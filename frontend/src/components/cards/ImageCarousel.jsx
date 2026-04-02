@@ -132,7 +132,7 @@ function ImageCarousel({ images }) {
                             </button>
                         </>
                     )}
-                    <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
+                    <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-20">
                         {images.map((_, index) => (
                             <button
                                 key={index}

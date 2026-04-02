@@ -57,3 +57,9 @@ export const formatHoverDate = (dateString) => {
     });
     return `${weekday} ${dayMonthYear}`;
 };
+
+export const formatShortAddress = (address) => {
+    if (!address) return "";
+    const parts = address.split(",").map((p) => p.trim());
+    return parts.slice(-2).join(", ");
+};

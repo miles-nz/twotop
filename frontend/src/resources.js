@@ -100,8 +100,8 @@ export const text = {
 
     // Review list
     noReviews: "No reviews yet.",
-    makeGoogleMapsLink: (place_id) =>
-        `https://www.google.com/maps/place/?q=place_id:${place_id}`,
+    makeGoogleMapsLink: (restaurant_name, place_id) =>
+        `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant_name)}&query_place_id=${place_id}`,
 
     // Errors
     errorFormatted: (error) => `Error: ${error}`,

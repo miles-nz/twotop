@@ -12,7 +12,11 @@ import { themes } from "../../themes";
 import ReactMarkdown from "react-markdown";
 import { Quote } from "lucide-react";
 import rehypeRaw from "rehype-raw";
-import { formatVisitDate, formatHoverDate } from "../../utils";
+import {
+    formatVisitDate,
+    formatHoverDate,
+    formatShortAddress,
+} from "../../utils";
 import { text } from "../../resources";
 
 function ReviewCard({ review, currentUserId, onReviewUpdated }) {
@@ -60,26 +64,55 @@ function ReviewCard({ review, currentUserId, onReviewUpdated }) {
                                             {review.place_id ? (
                                                 <a
                                                     href={text.makeGoogleMapsLink(
+                                                        review.restaurant_name,
                                                         review.place_id,
                                                     )}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="hover:text-text-mid transition-colors"
                                                 >
-                                                    {review.restaurant_address}
+                                                    <span className="hidden sm:inline">
+                                                        {
+                                                            review.restaurant_address
+                                                        }
+                                                    </span>
+                                                    <span className="sm:hidden">
+                                                        {formatShortAddress(
+                                                            review.restaurant_address,
+                                                        )}
+                                                    </span>
                                                 </a>
                                             ) : (
-                                                review.restaurant_address
+                                                <>
+                                                    <span className="hidden sm:inline">
+                                                        {
+                                                            review.restaurant_address
+                                                        }
+                                                    </span>
+                                                    <span className="sm:hidden">
+                                                        {formatShortAddress(
+                                                            review.restaurant_address,
+                                                        )}
+                                                    </span>
+                                                </>
                                             )}
                                         </span>
-                                        <span className="mx-1 text-text-light/35">
+                                        <span className="hidden sm:inline mx-1 text-text-light/35">
                                             |
                                         </span>
                                         <span
                                             title={formatHoverDate(
                                                 review.visit_date,
                                             )}
-                                            className="text-text-light"
+                                            className="hidden sm:inline text-text-light"
+                                        >
+                                            {formatVisitDate(review.visit_date)}
+                                        </span>
+                                        <span
+                                            title={formatHoverDate(
+                                                review.visit_date,
+                                            )}
+                                            className="sm:hidden block text-text-light mt-0.5"
                                         >
                                             {formatVisitDate(review.visit_date)}
                                         </span>
