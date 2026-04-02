@@ -1,4 +1,8 @@
 require("dotenv").config();
+console.log(
+    "All env keys:",
+    Object.keys(process.env).filter((k) => k.includes("GOOGLE")),
+);
 const express = require("express");
 const cors = require("cors");
 const { auth } = require("express-oauth2-jwt-bearer");
