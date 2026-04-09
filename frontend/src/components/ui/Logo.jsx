@@ -142,6 +142,7 @@ function Logo({
                         textShadow: "0 4px 12px rgba(0,0,0,0.18)",
                         userSelect: "none",
                         WebkitUserSelect: "none",
+                        transform: "translateY(-4px)",
                     }}
                 >
                     <span
