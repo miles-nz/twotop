@@ -1,6 +1,6 @@
 export const draftKeys = {
-    newReview: "mimu-review-draft",
-    editReviewPrefix: "mimu-review-draft-edit-",
+    newReview: "twotop-review-draft",
+    editReviewPrefix: "twotop-review-draft-edit-",
 };
 export const preferences = {
     collapseReviewImages: false,
@@ -37,7 +37,12 @@ export const placeholders = [
 
 export const text = {
     // App
-    appName: "MIMU",
+    appName1: "two",
+    appName2: "top",
+    appNameSeparator: ":",
+    get appName() {
+        return `${this.appName1}${this.appNameSeparator}${this.appName2}`;
+    },
 
     // Auth
     logIn: "Admin",

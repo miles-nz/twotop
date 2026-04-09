@@ -31,7 +31,6 @@ const lightThemes = {
         "--color-surface-100": "#fce8ed",
         "--color-surface-200": "#f8c1cc",
         "--color-surface-300": "#f4a8b8",
-
         "--color-primary-50": "#fef5f7",
         "--color-primary-100": "#fde8ec",
         "--color-primary-200": "#f8c1cc",
@@ -40,7 +39,6 @@ const lightThemes = {
         "--color-primary-500": "#d4607c",
         "--color-primary-600": "#b84d68",
         "--color-primary-700": "#8a3a50",
-
         "--color-secondary-50": "#f7f0f4",
         "--color-secondary-100": "#edd9e5",
         "--color-secondary-200": "#d4adc2",
@@ -49,7 +47,6 @@ const lightThemes = {
         "--color-secondary-500": "#7d4063",
         "--color-secondary-600": "#612940",
         "--color-secondary-700": "#4a1e30",
-
         "--color-text-light": "#9e8a91",
         "--color-text-mid": "#4a2d38",
         "--color-text-dark": "#2a1520",
@@ -114,42 +111,6 @@ const darkThemes = {
     },
 };
 
-const defaultDarkTheme = {
-    "--color-surface-50": "#1a1a1a",
-    "--color-surface-100": "#2a2a2a",
-    "--color-surface-200": "#3a3a3a",
-    "--color-surface-300": "#4a4a4a",
-    "--color-primary-50": "#23272b",
-    "--color-primary-100": "#2d333a",
-    "--color-primary-200": "#3a4047",
-    "--color-primary-300": "#515963",
-    "--color-primary-400": "#6c7680",
-    "--color-primary-500": "#87909a",
-    "--color-primary-600": "#a3aab3",
-    "--color-primary-700": "#c0c5cc",
-    "--color-primary-800": "#184a6a",
-    "--color-primary-900": "#102c3a",
-    "--color-secondary-50": "#2a2a35",
-    "--color-secondary-100": "#3a3a4a",
-    "--color-secondary-200": "#4a4a5a",
-    "--color-secondary-300": "#5a5a7a",
-    "--color-secondary-400": "#7a7a9a",
-    "--color-secondary-500": "#9a9aba",
-    "--color-secondary-600": "#bab8d0",
-    "--color-secondary-700": "#d0c8e8",
-    "--color-text-light": "#7a8a9a",
-    "--color-text-mid": "#a0b0c0",
-    "--color-text-dark": "#d0e0f0",
-    "--color-error-50": "#3a1a1a",
-    "--color-error-100": "#5a2a2a",
-    "--color-error-200": "#7a4a4a",
-    "--color-error-300": "#9a6a6a",
-    "--color-error-400": "#ba8a8a",
-    "--color-error-500": "#d0a0a0",
-    "--color-error-600": "#e0b8b8",
-    "--color-error-700": "#f0d0d0",
-};
-
 const defaultLightTheme = {
     "--color-surface-50": "#ffffff",
     "--color-surface-100": "#fafafa",
@@ -186,10 +147,64 @@ const defaultLightTheme = {
     "--color-error-700": "#b91c1c",
 };
 
+const defaultDarkTheme = {
+    "--color-surface-50": "#1a1a1a",
+    "--color-surface-100": "#2a2a2a",
+    "--color-surface-200": "#3a3a3a",
+    "--color-surface-300": "#4a4a4a",
+    "--color-primary-50": "#23272b",
+    "--color-primary-100": "#2d333a",
+    "--color-primary-200": "#3a4047",
+    "--color-primary-300": "#515963",
+    "--color-primary-400": "#6c7680",
+    "--color-primary-500": "#87909a",
+    "--color-primary-600": "#a3aab3",
+    "--color-primary-700": "#c0c5cc",
+    "--color-primary-800": "#184a6a",
+    "--color-primary-900": "#102c3a",
+    "--color-secondary-50": "#2a2a35",
+    "--color-secondary-100": "#3a3a4a",
+    "--color-secondary-200": "#4a4a5a",
+    "--color-secondary-300": "#5a5a7a",
+    "--color-secondary-400": "#7a7a9a",
+    "--color-secondary-500": "#9a9aba",
+    "--color-secondary-600": "#bab8d0",
+    "--color-secondary-700": "#d0c8e8",
+    "--color-text-light": "#7a8a9a",
+    "--color-text-mid": "#a0b0c0",
+    "--color-text-dark": "#d0e0f0",
+    "--color-error-50": "#3a1a1a",
+    "--color-error-100": "#5a2a2a",
+    "--color-error-200": "#7a4a4a",
+    "--color-error-300": "#9a6a6a",
+    "--color-error-400": "#ba8a8a",
+    "--color-error-500": "#d0a0a0",
+    "--color-error-600": "#e0b8b8",
+    "--color-error-700": "#f0d0d0",
+};
+
+const lightOverrides = {
+    "--logo-ring-opacity": "0",
+    "--color-logo-cutlery": "#1a1a1a",
+};
+
+const darkOverrides = {
+    "--logo-ring-opacity": "0.25",
+    "--color-logo-cutlery": "#a1a1a1",
+};
+
 darkThemes.default = defaultDarkTheme;
 lightThemes.default = defaultLightTheme;
 
+const applyOverrides = (themes, overrides) =>
+    Object.fromEntries(
+        Object.entries(themes).map(([key, theme]) => [
+            key,
+            { ...overrides, ...theme },
+        ]),
+    );
+
 export const themes = {
-    light: lightThemes,
-    dark: darkThemes,
+    light: applyOverrides(lightThemes, lightOverrides),
+    dark: applyOverrides(darkThemes, darkOverrides),
 };

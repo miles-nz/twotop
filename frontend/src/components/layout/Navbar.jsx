@@ -6,6 +6,7 @@ import Button from "../ui/Button";
 import AvatarDropdown from "./AvatarDropdown";
 import { text } from "../../resources";
 import PublicToggle from "./PublicToggle";
+import Logo from "../ui/Logo";
 
 function Navbar({
     isPublic = false,
@@ -76,17 +77,8 @@ function Navbar({
     };
 
     const title = (
-        <h1
-            style={{
-                fontFamily: "var(--font-title)",
-                background:
-                    "linear-gradient(0deg, var(--color-user1-primary), var(--color-gradient-mid), var(--color-user2-primary))",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-                touchAction: "manipulation",
-                cursor: "pointer",
-            }}
-            className="text-5xl tracking-tight"
+        <div
+            className="tracking-tight cursor-pointer touch-manipulation"
             onClick={handleTitleClick}
             onPointerDown={(e) => {
                 // Only trigger on desktop (md and up)
@@ -99,8 +91,13 @@ function Navbar({
                 if (window.innerWidth >= 768) endDesktopAdminTrigger();
             }}
         >
-            {text.appName}
-        </h1>
+            <Logo
+                size={50}
+                showIcon={false}
+                showText={true}
+                colonOverlap={true}
+            />
+        </div>
     );
 
     const avatarDropdownProps = {
@@ -200,33 +197,29 @@ function Navbar({
                                 className="fixed left-0 top-0 bottom-0 w-64 bg-surface-50 border-r border-surface-200 shadow-lg overflow-y-auto z-30"
                             >
                                 {/* Side menu app name absolutely positioned at the top, centered and large, aligned with close button */}
-                                <div
-                                    className="relative"
-                                    style={{ height: "56px" }}
-                                >
+                                <div className="relative">
                                     <div
-                                        className="absolute left-0 right-0 top-4 flex justify-center items-center select-none cursor-pointer"
+                                        className="flex items-center justify-center mx-5 pt-2"
                                         style={{
-                                            fontFamily: "var(--font-title)",
-                                            background:
-                                                "linear-gradient(0deg, var(--color-user1-primary), var(--color-gradient-mid), var(--color-user2-primary))",
-                                            WebkitTextFillColor: "transparent",
-                                            backgroundClip: "text",
+                                            height: "56px",
                                             touchAction: "manipulation",
-                                            fontSize: "2.25rem",
-                                            fontWeight: 100,
-                                            height: "48px",
-                                            lineHeight: "48px",
+                                            cursor: "pointer",
                                         }}
                                         onPointerDown={startMenuAdminTrigger}
                                         onPointerUp={endMenuAdminTrigger}
                                         onPointerCancel={endMenuAdminTrigger}
                                     >
-                                        {text.appName}
+                                        <Logo
+                                            size={50}
+                                            showIcon={true}
+                                            showText={false}
+                                            overlap={true}
+                                            disableAnimation={true}
+                                        />
                                     </div>
                                 </div>
                                 <div className="flex flex-col h-[calc(100vh-56px)]">
-                                    <div className="px-4 py-4 flex-1 overflow-y-auto">
+                                    <div className="px-4 py-2 flex-1 overflow-y-auto">
                                         <div className="pt-2 border-t border-surface-200 space-y-4">
                                             <div className="py-2">
                                                 {isAuthenticated && (
@@ -273,7 +266,7 @@ function Navbar({
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="fixed left-4 top-4 p-2 z-50 rounded-lg transition-colors"
+                                className="fixed left-4 top-3 p-2 z-50 rounded-lg transition-colors"
                             >
                                 <X size={24} className="text-text-dark" />
                             </motion.button>

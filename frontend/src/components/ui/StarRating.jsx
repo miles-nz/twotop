@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 
 function StarRating({ value, onChange, readOnly = false, size = "md" }) {
-    // Generate a unique gradient id for each StarRating instance
-    const gradientIdBase = `star-gradient-${Math.random().toString(36).substr(2, 9)}`;
+    const gradientIdBase = useRef(
+        `star-gradient-${Math.random().toString(36).substring(2, 9)}`,
+    ).current;
     const containerRef = useRef(null);
+
     const sizes = {
         xxs: "w-3 h-3",
         xs: "w-4 h-4",
@@ -11,11 +13,11 @@ function StarRating({ value, onChange, readOnly = false, size = "md" }) {
         md: "w-8 h-8",
         lg: "w-9.5 h-9.5",
     };
+
     const [hoverValue, setHoverValue] = useState(null);
 
     const getStarFill = (starIndex) => {
         const activeValue = hoverValue !== null ? hoverValue : value;
-
         if (!activeValue) return "empty";
         if (activeValue >= starIndex) return "full";
         if (activeValue >= starIndex - 0.5) return "half";
@@ -26,34 +28,14 @@ function StarRating({ value, onChange, readOnly = false, size = "md" }) {
         if (readOnly) return;
         const rect = e.currentTarget.getBoundingClientRect();
         const x = e.clientX - rect.left;
-        const isLeftHalf = x < rect.width / 2;
-        setHoverValue(isLeftHalf ? starIndex - 0.5 : starIndex);
+        setHoverValue(x < rect.width / 2 ? starIndex - 0.5 : starIndex);
     };
 
     const handleClick = (e, starIndex) => {
         if (readOnly) return;
         const rect = e.currentTarget.getBoundingClientRect();
         const x = e.clientX - rect.left;
-        const isLeftHalf = x < rect.width / 2;
-        onChange(isLeftHalf ? starIndex - 0.5 : starIndex);
-    };
-
-    const handleTouchMove = (e) => {
-        if (readOnly) return;
-        e.preventDefault();
-        const touch = e.touches[0];
-        const stars = containerRef.current.querySelectorAll("[data-star]");
-
-        for (const star of stars) {
-            const rect = star.getBoundingClientRect();
-            if (touch.clientX >= rect.left && touch.clientX <= rect.right) {
-                const x = touch.clientX - rect.left;
-                const isLeftHalf = x < rect.width / 2;
-                const starIndex = parseInt(star.dataset.star);
-                setHoverValue(isLeftHalf ? starIndex - 0.5 : starIndex);
-                break;
-            }
-        }
+        onChange(x < rect.width / 2 ? starIndex - 0.5 : starIndex);
     };
 
     const handleTouchEnd = (e) => {
@@ -67,11 +49,28 @@ function StarRating({ value, onChange, readOnly = false, size = "md" }) {
     useEffect(() => {
         const el = containerRef.current;
         if (!el) return;
+
+        const handleTouchMove = (e) => {
+            if (readOnly) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            const stars = el.querySelectorAll("[data-star]");
+            for (const star of stars) {
+                const rect = star.getBoundingClientRect();
+                if (touch.clientX >= rect.left && touch.clientX <= rect.right) {
+                    const x = touch.clientX - rect.left;
+                    const isLeftHalf = x < rect.width / 2;
+                    const starIndex = parseInt(star.dataset.star);
+                    setHoverValue(isLeftHalf ? starIndex - 0.5 : starIndex);
+                    break;
+                }
+            }
+        };
+
         el.addEventListener("touchmove", handleTouchMove, { passive: false });
         return () => el.removeEventListener("touchmove", handleTouchMove);
-    }, [hoverValue]);
+    }, [readOnly]);
 
-    // Keyboard navigation
     const handleStarKeyDown = (e, starIndex) => {
         if (readOnly) return;
         if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
@@ -90,6 +89,8 @@ function StarRating({ value, onChange, readOnly = false, size = "md" }) {
         <div
             ref={containerRef}
             className="flex gap-1"
+            role="radiogroup"
+            aria-label="Star rating"
             onMouseLeave={() => !readOnly && setHoverValue(null)}
             onTouchEnd={handleTouchEnd}
         >
@@ -131,19 +132,31 @@ function StarRating({ value, onChange, readOnly = false, size = "md" }) {
                                     <defs>
                                         <linearGradient
                                             id={gradientId}
-                                            x1="0"
-                                            y1="0"
-                                            x2="24"
-                                            y2="24"
+                                            x1="2"
+                                            y1="2"
+                                            x2="22"
+                                            y2="22"
                                             gradientUnits="userSpaceOnUse"
                                         >
                                             <stop
                                                 offset="0%"
                                                 stopColor="var(--color-primary-400)"
+                                                stopOpacity={0.8}
+                                            />
+                                            <stop
+                                                offset="50%"
+                                                stopColor="var(--color-primary-400)"
+                                                stopOpacity={1}
+                                            />
+                                            <stop
+                                                offset="70%"
+                                                stopColor="var(--color-primary-400)"
+                                                stopOpacity={0.5}
                                             />
                                             <stop
                                                 offset="100%"
-                                                stopColor="var(--color-gradient-mid)"
+                                                stopColor="var(--color-primary-400)"
+                                                stopOpacity={0.1}
                                             />
                                         </linearGradient>
                                     </defs>
