@@ -18,7 +18,7 @@ function Logo({
             "4xl": "text-4xl",
         }[fontSize] ?? "text-4xl";
     return (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 select-none">
             {showIcon && (
                 <div
                     className="relative"
@@ -134,8 +134,8 @@ function Logo({
             )}
 
             {showText && (
-                <h2
-                    className={`${fontSizeClass} text-text-dark select-none`}
+                <div
+                    className={`${fontSizeClass} text-text-dark`}
                     style={{
                         fontFamily: "var(--font-logo)",
                         fontWeight: "550",
@@ -169,7 +169,7 @@ function Logo({
                         )}
                         {text.appName2}
                     </span>
-                </h2>
+                </div>
             )}
         </div>
     );
