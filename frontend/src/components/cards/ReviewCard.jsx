@@ -131,7 +131,7 @@ function ReviewCard({ review, currentUserId, onReviewUpdated, isDarkMode }) {
                                     </span>
                                 )}
                             </div>
-                            <div className="flex items-center gap-2 ml-3 shrink-0">
+                            <div className="flex items-center gap-2 ml-3 mt-1 shrink-0">
                                 <div className="flex items-center gap-2">
                                     {review.reviewer_name && (
                                         <span className="text-xs text-text-mid">
