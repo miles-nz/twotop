@@ -1,7 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
      width="500" height="500" viewBox="0 0 500 500">
-  
-  <rect x="0" y="0" width="500" height="500" rx="50" ry="50" fill="#f0ece6"/>
+  <rect class="bg" x="0" y="0" width="500" height="500" rx="50" ry="50" fill="#f0ece6"/>
 
   <g transform="translate(-55, -45) scale(1.2)" style="isolation: isolate">
 

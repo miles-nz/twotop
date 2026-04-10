@@ -89,6 +89,7 @@ export const text = {
     removePhoto: "Remove photo",
     nextImage: "Next image",
     previousImage: "Previous image",
+    goToImage: (index, length) => `Go to image ${index + 1} of ${length}`,
 
     // Review card menu
     makePublic: "Make Public",

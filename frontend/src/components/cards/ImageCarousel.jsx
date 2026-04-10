@@ -142,6 +142,10 @@ function ImageCarousel({ images }) {
                                         ? "bg-white scale-125"
                                         : "bg-white/50"
                                 }`}
+                                aria-label={text.goToImage(
+                                    index,
+                                    images.length,
+                                )}
                                 {...(index === currentIndex && {
                                     "aria-current": "true",
                                 })}
