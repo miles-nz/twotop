@@ -134,14 +134,14 @@ function ReviewCard({ review, currentUserId, onReviewUpdated, isDarkMode }) {
                             <div className="flex items-center gap-2 ml-3 shrink-0">
                                 <div className="flex items-center gap-2">
                                     {review.reviewer_name && (
-                                        <span className="text-sm text-text-mid">
+                                        <span className="text-xs text-text-mid">
                                             {review.reviewer_name}
                                         </span>
                                     )}
                                     <Avatar
                                         name={review.reviewer_name}
                                         picture={review.reviewer_picture}
-                                        size="md"
+                                        size="sm"
                                         title={review.reviewer_name}
                                     />
                                 </div>
