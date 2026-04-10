@@ -15,6 +15,8 @@ function Navbar({
     onNameUpdated,
     currentUserPicture,
     onPictureUpdated,
+    isDarkMode,
+    onToggleDarkMode,
 }) {
     const { user, logout, isAuthenticated, loginWithRedirect } = useAuth0();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -109,6 +111,8 @@ function Navbar({
         onNameUpdated,
         currentUserPicture,
         onPictureUpdated,
+        isDarkMode,
+        onToggleDarkMode,
     };
 
     return (
@@ -213,7 +217,7 @@ function Navbar({
                                             size={50}
                                             showIcon={true}
                                             showText={false}
-                                            overlap={true}
+                                            colonOverlap={true}
                                             disableAnimation={true}
                                         />
                                     </div>

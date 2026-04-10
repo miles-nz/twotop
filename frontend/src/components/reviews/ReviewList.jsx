@@ -11,7 +11,6 @@ const statusCardClass =
 
 const alternateReviewers = (reviews) => {
     const result = [...reviews];
-
     for (let i = 1; i < result.length; i++) {
         if (result[i].user_id === result[i - 1].user_id) {
             const swapIndex = result.findIndex(
@@ -25,7 +24,6 @@ const alternateReviewers = (reviews) => {
             }
         }
     }
-
     return result;
 };
 
@@ -37,9 +35,9 @@ function ReviewList({
     currentUserId,
     onReviewUpdated,
     onScrollComplete,
+    isDarkMode,
 }) {
     const { getAccessTokenSilently } = useAuth0();
-
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -48,10 +46,8 @@ function ReviewList({
         const fetchReviews = async () => {
             setLoading(true);
             setError(null);
-
             try {
                 let response;
-
                 if (isPublic) {
                     response = await fetch(
                         `${import.meta.env.VITE_API_URL}/reviews/public`,
@@ -60,28 +56,22 @@ function ReviewList({
                     const token = await getAccessTokenSilently();
                     response = await fetch(
                         `${import.meta.env.VITE_API_URL}/reviews`,
-                        {
-                            headers: { Authorization: `Bearer ${token}` },
-                        },
+                        { headers: { Authorization: `Bearer ${token}` } },
                     );
                 }
-
                 const data = await response.json();
-
                 if (!response.ok) {
                     setError(text.errorFailedFetch);
                     return;
                 }
-
                 setReviews(alternateReviewers(data));
-                if (onReviewsLoaded) onReviewsLoaded(data.length);
+                onReviewsLoaded?.(data.length);
             } catch (err) {
                 setError(text.errorGeneric);
             } finally {
                 setLoading(false);
             }
         };
-
         fetchReviews();
     }, [refreshTrigger, isPublic, getAccessTokenSilently]);
 
@@ -91,7 +81,7 @@ function ReviewList({
         if (el) {
             setTimeout(() => {
                 el.scrollIntoView({ behavior: "smooth", block: "center" });
-                if (onScrollComplete) onScrollComplete();
+                onScrollComplete?.();
             }, 1000);
         }
     }, [scrollToId, reviews]);
@@ -162,6 +152,7 @@ function ReviewList({
                         review={review}
                         currentUserId={currentUserId}
                         onReviewUpdated={onReviewUpdated}
+                        isDarkMode={isDarkMode}
                     />
                 ))}
             </div>

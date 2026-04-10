@@ -52,6 +52,11 @@ export const text = {
     writeReview: "Write a Review",
     close: "Close",
     publicOnly: "Public Only",
+    public: "Public",
+    theme: "Theme",
+    light: "Light",
+    dark: "Dark",
+    toggleDarkMode: "Toggle dark mode",
 
     // Review form
     restaurantNameLabel: "Restaurant",

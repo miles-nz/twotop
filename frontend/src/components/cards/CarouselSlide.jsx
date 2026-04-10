@@ -12,13 +12,13 @@ function CarouselSlide({ src, alt }) {
         }
     }, []);
 
-    const user1Color = getComputedStyle(document.documentElement)
+    const leftColor = getComputedStyle(document.documentElement)
         .getPropertyValue("--color-primary-400")
         .trim();
-    const gradientMid = getComputedStyle(document.documentElement)
-        .getPropertyValue("--color-gradient-mid")
+    const middleColor = getComputedStyle(document.documentElement)
+        .getPropertyValue("--color-primary-200")
         .trim();
-    const lightColor = getComputedStyle(document.documentElement)
+    const rightColor = getComputedStyle(document.documentElement)
         .getPropertyValue("--color-surface-50")
         .trim();
 
@@ -29,10 +29,10 @@ function CarouselSlide({ src, alt }) {
                 animate={{
                     opacity: loaded ? 0 : 1,
                     background: [
-                        `linear-gradient(135deg, ${user1Color}, ${gradientMid})`,
-                        `linear-gradient(135deg, ${gradientMid}, ${lightColor})`,
-                        `linear-gradient(135deg, ${lightColor}, ${gradientMid})`,
-                        `linear-gradient(135deg, ${gradientMid}, ${user1Color})`,
+                        `linear-gradient(135deg, ${leftColor}, ${middleColor})`,
+                        `linear-gradient(135deg, ${middleColor}, ${rightColor})`,
+                        `linear-gradient(135deg, ${rightColor}, ${middleColor})`,
+                        `linear-gradient(135deg, ${middleColor}, ${leftColor})`,
                     ],
                 }}
                 transition={{
@@ -45,7 +45,7 @@ function CarouselSlide({ src, alt }) {
                     },
                 }}
             >
-                {!loaded && <LoadingDots color={lightColor} size="w-3 h-3" />}
+                {!loaded && <LoadingDots color={rightColor} size="w-3 h-3" />}
             </motion.div>
             <img
                 ref={imgRef}

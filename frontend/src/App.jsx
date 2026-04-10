@@ -12,7 +12,7 @@ import { smoothScrollToTop, isDefaultAvatar } from "./utils";
 
 function App() {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
-    const isDarkMode = useDarkMode();
+    const { isDarkMode, toggleDarkMode } = useDarkMode();
 
     const [formOpen, setFormOpen] = useState(false);
     const [justSubmitted, setJustSubmitted] = useState(false);
@@ -85,6 +85,10 @@ function App() {
         fetchCurrentPicture();
     }, [user, isAuthenticated, getAccessTokenSilently]);
 
+    useEffect(() => {
+        document.documentElement.classList.toggle("dark", isDarkMode);
+    }, [isDarkMode]);
+
     if (!isAuthenticated) {
         return (
             <motion.div
@@ -96,11 +100,14 @@ function App() {
                 <Navbar
                     isPublic={isPublicOnly}
                     onTogglePublic={setIsPublicOnly}
+                    isDarkMode={isDarkMode}
+                    onToggleDarkMode={toggleDarkMode}
                 />
                 <div className="max-w-3xl mx-auto py-8 px-4">
                     <ReviewList
                         isPublic
                         onScrollComplete={() => setScrollToId(null)}
+                        isDarkMode={isDarkMode}
                     />
                 </div>
             </motion.div>
@@ -127,6 +134,8 @@ function App() {
                     setCurrentUserName(name);
                     setRefreshTrigger((prev) => prev + 1);
                 }}
+                isDarkMode={isDarkMode}
+                onToggleDarkMode={toggleDarkMode}
             />
             <div className="max-w-3xl mx-auto pt-6 pb-16 px-4 sm:px-6 lg:px-0">
                 {/* Floating Write a Review Button (desktop only) */}
@@ -210,6 +219,7 @@ function App() {
                         setRefreshTrigger((prev) => prev + 1);
                     }}
                     onScrollComplete={() => setScrollToId(null)}
+                    isDarkMode={isDarkMode}
                 />
             </div>
         </motion.div>

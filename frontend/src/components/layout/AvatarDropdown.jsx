@@ -7,6 +7,7 @@ import { text, enums } from "../../resources";
 import { isDefaultAvatar } from "../../utils";
 import LoadingOverlay from "../ui/LoadingOverlay";
 import InlineEdit from "../ui/InlineEdit";
+import DarkModeToggle from "./DarkModeToggle";
 
 export default function AvatarDropdown({
     user,
@@ -19,6 +20,8 @@ export default function AvatarDropdown({
     onPictureUpdated,
     onNameUpdated,
     mobile = false,
+    isDarkMode,
+    onToggleDarkMode,
 }) {
     const { getAccessTokenSilently } = useAuth0();
     const [open, setOpen] = useState(false);
@@ -210,6 +213,17 @@ export default function AvatarDropdown({
                             >
                                 {text.removePhoto}
                             </button>
+                        )}
+                        {onToggleDarkMode && (
+                            <div className="w-full px-4 py-2 hover:bg-surface-100 transition-colors flex items-center justify-between">
+                                <span className="text-sm text-text-dark">
+                                    {text.theme}
+                                </span>
+                                <DarkModeToggle
+                                    isDarkMode={isDarkMode}
+                                    onToggle={onToggleDarkMode}
+                                />
+                            </div>
                         )}
                         <button
                             onClick={() => {

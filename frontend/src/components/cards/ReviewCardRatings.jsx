@@ -46,11 +46,11 @@ function ReviewCardRatings({ foodRating, drinkRating, ambienceRating }) {
                                 readOnly
                                 size={isDesktop ? "lg" : "md"}
                             />
-                            {isDesktop && foodRating && drinkRating && (
+                            {isDesktop && (drinkRating || ambienceRating) && (
                                 <span
                                     className="mx-3 h-10 border-l border-surface-200"
                                     aria-hidden="true"
-                                ></span>
+                                />
                             )}
                         </div>
                     </span>
@@ -86,11 +86,11 @@ function ReviewCardRatings({ foodRating, drinkRating, ambienceRating }) {
                                 readOnly
                                 size={isDesktop ? "lg" : "md"}
                             />
-                            {isDesktop && drinkRating && ambienceRating && (
+                            {isDesktop && ambienceRating && (
                                 <span
                                     className="mx-3 h-10 border-l border-surface-200"
                                     aria-hidden="true"
-                                ></span>
+                                />
                             )}
                         </div>
                     </span>

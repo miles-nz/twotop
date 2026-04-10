@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useReviewCardEditing } from "../../hooks/useReviewCardEditing";
-import { useDarkMode } from "../../hooks/useDarkMode";
 import Avatar from "../ui/Avatar";
 import EditReviewUI from "./EditReviewUI";
 import LoadingOverlay from "../ui/LoadingOverlay";
@@ -19,22 +18,18 @@ import {
 } from "../../utils";
 import { text } from "../../resources";
 
-function ReviewCard({ review, currentUserId, onReviewUpdated }) {
-    const isDarkMode = useDarkMode();
+function ReviewCard({ review, currentUserId, onReviewUpdated, isDarkMode }) {
     const themeSet = isDarkMode ? themes.dark : themes.light;
     const theme = themeSet[review.user_id] || {};
 
     const [editing, setEditing] = useState(false);
-
     const editingState = useReviewCardEditing(review, onReviewUpdated, editing);
 
     return (
         <motion.div
             id={`review-${review.id}`}
             initial={{ opacity: 0 }}
-            animate={{
-                opacity: 1,
-            }}
+            animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.8 }}
             style={theme}
