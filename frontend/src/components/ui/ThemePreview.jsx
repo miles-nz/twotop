@@ -60,7 +60,7 @@ function ThemePreview({ themeId, isActive, onClick, isDarkMode }) {
                     {/* Title -- first word */}
                     <div
                         style={{
-                            fontSize: 9,
+                            fontSize: 10,
                             fontWeight: 600,
                             color: textDark,
                             opacity: 0.85,
@@ -76,7 +76,7 @@ function ThemePreview({ themeId, isActive, onClick, isDarkMode }) {
                     {/* Subtitle -- second word */}
                     <div
                         style={{
-                            fontSize: 6,
+                            fontSize: 10,
                             fontWeight: 400,
                             color: textLight,
                             opacity: 0.7,
