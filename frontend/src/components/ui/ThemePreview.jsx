@@ -13,7 +13,7 @@ function ThemePreview({ themeId, isActive, onClick, isDarkMode }) {
     const textLight = theme["--color-text-light"];
     const textMid = theme["--color-text-mid"];
     const starsCount = Math.random() > 0.5 ? 3 : 4; // Randomly assign 3 or 4 stars for visual interest
-    const size = 90;
+    const size = 120;
 
     const words = themeId
         .split("-")
@@ -60,7 +60,7 @@ function ThemePreview({ themeId, isActive, onClick, isDarkMode }) {
                     {/* Title -- first word */}
                     <div
                         style={{
-                            fontSize: 10,
+                            fontSize: 12,
                             fontWeight: 600,
                             color: textDark,
                             opacity: 0.85,
@@ -76,7 +76,7 @@ function ThemePreview({ themeId, isActive, onClick, isDarkMode }) {
                     {/* Subtitle -- second word */}
                     <div
                         style={{
-                            fontSize: 10,
+                            fontSize: 11,
                             fontWeight: 400,
                             color: textLight,
                             opacity: 0.7,
@@ -94,8 +94,8 @@ function ThemePreview({ themeId, isActive, onClick, isDarkMode }) {
                         {[1, 2, 3, 4, 5].map((i) => (
                             <svg
                                 key={i}
-                                width={8}
-                                height={8}
+                                width={13}
+                                height={13}
                                 viewBox="0 0 24 24"
                                 fill={
                                     i <= starsCount ? primaryAccent : surface200
@@ -115,18 +115,18 @@ function ThemePreview({ themeId, isActive, onClick, isDarkMode }) {
                     >
                         <div
                             style={{
-                                height: 4,
+                                height: 6,
                                 width: "90%",
-                                borderRadius: 2,
+                                borderRadius: 3,
                                 background: textMid,
                                 opacity: 0.4,
                             }}
                         />
                         <div
                             style={{
-                                height: 4,
+                                height: 6,
                                 width: "65%",
-                                borderRadius: 2,
+                                borderRadius: 3,
                                 background: textMid,
                                 opacity: 0.4,
                             }}
