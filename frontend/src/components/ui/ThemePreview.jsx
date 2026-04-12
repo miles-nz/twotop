@@ -13,7 +13,7 @@ function ThemePreview({ themeId, isActive, onClick, isDarkMode }) {
     const textLight = theme["--color-text-light"];
     const textMid = theme["--color-text-mid"];
     const starsCount = Math.random() > 0.5 ? 3 : 4; // Randomly assign 3 or 4 stars for visual interest
-    const size = 120;
+    const size = 100;
 
     const words = themeId
         .split("-")
@@ -31,7 +31,7 @@ function ThemePreview({ themeId, isActive, onClick, isDarkMode }) {
         >
             <div
                 className={`rounded-xl overflow-hidden transition-all duration-150 ${
-                    isActive ? "scale-110" : "group-hover:scale-102"
+                    isActive ? "scale-108" : "group-hover:scale-102"
                 }`}
                 style={{
                     width: size,
@@ -60,7 +60,7 @@ function ThemePreview({ themeId, isActive, onClick, isDarkMode }) {
                     {/* Title -- first word */}
                     <div
                         style={{
-                            fontSize: 12,
+                            fontSize: 11,
                             fontWeight: 600,
                             color: textDark,
                             opacity: 0.85,
@@ -76,7 +76,7 @@ function ThemePreview({ themeId, isActive, onClick, isDarkMode }) {
                     {/* Subtitle -- second word */}
                     <div
                         style={{
-                            fontSize: 11,
+                            fontSize: 10,
                             fontWeight: 400,
                             color: textLight,
                             opacity: 0.7,

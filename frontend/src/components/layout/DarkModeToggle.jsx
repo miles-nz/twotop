@@ -12,7 +12,7 @@ export default function DarkModeToggle({ isDarkMode, onToggle }) {
             {isDarkMode ? (
                 <Moon size={10} className="text-secondary-500" />
             ) : (
-                <Sun size={10} className="text-surface-300" />
+                <Sun size={10} className="text-secondary-500" />
             )}
         </Toggle>
     );
