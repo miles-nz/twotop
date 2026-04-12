@@ -23,6 +23,9 @@ function App() {
 
     const [currentUserName, setCurrentUserName] = useState(undefined);
     const [currentUserPicture, setCurrentUserPicture] = useState(undefined);
+    const [currentThemeId, setCurrentThemeId] = useState(
+        () => localStorage.getItem("twotop-theme-id") || "default-theme",
+    );
 
     const handleReviewSubmitted = (newId) => {
         setJustSubmitted(true);
@@ -39,27 +42,41 @@ function App() {
         }
     };
 
-    useEffect(() => {
-        // Apply appropriate theme based on dark mode preference
-        // If user is logged in, use their personalized theme
-        // Otherwise, use the default theme colors adjusted for dark mode
-        if (user) {
-            const themeSet = isDarkMode ? themes.dark : themes.light;
-            const theme = themeSet[user.sub] || {};
-
-            Object.entries(theme).forEach(([key, value]) => {
-                document.documentElement.style.setProperty(key, value);
+    const handleThemeChange = async (themeId) => {
+        const previousThemeId = currentThemeId;
+        setCurrentThemeId(themeId);
+        localStorage.setItem("twotop-theme-id", themeId);
+        try {
+            const token = await getAccessTokenSilently();
+            await fetch(`${import.meta.env.VITE_API_URL}/user/preferences`, {
+                method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ theme_id: themeId }),
             });
-        } else {
-            // Apply default theme based on dark mode preference when logged out
-            const defaultTheme = isDarkMode
-                ? themes.dark.default
-                : themes.light.default;
-            Object.entries(defaultTheme).forEach(([key, value]) => {
-                document.documentElement.style.setProperty(key, value);
-            });
+            setRefreshTrigger((prev) => prev + 1);
+        } catch (err) {
+            setCurrentThemeId(previousThemeId);
+            localStorage.setItem("twotop-theme-id", previousThemeId);
+            setRefreshTrigger((prev) => prev + 1);
         }
-    }, [user, isDarkMode]);
+    };
+
+    const handleThemePreview = (themeId) => {
+        setCurrentThemeId(themeId);
+    };
+
+    useEffect(() => {
+        const themeSet = isDarkMode ? themes.dark : themes.light;
+        const theme = user
+            ? themeSet[currentThemeId] || themeSet["default-theme"]
+            : themeSet["default-theme"];
+        Object.entries(theme).forEach(([key, value]) => {
+            document.documentElement.style.setProperty(key, value);
+        });
+    }, [user, isDarkMode, currentThemeId]);
 
     useEffect(() => {
         if (!user) return;
@@ -83,6 +100,25 @@ function App() {
             }
         };
         fetchCurrentPicture();
+
+        const fetchPreferences = async () => {
+            try {
+                const token = await getAccessTokenSilently();
+                const response = await fetch(
+                    `${import.meta.env.VITE_API_URL}/user/preferences`,
+                    { headers: { Authorization: `Bearer ${token}` } },
+                );
+                const data = await response.json();
+                if (response.ok) {
+                    const themeId = data.theme_id || "default-theme";
+                    setCurrentThemeId(themeId);
+                    localStorage.setItem("twotop-theme-id", themeId);
+                }
+            } catch (err) {
+                setCurrentThemeId("default-theme");
+            }
+        };
+        fetchPreferences();
     }, [user, isAuthenticated, getAccessTokenSilently]);
 
     useEffect(() => {
@@ -102,6 +138,9 @@ function App() {
                     onTogglePublic={setIsPublicOnly}
                     isDarkMode={isDarkMode}
                     onToggleDarkMode={toggleDarkMode}
+                    currentThemeId={currentThemeId}
+                    onThemeChange={handleThemeChange}
+                    onThemePreview={handleThemePreview}
                 />
                 <div className="max-w-3xl mx-auto py-8 px-4">
                     <ReviewList
@@ -136,6 +175,9 @@ function App() {
                 }}
                 isDarkMode={isDarkMode}
                 onToggleDarkMode={toggleDarkMode}
+                currentThemeId={currentThemeId}
+                onThemeChange={handleThemeChange}
+                onThemePreview={handleThemePreview}
             />
             <div className="max-w-3xl mx-auto pt-6 pb-16 px-4 sm:px-6 lg:px-0">
                 {/* Floating Write a Review Button (desktop only) */}
@@ -160,7 +202,7 @@ function App() {
                                 setFormOpen(false);
                             }
                         }}
-                        className="fixed bottom-8 right-8 z-40 bg-secondary-500 hover:bg-secondary-600 text-white rounded-full shadow-lg w-16 h-16 flex items-center justify-center text-3xl font-bold transition-colors duration-200 drop-shadow-lg"
+                        className="fixed bottom-8 right-8 z-40 bg-secondary-500 hover:bg-secondary-600 text-white rounded-full shadow-lg w-16 h-16 flex items-center justify-center text-3xl font-bold transition-colors duration-200 drop-shadow-lg cursor-pointer"
                         style={{ boxShadow: "0 4px 24px 0 rgba(0,0,0,0.10)" }}
                         aria-label={formOpen ? text.close : text.writeReview}
                     >

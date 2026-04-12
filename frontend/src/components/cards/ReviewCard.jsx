@@ -20,7 +20,7 @@ import { text } from "../../resources";
 
 function ReviewCard({ review, currentUserId, onReviewUpdated, isDarkMode }) {
     const themeSet = isDarkMode ? themes.dark : themes.light;
-    const theme = themeSet[review.user_id] || {};
+    const theme = themeSet[review.theme_id] || {};
 
     const [editing, setEditing] = useState(false);
     const editingState = useReviewCardEditing(review, onReviewUpdated, editing);

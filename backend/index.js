@@ -27,7 +27,7 @@ const REVIEW_IMAGE_BUCKET = "review-images";
 const PROFILE_PICTURE_BUCKET = "profile-pictures";
 const MAX_USER_NAME_LENGTH = 20;
 const MAX_RESTAURANT_NAME_LENGTH = 100;
-const MAX_REVIEW_TEXT_LENGTH = 10000;
+const MAX_REVIEW_TEXT_LENGTH = 2000;
 const RATING_MIN = 0.5;
 const RATING_MAX = 5;
 
@@ -739,15 +739,6 @@ app.get("/places/details", checkJwt, async (req, res) => {
                 ? ""
                 : getComponent(["country"]);
 
-        /*
-        Westfield is sometimes in the city field in NZ,
-        so replace that with the administrative area,
-        which should be the actual city for those addresses
-        */
-        if (country === "" && city === "Westfield") {
-            city = getComponent(["administrative_area_level_1"]);
-        }
-
         const streetAddress = [
             subpremise,
             streetNumber && route ? `${streetNumber} ${route}` : route,
@@ -762,6 +753,59 @@ app.get("/places/details", checkJwt, async (req, res) => {
             name: data.displayName?.text || "",
             address: parts.join(", "),
         });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get("/user/preferences", checkJwt, async (req, res) => {
+    const user_id = req.auth.payload.sub;
+    try {
+        const { data, error } = await supabase
+            .from("user_preferences")
+            .select("theme_id")
+            .eq("user_id", user_id)
+            .single();
+
+        if (error && error.code !== "PGRST116") {
+            return res.status(500).json({ error: error.message });
+        }
+
+        res.status(200).json({ theme_id: data?.theme_id || "default-theme" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.patch("/user/preferences", checkJwt, async (req, res) => {
+    const user_id = req.auth.payload.sub;
+    const { theme_id } = req.body;
+
+    if (!theme_id || typeof theme_id !== "string") {
+        return res.status(400).json({ error: "Invalid theme_id" });
+    }
+
+    try {
+        const { error: upsertError } = await supabase
+            .from("user_preferences")
+            .upsert({
+                user_id,
+                theme_id,
+                updated_at: new Date().toISOString(),
+            });
+
+        if (upsertError)
+            return res.status(500).json({ error: upsertError.message });
+
+        const { error: reviewsError } = await supabase
+            .from("reviews")
+            .update({ theme_id })
+            .eq("user_id", user_id);
+
+        if (reviewsError)
+            return res.status(500).json({ error: reviewsError.message });
+
+        res.status(200).json({ theme_id });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

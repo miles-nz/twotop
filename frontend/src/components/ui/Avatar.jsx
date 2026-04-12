@@ -21,7 +21,7 @@ function Avatar({ name, picture, size = "md", title, loading = false }) {
 
     return (
         <div
-            className={`${sizes[size]} rounded-full bg-primary-400 text-white flex items-center justify-center font-semibold text-xs overflow-hidden shrink-0`}
+            className={`${sizes[size]} rounded-full bg-secondary-400 text-white flex items-center justify-center font-semibold text-xs overflow-hidden shrink-0`}
             title={title || name}
         >
             {loading ? (

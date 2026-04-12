@@ -5,8 +5,9 @@ import Avatar from "../ui/Avatar";
 import ImageCropModal from "../cards/ImageCropModal";
 import { text, enums } from "../../resources";
 import { isDefaultAvatar } from "../../utils";
-import LoadingOverlay from "../ui/LoadingOverlay";
 import InlineEdit from "../ui/InlineEdit";
+import LoadingOverlay from "../ui/LoadingOverlay";
+import ThemeModal from "../ui/ThemeModal";
 import DarkModeToggle from "./DarkModeToggle";
 
 export default function AvatarDropdown({
@@ -22,12 +23,16 @@ export default function AvatarDropdown({
     mobile = false,
     isDarkMode,
     onToggleDarkMode,
+    currentThemeId,
+    onThemeChange,
+    onThemePreview,
 }) {
     const { getAccessTokenSilently } = useAuth0();
     const [open, setOpen] = useState(false);
     const [cropSrc, setCropSrc] = useState(null);
     const [uploading, setUploading] = useState(false);
     const [savingName, setSavingName] = useState(false);
+    const [themeModalOpen, setThemeModalOpen] = useState(false);
     const dropdownRef = useRef(null);
     const fileInputRef = useRef(null);
 
@@ -176,6 +181,49 @@ export default function AvatarDropdown({
                         transition={{ duration: 0.15 }}
                         className={`absolute right-0 mt-2 w-40 bg-surface-50 border border-surface-200 rounded-lg shadow-lg overflow-hidden z-50 ${dropdownClassName}`}
                     >
+                        {(onToggleDarkMode || onThemeChange) && (
+                            <div className="w-full px-4 py-2 transition-colors flex items-center justify-around">
+                                <div className="flex items-center gap-2">
+                                    {onThemeChange && (
+                                        <button
+                                            onClick={() => {
+                                                setThemeModalOpen(true);
+                                                setOpen(false);
+                                            }}
+                                            className="text-secondary-300 hover:text-text-dark transition-colors"
+                                            aria-label={text.theme}
+                                        >
+                                            <svg
+                                                width="18"
+                                                height="18"
+                                                viewBox="0 0 14 14"
+                                                fill="currentColor"
+                                                className="mx-4"
+                                            >
+                                                {[0, 1, 2].map((row) =>
+                                                    [0, 1, 2].map((col) => (
+                                                        <rect
+                                                            key={`${row}-${col}`}
+                                                            x={col * 5}
+                                                            y={row * 5}
+                                                            width="3.5"
+                                                            height="3.5"
+                                                            rx="0.5"
+                                                        />
+                                                    )),
+                                                )}
+                                            </svg>
+                                        </button>
+                                    )}
+                                    {onToggleDarkMode && (
+                                        <DarkModeToggle
+                                            isDarkMode={isDarkMode}
+                                            onToggle={onToggleDarkMode}
+                                        />
+                                    )}
+                                </div>
+                            </div>
+                        )}
                         {showName && (
                             <div className="w-full px-4 py-2 hover:bg-surface-100 transition-colors text-left">
                                 <InlineEdit
@@ -214,17 +262,6 @@ export default function AvatarDropdown({
                                 {text.removePhoto}
                             </button>
                         )}
-                        {onToggleDarkMode && (
-                            <div className="w-full px-4 py-2 hover:bg-surface-100 transition-colors flex items-center justify-between">
-                                <span className="text-sm text-text-dark">
-                                    {text.theme}
-                                </span>
-                                <DarkModeToggle
-                                    isDarkMode={isDarkMode}
-                                    onToggle={onToggleDarkMode}
-                                />
-                            </div>
-                        )}
                         <button
                             onClick={() => {
                                 onLogout();
@@ -245,6 +282,19 @@ export default function AvatarDropdown({
                 />
             )}
             <LoadingOverlay isVisible={uploading || savingName} />
+            {themeModalOpen && (
+                <ThemeModal
+                    currentThemeId={currentThemeId}
+                    onThemeChange={(themeId) => {
+                        onThemeChange(themeId);
+                        setThemeModalOpen(false);
+                    }}
+                    onThemePreview={onThemePreview}
+                    onClose={() => setThemeModalOpen(false)}
+                    isDarkMode={isDarkMode}
+                    onToggleDarkMode={onToggleDarkMode}
+                />
+            )}
         </div>
     );
 }

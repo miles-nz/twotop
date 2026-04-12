@@ -28,8 +28,8 @@ function ReviewCardRatings({ foodRating, drinkRating, ambienceRating }) {
                         <span
                             className={
                                 isDesktop
-                                    ? "text-xs sm:text-sm text-text-light tracking-wide min-w-[70px] text-left"
-                                    : "text-xs sm:text-sm text-text-light tracking-wide min-w-[70px] text-center"
+                                    ? "text-xs sm:text-sm text-text-light tracking-wide min-w-17.5 text-left"
+                                    : "text-xs sm:text-sm text-text-light tracking-wide min-w-17.5 text-center"
                             }
                         >
                             Food
@@ -68,8 +68,8 @@ function ReviewCardRatings({ foodRating, drinkRating, ambienceRating }) {
                         <span
                             className={
                                 isDesktop
-                                    ? "text-xs sm:text-sm text-text-light tracking-wide min-w-[70px] text-left"
-                                    : "text-xs sm:text-sm text-text-light tracking-wide min-w-[70px] text-center"
+                                    ? "text-xs sm:text-sm text-text-light tracking-wide min-w-17.5 text-left"
+                                    : "text-xs sm:text-sm text-text-light tracking-wide min-w-17.5 text-center"
                             }
                         >
                             Drink
@@ -108,8 +108,8 @@ function ReviewCardRatings({ foodRating, drinkRating, ambienceRating }) {
                         <span
                             className={
                                 isDesktop
-                                    ? "text-xs sm:text-sm text-text-light tracking-wide min-w-[70px] text-left"
-                                    : "text-xs sm:text-sm text-text-light tracking-wide min-w-[70px] text-center"
+                                    ? "text-xs sm:text-sm text-text-light tracking-wide min-w-17.5 text-left"
+                                    : "text-xs sm:text-sm text-text-light tracking-wide min-w-17.5 text-center"
                             }
                         >
                             Ambience

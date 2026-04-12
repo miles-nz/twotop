@@ -17,6 +17,9 @@ function Navbar({
     onPictureUpdated,
     isDarkMode,
     onToggleDarkMode,
+    currentThemeId,
+    onThemeChange,
+    onThemePreview,
 }) {
     const { user, logout, isAuthenticated, loginWithRedirect } = useAuth0();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -82,14 +85,14 @@ function Navbar({
         <div
             className="tracking-tight cursor-pointer touch-manipulation"
             onClick={handleTitleClick}
-            onPointerDown={(e) => {
+            onPointerDown={() => {
                 // Only trigger on desktop (md and up)
                 if (window.innerWidth >= 768) startDesktopAdminTrigger();
             }}
-            onPointerUp={(e) => {
+            onPointerUp={() => {
                 if (window.innerWidth >= 768) endDesktopAdminTrigger();
             }}
-            onPointerCancel={(e) => {
+            onPointerCancel={() => {
                 if (window.innerWidth >= 768) endDesktopAdminTrigger();
             }}
         >
@@ -113,6 +116,9 @@ function Navbar({
         onPictureUpdated,
         isDarkMode,
         onToggleDarkMode,
+        currentThemeId,
+        onThemeChange,
+        onThemePreview,
     };
 
     return (
@@ -200,7 +206,6 @@ function Navbar({
                                 transition={{ duration: 0.3 }}
                                 className="fixed left-0 top-0 bottom-0 w-64 bg-surface-50 border-r border-surface-200 shadow-lg overflow-y-auto z-30"
                             >
-                                {/* Side menu app name absolutely positioned at the top, centered and large, aligned with close button */}
                                 <div className="relative">
                                     <div
                                         className="flex items-center justify-center mx-5 pt-2"

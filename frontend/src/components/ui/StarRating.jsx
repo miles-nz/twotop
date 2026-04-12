@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { STAR_PATH } from "../../resources";
 
 function StarRating({ value, onChange, readOnly = false, size = "md" }) {
     const gradientIdBase = useRef(
@@ -108,14 +109,16 @@ function StarRating({ value, onChange, readOnly = false, size = "md" }) {
                         aria-label={`Set rating to ${starIndex} star${starIndex > 1 ? "s" : ""}`}
                         onKeyDown={(e) => handleStarKeyDown(e, starIndex)}
                         role="radio"
-                        aria-checked={value === starIndex}
+                        aria-checked={
+                            value >= starIndex - 0.5 && value <= starIndex
+                        }
                     >
                         <svg
                             viewBox="0 0 24 24"
                             className="absolute inset-0 w-full h-full text-surface-300"
                             fill="currentColor"
                         >
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                            <path d={STAR_PATH} />
                         </svg>
                         {fill !== "empty" && (
                             <div
@@ -140,27 +143,19 @@ function StarRating({ value, onChange, readOnly = false, size = "md" }) {
                                         >
                                             <stop
                                                 offset="0%"
-                                                stopColor="var(--color-primary-400)"
-                                                stopOpacity={0.8}
+                                                stopColor="var(--color-primary-500)"
                                             />
                                             <stop
-                                                offset="50%"
-                                                stopColor="var(--color-primary-400)"
-                                                stopOpacity={1}
-                                            />
-                                            <stop
-                                                offset="70%"
-                                                stopColor="var(--color-primary-400)"
-                                                stopOpacity={0.5}
+                                                offset="60%"
+                                                stopColor="var(--color-primary-500)"
                                             />
                                             <stop
                                                 offset="100%"
-                                                stopColor="var(--color-primary-400)"
-                                                stopOpacity={0.1}
+                                                stopColor="var(--color-primary-600)"
                                             />
                                         </linearGradient>
                                     </defs>
-                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                    <path d={STAR_PATH} />
                                 </svg>
                             </div>
                         )}
