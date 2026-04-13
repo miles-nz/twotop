@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Search } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import Button from "../ui/Button";
 import AvatarDropdown from "./AvatarDropdown";
 import { text } from "../../resources";
@@ -20,64 +20,13 @@ function Navbar({
     currentThemeId,
     onThemeChange,
     onThemePreview,
+    sharedWith,
+    onSharedWithChange,
 }) {
     const { user, logout, isAuthenticated, loginWithRedirect } = useAuth0();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [showMobileAdminButton, setShowMobileAdminButton] = useState(false);
-    const [showDesktopAdminButton, setShowDesktopAdminButton] = useState(false);
-    const desktopAdminTimer = useRef(null);
-    const desktopAdminHideTimer = useRef(null);
-    const ignoreNextDesktopClick = useRef(false);
-    const menuAdminTriggerTimer = useRef(null);
-    const menuAdminHideTimer = useRef(null);
 
-    // Desktop (main navbar) long-press admin trigger
-    const startDesktopAdminTrigger = () => {
-        ignoreNextDesktopClick.current = false;
-        window.clearTimeout(desktopAdminTimer.current);
-        desktopAdminTimer.current = window.setTimeout(() => {
-            setShowDesktopAdminButton(true);
-            ignoreNextDesktopClick.current = true;
-            window.clearTimeout(desktopAdminHideTimer.current);
-            desktopAdminHideTimer.current = window.setTimeout(() => {
-                setShowDesktopAdminButton(false);
-            }, 10000); // 10 seconds
-        }, 700);
-    };
-    const endDesktopAdminTrigger = () => {
-        window.clearTimeout(desktopAdminTimer.current);
-    };
-
-    // Mobile side menu admin trigger
-    const startMenuAdminTrigger = () => {
-        window.clearTimeout(menuAdminTriggerTimer.current);
-        menuAdminTriggerTimer.current = window.setTimeout(() => {
-            setShowMobileAdminButton(true);
-            window.clearTimeout(menuAdminHideTimer.current);
-            menuAdminHideTimer.current = window.setTimeout(() => {
-                setShowMobileAdminButton(false);
-            }, 10000); // 10 seconds
-        }, 700);
-    };
-    const endMenuAdminTrigger = () => {
-        window.clearTimeout(menuAdminTriggerTimer.current);
-    };
-
-    useEffect(() => {
-        return () => {
-            window.clearTimeout(desktopAdminTimer.current);
-            window.clearTimeout(desktopAdminHideTimer.current);
-            window.clearTimeout(menuAdminTriggerTimer.current);
-            window.clearTimeout(menuAdminHideTimer.current);
-        };
-    }, []);
-
-    // Desktop/main title click navigates home unless long-press
     const handleTitleClick = () => {
-        if (ignoreNextDesktopClick.current) {
-            ignoreNextDesktopClick.current = false;
-            return;
-        }
         window.location.href = "/";
     };
 
@@ -85,16 +34,6 @@ function Navbar({
         <div
             className="tracking-tight cursor-pointer touch-manipulation"
             onClick={handleTitleClick}
-            onPointerDown={() => {
-                // Only trigger on desktop (md and up)
-                if (window.innerWidth >= 768) startDesktopAdminTrigger();
-            }}
-            onPointerUp={() => {
-                if (window.innerWidth >= 768) endDesktopAdminTrigger();
-            }}
-            onPointerCancel={() => {
-                if (window.innerWidth >= 768) endDesktopAdminTrigger();
-            }}
         >
             <Logo
                 size={50}
@@ -119,6 +58,8 @@ function Navbar({
         currentThemeId,
         onThemeChange,
         onThemePreview,
+        sharedWith,
+        onSharedWithChange,
     };
 
     return (
@@ -138,30 +79,17 @@ function Navbar({
                     <div className="justify-self-center">{title}</div>
 
                     <div className="flex items-center gap-6 justify-end">
-                        {user && (
+                        {user ? (
                             <div className="hidden lg:block">
                                 <AvatarDropdown {...avatarDropdownProps} />
                             </div>
-                        )}
-                        {!isAuthenticated && (
-                            <AnimatePresence>
-                                {showDesktopAdminButton && (
-                                    <motion.div
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        exit={{ opacity: 0 }}
-                                        transition={{ duration: 0.3 }}
-                                        key="admin-desktop-btn"
-                                    >
-                                        <Button
-                                            variant="surface"
-                                            onClick={() => loginWithRedirect()}
-                                        >
-                                            {text.logIn}
-                                        </Button>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
+                        ) : (
+                            <Button
+                                variant="surface"
+                                onClick={() => loginWithRedirect()}
+                            >
+                                {text.logIn}
+                            </Button>
                         )}
                     </div>
                 </div>
@@ -189,9 +117,12 @@ function Navbar({
                             mobile={true}
                         />
                     ) : (
-                        <span className="p-2 rounded-lg invisible">
-                            <Search size={24} className="text-text-dark" />
-                        </span>
+                        <Button
+                            variant="surface"
+                            onClick={() => loginWithRedirect()}
+                        >
+                            {text.logIn}
+                        </Button>
                     )}
                 </div>
 
@@ -214,9 +145,6 @@ function Navbar({
                                             touchAction: "manipulation",
                                             cursor: "pointer",
                                         }}
-                                        onPointerDown={startMenuAdminTrigger}
-                                        onPointerUp={endMenuAdminTrigger}
-                                        onPointerCancel={endMenuAdminTrigger}
                                     >
                                         <Logo
                                             size={50}
@@ -242,32 +170,17 @@ function Navbar({
                                             </div>
                                         </div>
                                     </div>
-                                    {/* Admin button at the bottom */}
-                                    <div className="px-4 pb-6 mt-auto">
-                                        <AnimatePresence>
-                                            {showMobileAdminButton && !user && (
-                                                <motion.div
-                                                    initial={{ opacity: 0 }}
-                                                    animate={{ opacity: 1 }}
-                                                    exit={{ opacity: 0 }}
-                                                    transition={{
-                                                        duration: 0.3,
-                                                    }}
-                                                    key="admin-mobile-btn"
-                                                >
-                                                    <Button
-                                                        variant="surface"
-                                                        onClick={
-                                                            loginWithRedirect
-                                                        }
-                                                        className="w-full"
-                                                    >
-                                                        {text.logIn}
-                                                    </Button>
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
-                                    </div>
+                                    {!user && (
+                                        <div className="px-4 pb-6 mt-auto">
+                                            <Button
+                                                variant="surface"
+                                                onClick={loginWithRedirect}
+                                                className="w-full"
+                                            >
+                                                {text.logIn}
+                                            </Button>
+                                        </div>
+                                    )}
                                 </div>
                             </motion.div>
                             <motion.button

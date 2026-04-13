@@ -8,7 +8,9 @@ import ReviewList from "./components/reviews/ReviewList";
 import { themes } from "./themes";
 import { text } from "./resources";
 import { useDarkMode } from "./hooks/useDarkMode";
-import { smoothScrollToTop, isDefaultAvatar } from "./utils";
+import { useUserPicture } from "./hooks/useUserPicture";
+import { useUserPreferences } from "./hooks/useUserPreferences";
+import { smoothScrollToTop } from "./utils";
 
 function App() {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
@@ -22,10 +24,17 @@ function App() {
     const [scrollToId, setScrollToId] = useState(null);
 
     const [currentUserName, setCurrentUserName] = useState(undefined);
-    const [currentUserPicture, setCurrentUserPicture] = useState(undefined);
-    const [currentThemeId, setCurrentThemeId] = useState(
-        () => localStorage.getItem("twotop-theme-id") || "default-theme",
-    );
+
+    const { currentUserPicture, setCurrentUserPicture, fetchCurrentPicture } =
+        useUserPicture();
+    const {
+        currentThemeId,
+        sharedWith,
+        fetchPreferences,
+        handleThemeChange,
+        handleSharedWithChange,
+        handleThemePreview,
+    } = useUserPreferences();
 
     const handleReviewSubmitted = (newId) => {
         setJustSubmitted(true);
@@ -42,32 +51,6 @@ function App() {
         }
     };
 
-    const handleThemeChange = async (themeId) => {
-        const previousThemeId = currentThemeId;
-        setCurrentThemeId(themeId);
-        localStorage.setItem("twotop-theme-id", themeId);
-        try {
-            const token = await getAccessTokenSilently();
-            await fetch(`${import.meta.env.VITE_API_URL}/user/preferences`, {
-                method: "PATCH",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ theme_id: themeId }),
-            });
-            setRefreshTrigger((prev) => prev + 1);
-        } catch (err) {
-            setCurrentThemeId(previousThemeId);
-            localStorage.setItem("twotop-theme-id", previousThemeId);
-            setRefreshTrigger((prev) => prev + 1);
-        }
-    };
-
-    const handleThemePreview = (themeId) => {
-        setCurrentThemeId(themeId);
-    };
-
     useEffect(() => {
         const themeSet = isDarkMode ? themes.dark : themes.light;
         const theme = user
@@ -81,43 +64,7 @@ function App() {
     useEffect(() => {
         if (!user) return;
         if (currentUserName === undefined) setCurrentUserName(user.name);
-        const fetchCurrentPicture = async () => {
-            try {
-                const token = await getAccessTokenSilently();
-                const response = await fetch(
-                    `${import.meta.env.VITE_API_URL}/user/picture`,
-                    {
-                        headers: { Authorization: `Bearer ${token}` },
-                    },
-                );
-                const data = await response.json();
-                if (response.ok)
-                    setCurrentUserPicture(
-                        isDefaultAvatar(data.picture) ? null : data.picture,
-                    );
-            } catch (err) {
-                setCurrentUserPicture(null);
-            }
-        };
         fetchCurrentPicture();
-
-        const fetchPreferences = async () => {
-            try {
-                const token = await getAccessTokenSilently();
-                const response = await fetch(
-                    `${import.meta.env.VITE_API_URL}/user/preferences`,
-                    { headers: { Authorization: `Bearer ${token}` } },
-                );
-                const data = await response.json();
-                if (response.ok) {
-                    const themeId = data.theme_id || "default-theme";
-                    setCurrentThemeId(themeId);
-                    localStorage.setItem("twotop-theme-id", themeId);
-                }
-            } catch (err) {
-                setCurrentThemeId("default-theme");
-            }
-        };
         fetchPreferences();
     }, [user, isAuthenticated, getAccessTokenSilently]);
 
@@ -139,8 +86,6 @@ function App() {
                     isDarkMode={isDarkMode}
                     onToggleDarkMode={toggleDarkMode}
                     currentThemeId={currentThemeId}
-                    onThemeChange={handleThemeChange}
-                    onThemePreview={handleThemePreview}
                 />
                 <div className="max-w-3xl mx-auto py-8 px-4">
                     <ReviewList
@@ -176,8 +121,14 @@ function App() {
                 isDarkMode={isDarkMode}
                 onToggleDarkMode={toggleDarkMode}
                 currentThemeId={currentThemeId}
-                onThemeChange={handleThemeChange}
+                onThemeChange={(themeId) =>
+                    handleThemeChange(themeId, () =>
+                        setRefreshTrigger((prev) => prev + 1),
+                    )
+                }
                 onThemePreview={handleThemePreview}
+                sharedWith={sharedWith}
+                onSharedWithChange={handleSharedWithChange}
             />
             <div className="max-w-3xl mx-auto pt-6 pb-16 px-4 sm:px-6 lg:px-0">
                 {/* Floating Write a Review Button (desktop only) */}

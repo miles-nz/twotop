@@ -30,6 +30,7 @@ const MAX_RESTAURANT_NAME_LENGTH = 100;
 const MAX_REVIEW_TEXT_LENGTH = 2000;
 const RATING_MIN = 0.5;
 const RATING_MAX = 5;
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 // Errors
 const ERRORS = {
@@ -51,6 +52,8 @@ const ERRORS = {
     restaurantNameTooLong: `Restaurant name must be ${MAX_RESTAURANT_NAME_LENGTH} characters or less.`,
     userNameTooLong: `Name must be ${MAX_USER_NAME_LENGTH} characters or less.`,
     userNameRequired: "Name is required.",
+    userNotFound: "No user found with that email address.",
+    invalidEmail: "A valid email address is required.",
 };
 
 // Multer setup
@@ -212,13 +215,41 @@ const getMgmtToken = async () => {
 
 // Routes
 app.get("/reviews", checkJwt, async (req, res) => {
-    const { data, error } = await supabase
-        .from("reviews")
-        .select("*")
-        .order("visit_date", { ascending: false });
+    const user_id = req.auth.payload.sub;
+    try {
+        // Get all users who have shared their private reviews with the current user
+        const { data: prefs } = await supabase
+            .from("user_preferences")
+            .select("user_id, shared_with")
+            .filter(
+                "shared_with",
+                "cs",
+                JSON.stringify([{ user_id: user_id }]),
+            );
 
-    if (error) return res.status(500).json({ error: error.message });
-    res.status(200).json(data);
+        const sharedByUserIds = (prefs || []).map((p) => p.user_id);
+
+        // Fetch own reviews + reviews shared with current user
+        const { data, error } =
+            sharedByUserIds.length > 0
+                ? await supabase
+                      .from("reviews")
+                      .select("*")
+                      .or(
+                          `user_id.eq.${user_id},user_id.in.(${sharedByUserIds.join(",")})`,
+                      )
+                      .order("visit_date", { ascending: false })
+                : await supabase
+                      .from("reviews")
+                      .select("*")
+                      .eq("user_id", user_id)
+                      .order("visit_date", { ascending: false });
+
+        if (error) return res.status(500).json({ error: error.message });
+        res.status(200).json(data);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 app.get("/reviews/public", async (req, res) => {
@@ -449,6 +480,52 @@ app.delete("/reviews/:id", checkJwt, async (req, res) => {
     }
 });
 
+app.get("/user", checkJwt, async (req, res) => {
+    const { email } = req.query;
+
+    if (!email || !EMAIL_REGEX.test(email)) {
+        return res.status(400).json({ error: ERRORS.invalidEmail });
+    }
+
+    try {
+        const token = await getMgmtToken();
+        const response = await fetch(
+            `https://${process.env.AUTH0_DOMAIN}/api/v2/users-by-email?email=${encodeURIComponent(email)}`,
+            { headers: { Authorization: `Bearer ${token}` } },
+        );
+        const data = await response.json();
+
+        if (!data || data.length === 0) {
+            return res.status(404).json({ error: ERRORS.userNotFound });
+        }
+
+        res.status(200).json({
+            user_id: data[0].user_id,
+            name: data[0].name,
+            picture: data[0].picture,
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get("/user/picture", checkJwt, async (req, res) => {
+    const user_id = req.auth.payload.sub;
+    try {
+        const token = await getMgmtToken();
+        const userResponse = await fetch(
+            `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(user_id)}`,
+            {
+                headers: { Authorization: `Bearer ${token}` },
+            },
+        );
+        const userData = await userResponse.json();
+        res.status(200).json({ picture: userData.picture });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.patch(
     "/user/picture",
     checkJwt,
@@ -532,23 +609,6 @@ app.patch(
         }
     },
 );
-
-app.get("/user/picture", checkJwt, async (req, res) => {
-    const user_id = req.auth.payload.sub;
-    try {
-        const token = await getMgmtToken();
-        const userResponse = await fetch(
-            `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(user_id)}`,
-            {
-                headers: { Authorization: `Bearer ${token}` },
-            },
-        );
-        const userData = await userResponse.json();
-        res.status(200).json({ picture: userData.picture });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
 
 app.delete("/user/picture", checkJwt, async (req, res) => {
     const user_id = req.auth.payload.sub;
@@ -655,6 +715,71 @@ app.patch("/user/name", checkJwt, async (req, res) => {
     }
 });
 
+app.get("/user/preferences", checkJwt, async (req, res) => {
+    const user_id = req.auth.payload.sub;
+    try {
+        const { data, error } = await supabase
+            .from("user_preferences")
+            .select("theme_id, shared_with")
+            .eq("user_id", user_id)
+            .single();
+
+        if (error && error.code !== "PGRST116") {
+            return res.status(500).json({ error: error.message });
+        }
+
+        res.status(200).json({
+            theme_id: data?.theme_id || "default-theme",
+            shared_with: data?.shared_with || [],
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.patch("/user/preferences", checkJwt, async (req, res) => {
+    const user_id = req.auth.payload.sub;
+    const { theme_id, shared_with } = req.body;
+
+    if (theme_id !== undefined && typeof theme_id !== "string") {
+        return res.status(400).json({ error: "Invalid theme_id" });
+    }
+
+    if (shared_with !== undefined && !Array.isArray(shared_with)) {
+        return res.status(400).json({ error: "Invalid shared_with" });
+    }
+
+    const updates = { updated_at: new Date().toISOString() };
+    if (theme_id !== undefined) updates.theme_id = theme_id;
+    if (shared_with !== undefined) updates.shared_with = shared_with;
+
+    try {
+        const { error: upsertError } = await supabase
+            .from("user_preferences")
+            .upsert({ user_id, ...updates });
+
+        if (upsertError)
+            return res.status(500).json({ error: upsertError.message });
+
+        if (theme_id !== undefined) {
+            const { error: reviewsError } = await supabase
+                .from("reviews")
+                .update({ theme_id })
+                .eq("user_id", user_id);
+
+            if (reviewsError)
+                return res.status(500).json({ error: reviewsError.message });
+        }
+
+        res.status(200).json({
+            ...(theme_id !== undefined && { theme_id }),
+            ...(shared_with !== undefined && { shared_with }),
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.get("/places/search", checkJwt, placesRateLimit, async (req, res) => {
     const { q } = req.query;
     if (!q) return res.status(400).json({ error: "Query is required" });
@@ -753,59 +878,6 @@ app.get("/places/details", checkJwt, async (req, res) => {
             name: data.displayName?.text || "",
             address: parts.join(", "),
         });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.get("/user/preferences", checkJwt, async (req, res) => {
-    const user_id = req.auth.payload.sub;
-    try {
-        const { data, error } = await supabase
-            .from("user_preferences")
-            .select("theme_id")
-            .eq("user_id", user_id)
-            .single();
-
-        if (error && error.code !== "PGRST116") {
-            return res.status(500).json({ error: error.message });
-        }
-
-        res.status(200).json({ theme_id: data?.theme_id || "default-theme" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.patch("/user/preferences", checkJwt, async (req, res) => {
-    const user_id = req.auth.payload.sub;
-    const { theme_id } = req.body;
-
-    if (!theme_id || typeof theme_id !== "string") {
-        return res.status(400).json({ error: "Invalid theme_id" });
-    }
-
-    try {
-        const { error: upsertError } = await supabase
-            .from("user_preferences")
-            .upsert({
-                user_id,
-                theme_id,
-                updated_at: new Date().toISOString(),
-            });
-
-        if (upsertError)
-            return res.status(500).json({ error: upsertError.message });
-
-        const { error: reviewsError } = await supabase
-            .from("reviews")
-            .update({ theme_id })
-            .eq("user_id", user_id);
-
-        if (reviewsError)
-            return res.status(500).json({ error: reviewsError.message });
-
-        res.status(200).json({ theme_id });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

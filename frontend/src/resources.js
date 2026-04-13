@@ -18,6 +18,7 @@ export const placeholders = [
     "Elixir Café",
     "Flying Burrito Brothers",
     "Gerome",
+    "Hill House Café",
     "Honey Café",
     "Humbug",
     "Jam Organic Café",
@@ -39,6 +40,23 @@ export const placeholders = [
 ];
 
 export const text = {
+    // General
+    add: "Add",
+    apply: "Apply",
+    save: "Save",
+    edit: "Edit",
+    editLabel: (valueName) => `Edit ${valueName}`,
+    remove: "Remove",
+    removeLabel: (valueName) => `Remove ${valueName}`,
+    delete: "Delete",
+    cancel: "Cancel",
+    close: "Close",
+    done: "Done",
+    saving: "Saving...",
+    deleting: "Deleting...",
+    yes: "Yes",
+    no: "No",
+
     // App
     appName1: "two",
     appName2: "top",
@@ -48,19 +66,23 @@ export const text = {
     },
 
     // Auth
-    logIn: "Admin",
+    logIn: "Log In",
     logOut: "Log Out",
 
-    // Navigation
-    writeReview: "Write a Review",
-    close: "Close",
-    publicOnly: "Public Only",
-    public: "Public",
+    // User preferences
     theme: "Theme",
     light: "Light",
     dark: "Dark",
     toggleDarkMode: "Toggle dark mode",
-    apply: "Apply",
+    editSharedWith: "Review Sharing",
+    noSharedReviews: "No one can see your private reviews yet.",
+    enterEmailAddress: "Enter email address",
+    sharedWithLabel: "Who can see my private reviews",
+
+    // Navigation
+    writeReview: "Write a Review",
+    publicOnly: "Public Only",
+    public: "Public",
 
     // Review form
     restaurantNameLabel: "Restaurant",
@@ -80,13 +102,9 @@ export const text = {
     markAsPublic: "Mark as Public",
     submitReview: "Submit Review",
     submitting: "Submitting...",
-    edit: "Edit",
-    editLabel: (valueName) => `Edit ${valueName}`,
     draftRestored: "Draft restored",
     clearDraft: "Clear draft",
     clearDraftConfirm: "Clear draft?",
-    yes: "Yes",
-    no: "No",
 
     // Photos
     photo: "Photo",
@@ -103,9 +121,6 @@ export const text = {
     // Review card menu
     makePublic: "Make Public",
     makePrivate: "Make Private",
-    delete: "Delete",
-    deleting: "Deleting...",
-    cancel: "Cancel",
     confirmDeleteReview: "Are you sure you want to delete this review?",
 
     // Review list
@@ -123,6 +138,10 @@ export const text = {
     errorImageSize: "Images must be 20MB or less",
     searchError:
         "Search unavailable. You can still enter the restaurant name and address manually.",
+    invalidEmail: "Please enter a valid email address.",
+    userNotFound: "User not found.",
+    alreadyHasAccess: "This user already has access.",
+    ownReviewAccess: "You can already see your own reviews.",
 };
 
 export const enums = {

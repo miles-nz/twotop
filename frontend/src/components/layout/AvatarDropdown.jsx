@@ -7,6 +7,7 @@ import { text, enums } from "../../resources";
 import { isDefaultAvatar } from "../../utils";
 import InlineEdit from "../ui/InlineEdit";
 import LoadingOverlay from "../ui/LoadingOverlay";
+import SharedWithModal from "../ui/SharedWithModal";
 import ThemeModal from "../ui/ThemeModal";
 import DarkModeToggle from "./DarkModeToggle";
 
@@ -26,6 +27,8 @@ export default function AvatarDropdown({
     currentThemeId,
     onThemeChange,
     onThemePreview,
+    sharedWith,
+    onSharedWithChange,
 }) {
     const { getAccessTokenSilently } = useAuth0();
     const [open, setOpen] = useState(false);
@@ -33,6 +36,7 @@ export default function AvatarDropdown({
     const [uploading, setUploading] = useState(false);
     const [savingName, setSavingName] = useState(false);
     const [themeModalOpen, setThemeModalOpen] = useState(false);
+    const [sharedWithModalOpen, setSharedWithModalOpen] = useState(false);
     const dropdownRef = useRef(null);
     const fileInputRef = useRef(null);
 
@@ -264,6 +268,15 @@ export default function AvatarDropdown({
                         )}
                         <button
                             onClick={() => {
+                                setSharedWithModalOpen(true);
+                                setOpen(false);
+                            }}
+                            className="w-full px-4 py-2 text-sm text-text-dark hover:bg-surface-100 transition-colors text-left"
+                        >
+                            {text.editSharedWith}
+                        </button>
+                        <button
+                            onClick={() => {
                                 onLogout();
                                 setOpen(false);
                             }}
@@ -293,6 +306,15 @@ export default function AvatarDropdown({
                     onClose={() => setThemeModalOpen(false)}
                     isDarkMode={isDarkMode}
                     onToggleDarkMode={onToggleDarkMode}
+                />
+            )}
+            {sharedWithModalOpen && (
+                <SharedWithModal
+                    sharedWith={sharedWith}
+                    onSharedWithChange={onSharedWithChange}
+                    onClose={() => setSharedWithModalOpen(false)}
+                    getAccessTokenSilently={getAccessTokenSilently}
+                    currentUserEmail={user?.email}
                 />
             )}
         </div>
