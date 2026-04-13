@@ -60,6 +60,7 @@ export const text = {
     light: "Light",
     dark: "Dark",
     toggleDarkMode: "Toggle dark mode",
+    apply: "Apply",
 
     // Review form
     restaurantNameLabel: "Restaurant",

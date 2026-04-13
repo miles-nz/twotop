@@ -151,7 +151,7 @@ function StarRating({ value, onChange, readOnly = false, size = "md" }) {
                                             />
                                             <stop
                                                 offset="100%"
-                                                stopColor="var(--color-primary-600)"
+                                                stopColor="var(--color-primary-400)"
                                             />
                                         </linearGradient>
                                     </defs>

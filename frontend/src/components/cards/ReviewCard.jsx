@@ -206,7 +206,7 @@ function ReviewCard({ review, currentUserId, onReviewUpdated, isDarkMode }) {
                                             <div className="flex gap-1">
                                                 <Quote
                                                     size={50}
-                                                    className="fill-current"
+                                                    className="fill-current text-primary-500"
                                                 />
                                                 <blockquote className="pl-3 border-l-0 text-text-light italic">
                                                     {children}

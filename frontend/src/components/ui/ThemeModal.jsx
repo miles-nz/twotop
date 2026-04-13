@@ -6,8 +6,6 @@ import ThemePreview from "./ThemePreview";
 import { text } from "../../resources";
 import DarkModeToggle from "../layout/DarkModeToggle";
 
-const GRID_SIZE = 9;
-
 function ThemeModal({
     currentThemeId,
     onThemeChange,
@@ -56,7 +54,7 @@ function ThemeModal({
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: 8 }}
                     transition={{ duration: 0.2 }}
-                    className="bg-surface-50 rounded-2xl shadow-xl border border-surface-200 w-full max-w-sm overflow-hidden"
+                    className="bg-surface-50 rounded-2xl shadow-xl border border-surface-200 w-full max-w-md overflow-hidden"
                 >
                     {/* Header */}
                     <div className="flex items-center justify-between px-5 py-4 border-b border-surface-200">
@@ -80,29 +78,18 @@ function ThemeModal({
                         </div>
                     </div>
 
-                    {/* 3x3 Grid */}
-                    <div className="p-5">
-                        <div className="grid grid-cols-3 gap-4">
-                            {Array.from({ length: GRID_SIZE }).map((_, i) => {
-                                const themeId = themeIds[i];
-                                if (!themeId) {
-                                    return (
-                                        <div
-                                            key={i}
-                                            className="w-27.5 h-27.5 rounded-xl bg-surface-100 border border-dashed border-surface-300"
-                                        />
-                                    );
-                                }
-                                return (
-                                    <ThemePreview
-                                        key={themeId}
-                                        themeId={themeId}
-                                        isActive={selectedThemeId === themeId}
-                                        onClick={() => handleSelect(themeId)}
-                                        isDarkMode={isDarkMode}
-                                    />
-                                );
-                            })}
+                    {/* Grid */}
+                    <div className="p-5 overflow-y-auto max-h-[70vh]">
+                        <div className="grid grid-cols-3 gap-3">
+                            {themeIds.map((themeId) => (
+                                <ThemePreview
+                                    key={themeId}
+                                    themeId={themeId}
+                                    isActive={selectedThemeId === themeId}
+                                    onClick={() => handleSelect(themeId)}
+                                    isDarkMode={isDarkMode}
+                                />
+                            ))}
                         </div>
                     </div>
 
@@ -119,7 +106,7 @@ function ThemeModal({
                             disabled={selectedThemeId === originalThemeId}
                             className="text-sm bg-secondary-500 hover:bg-secondary-600 disabled:opacity-40 disabled:cursor-not-allowed text-white px-4 py-1.5 rounded-lg transition-colors"
                         >
-                            Apply
+                            {text.apply}
                         </button>
                     </div>
                 </motion.div>
