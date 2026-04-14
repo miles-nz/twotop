@@ -173,7 +173,7 @@ export default function AvatarDropdown({
                 <Avatar
                     name={displayName}
                     picture={picture}
-                    loading={uploading}
+                    loading={uploading || currentUserPicture === undefined}
                 />
             </button>
             <AnimatePresence>

@@ -35,6 +35,7 @@ function ReviewList({
     currentUserId,
     onReviewUpdated,
     onScrollComplete,
+    currentThemeId,
     isDarkMode,
 }) {
     const { getAccessTokenSilently } = useAuth0();
@@ -100,7 +101,9 @@ function ReviewList({
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
                 >
-                    <LoadingDots />
+                    <LoadingDots
+                        logoColours={currentThemeId === "default-theme"}
+                    />
                 </motion.div>
             </AnimatePresence>
         );

@@ -27,7 +27,7 @@ const resolveColor = (variable) =>
         .getPropertyValue(variable.replace("var(", "").replace(")", "").trim())
         .trim();
 
-function LoadingDots({ size = 12 }) {
+function LoadingDots({ size = 12, logoColours = false, colourValue = 500 }) {
     const orbitRadius = size / 3;
     const containerSize = orbitRadius * 2 + size;
     const duration = 1000;
@@ -36,10 +36,18 @@ function LoadingDots({ size = 12 }) {
     const customEase = createEase(2);
     const translationAmount = (3 * size) / 5;
 
-    const resolvedTop = resolveColor("--color-secondary-500");
-    const resolvedBottom = resolveColor("--color-secondary-400");
-    const resolvedTopMid = resolveColor("--color-secondary-300");
-    const resolvedBottomMid = resolveColor("--color-secondary-200");
+    const resolvedTop = logoColours
+        ? resolveColor("--color-logo-primary")
+        : resolveColor(`--color-secondary-${colourValue}`);
+    const resolvedBottom = logoColours
+        ? resolveColor("--color-logo-secondary")
+        : resolveColor(`--color-secondary-${colourValue}`);
+    const resolvedTopMid = logoColours
+        ? resolveColor("--color-logo-primary")
+        : resolveColor(`--color-secondary-${Math.max(colourValue - 200, 100)}`);
+    const resolvedBottomMid = logoColours
+        ? resolveColor("--color-logo-secondary")
+        : resolveColor(`--color-secondary-${Math.max(colourValue - 200, 100)}`);
 
     const topX = useMotionValue(0);
     const topY = useMotionValue(0);

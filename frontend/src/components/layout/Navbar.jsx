@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { LogIn, Menu, X } from "lucide-react";
 import Button from "../ui/Button";
 import AvatarDropdown from "./AvatarDropdown";
 import { text } from "../../resources";
@@ -98,32 +98,37 @@ function Navbar({
             {/* Mobile Navbar */}
             <div className="md:hidden sticky top-0 z-50">
                 <div className="px-4 py-3 flex items-center justify-between bg-surface-50 border-b border-surface-200">
-                    <button
-                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        className="p-2 rounded-lg transition-colors"
-                    >
-                        {mobileMenuOpen ? (
-                            <X size={24} className="text-text-dark" />
-                        ) : (
-                            <Menu size={24} className="text-text-dark" />
-                        )}
-                    </button>
+                    <div className="w-20 flex items-center">
+                        <button
+                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                            className="p-2 rounded-lg transition-colors"
+                        >
+                            {mobileMenuOpen ? (
+                                <X size={24} className="text-text-dark" />
+                            ) : (
+                                <Menu size={24} className="text-text-dark" />
+                            )}
+                        </button>
+                    </div>
 
                     <div className="flex-1 flex justify-center">{title}</div>
 
-                    {user ? (
-                        <AvatarDropdown
-                            {...avatarDropdownProps}
-                            mobile={true}
-                        />
-                    ) : (
-                        <Button
-                            variant="surface"
-                            onClick={() => loginWithRedirect()}
-                        >
-                            {text.logIn}
-                        </Button>
-                    )}
+                    <div className="w-20 flex items-center justify-end">
+                        {user ? (
+                            <AvatarDropdown
+                                {...avatarDropdownProps}
+                                mobile={true}
+                            />
+                        ) : (
+                            <button
+                                onClick={() => loginWithRedirect()}
+                                className="p-2 rounded-lg transition-colors"
+                                aria-label={text.logIn}
+                            >
+                                <LogIn size={24} className="text-text-dark" />
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 {/* Mobile Menu */}

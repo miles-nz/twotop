@@ -91,6 +91,7 @@ function App() {
                     <ReviewList
                         isPublic
                         onScrollComplete={() => setScrollToId(null)}
+                        currentThemeId={currentThemeId}
                         isDarkMode={isDarkMode}
                     />
                 </div>
@@ -212,6 +213,7 @@ function App() {
                         setRefreshTrigger((prev) => prev + 1);
                     }}
                     onScrollComplete={() => setScrollToId(null)}
+                    currentThemeId={currentThemeId}
                     isDarkMode={isDarkMode}
                 />
             </div>

@@ -1,5 +1,7 @@
+import { useState, useEffect } from "react";
 import LoadingDots from "./LoadingDots";
 import { isDefaultAvatar } from "../../utils";
+import { motion } from "framer-motion";
 
 const getInitials = (name) => {
     if (!name) return "?";
@@ -13,6 +15,18 @@ const getInitials = (name) => {
 };
 
 function Avatar({ name, picture, size = "md", title, loading = false }) {
+    const [imageLoaded, setImageLoaded] = useState(false);
+
+    useEffect(() => {
+        if (!picture) {
+            setImageLoaded(false);
+            return;
+        }
+        const img = new Image();
+        img.onload = () => setImageLoaded(true);
+        img.src = picture;
+    }, [picture]);
+
     const sizes = {
         sm: "w-6 h-6 text-xs",
         md: "w-8 h-8 text-sm",
@@ -24,17 +38,25 @@ function Avatar({ name, picture, size = "md", title, loading = false }) {
             className={`${sizes[size]} rounded-full bg-secondary-400 text-white flex items-center justify-center font-semibold text-xs overflow-hidden shrink-0`}
             title={title || name}
         >
-            {loading ? (
-                <LoadingDots size="w-1 h-1" color="bg-white" />
-            ) : picture && !isDefaultAvatar(picture) ? (
-                <img
-                    src={picture}
-                    alt={name}
-                    className="w-full h-full object-cover"
-                />
-            ) : (
-                getInitials(name)
-            )}
+            <div className="relative w-full h-full flex items-center justify-center">
+                {(loading ||
+                    (picture && !isDefaultAvatar(picture) && !imageLoaded)) && (
+                    <LoadingDots size={8} colourValue={100} />
+                )}
+                {picture && !isDefaultAvatar(picture) && (
+                    <motion.img
+                        src={picture}
+                        alt={name}
+                        className="w-full h-full object-cover absolute inset-0"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: imageLoaded ? 1 : 0 }}
+                        transition={{ duration: 0.3 }}
+                    />
+                )}
+                {!loading && (!picture || isDefaultAvatar(picture)) && (
+                    <span className="absolute">{getInitials(name)}</span>
+                )}
+            </div>
         </div>
     );
 }
