@@ -11,17 +11,8 @@ import Logo from "../ui/Logo";
 function Navbar({
     isPublic = false,
     onTogglePublic,
-    currentUserName,
-    onNameUpdated,
-    currentUserPicture,
     onPictureUpdated,
-    isDarkMode,
-    onToggleDarkMode,
-    currentThemeId,
-    onThemeChange,
-    onThemePreview,
-    sharedWith,
-    onSharedWithChange,
+    onNameUpdated,
 }) {
     const { user, logout, isAuthenticated, loginWithRedirect } = useAuth0();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -49,17 +40,8 @@ function Navbar({
         onLogout: () =>
             logout({ logoutParams: { returnTo: window.location.origin } }),
         showName: true,
-        currentUserName,
-        onNameUpdated,
-        currentUserPicture,
         onPictureUpdated,
-        isDarkMode,
-        onToggleDarkMode,
-        currentThemeId,
-        onThemeChange,
-        onThemePreview,
-        sharedWith,
-        onSharedWithChange,
+        onNameUpdated,
     };
 
     return (

@@ -1,40 +1,29 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Button from "./components/ui/Button";
 import Navbar from "./components/layout/Navbar";
 import ReviewForm from "./components/reviews/ReviewForm";
 import ReviewList from "./components/reviews/ReviewList";
-import { themes } from "./themes";
 import { text } from "./resources";
-import { useDarkMode } from "./hooks/useDarkMode";
-import { useUserPicture } from "./hooks/useUserPicture";
-import { useUserPreferences } from "./hooks/useUserPreferences";
-import { smoothScrollToTop } from "./utils";
+import { applyThemeToCss } from "./utils";
+import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
+import { UserProvider, useUser } from "./contexts/UserContext";
 
-function App() {
+function AppContent({ onRegisterRefresh }) {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
-    const { isDarkMode, toggleDarkMode } = useDarkMode();
+    const { currentThemeId, isDarkMode } = useTheme();
+    const { fetchCurrentUser, fetchPreferences } = useUser();
 
     const [formOpen, setFormOpen] = useState(false);
     const [justSubmitted, setJustSubmitted] = useState(false);
     const [isPublicOnly, setIsPublicOnly] = useState(false);
-
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [scrollToId, setScrollToId] = useState(null);
 
-    const [currentUserName, setCurrentUserName] = useState(undefined);
-
-    const { currentUserPicture, setCurrentUserPicture, fetchCurrentPicture } =
-        useUserPicture();
-    const {
-        currentThemeId,
-        sharedWith,
-        fetchPreferences,
-        handleThemeChange,
-        handleSharedWithChange,
-        handleThemePreview,
-    } = useUserPreferences();
+    useEffect(() => {
+        onRegisterRefresh(() => setRefreshTrigger((prev) => prev + 1));
+    }, []);
 
     const handleReviewSubmitted = (newId) => {
         setJustSubmitted(true);
@@ -43,7 +32,6 @@ function App() {
     };
 
     const handleReviewsLoaded = (count) => {
-        // Only auto-expand the form if not in public only mode
         if (count === 0 && !isPublicOnly) setFormOpen(true);
         if (justSubmitted) {
             setFormOpen(false);
@@ -51,23 +39,20 @@ function App() {
         }
     };
 
+    // Apply theme CSS variables
     useEffect(() => {
-        const themeSet = isDarkMode ? themes.dark : themes.light;
-        const theme = user
-            ? themeSet[currentThemeId] || themeSet["default-theme"]
-            : themeSet["default-theme"];
-        Object.entries(theme).forEach(([key, value]) => {
-            document.documentElement.style.setProperty(key, value);
-        });
+        const themeId = user ? currentThemeId : "default-theme";
+        applyThemeToCss(themeId, isDarkMode);
     }, [user, isDarkMode, currentThemeId]);
 
+    // Fetch user data on login
     useEffect(() => {
         if (!user) return;
-        if (currentUserName === undefined) setCurrentUserName(user.name);
-        fetchCurrentPicture();
+        fetchCurrentUser();
         fetchPreferences();
     }, [user, isAuthenticated, getAccessTokenSilently]);
 
+    // Sync dark mode class
     useEffect(() => {
         document.documentElement.classList.toggle("dark", isDarkMode);
     }, [isDarkMode]);
@@ -83,16 +68,11 @@ function App() {
                 <Navbar
                     isPublic={isPublicOnly}
                     onTogglePublic={setIsPublicOnly}
-                    isDarkMode={isDarkMode}
-                    onToggleDarkMode={toggleDarkMode}
-                    currentThemeId={currentThemeId}
                 />
                 <div className="max-w-3xl mx-auto py-8 px-4">
                     <ReviewList
                         isPublic
                         onScrollComplete={() => setScrollToId(null)}
-                        currentThemeId={currentThemeId}
-                        isDarkMode={isDarkMode}
                     />
                 </div>
             </motion.div>
@@ -109,27 +89,12 @@ function App() {
             <Navbar
                 isPublic={isPublicOnly}
                 onTogglePublic={setIsPublicOnly}
-                currentUserPicture={currentUserPicture}
-                onPictureUpdated={(picture) => {
-                    setCurrentUserPicture(picture);
+                onPictureUpdated={() => {
                     setRefreshTrigger((prev) => prev + 1);
                 }}
-                currentUserName={currentUserName}
-                onNameUpdated={(name) => {
-                    setCurrentUserName(name);
+                onNameUpdated={() => {
                     setRefreshTrigger((prev) => prev + 1);
                 }}
-                isDarkMode={isDarkMode}
-                onToggleDarkMode={toggleDarkMode}
-                currentThemeId={currentThemeId}
-                onThemeChange={(themeId) =>
-                    handleThemeChange(themeId, () =>
-                        setRefreshTrigger((prev) => prev + 1),
-                    )
-                }
-                onThemePreview={handleThemePreview}
-                sharedWith={sharedWith}
-                onSharedWithChange={handleSharedWithChange}
             />
             <div className="max-w-3xl mx-auto pt-6 pb-16 px-4 sm:px-6 lg:px-0">
                 {/* Floating Write a Review Button (desktop only) */}
@@ -138,18 +103,12 @@ function App() {
                         onClick={() => {
                             if (!formOpen) {
                                 setFormOpen(true);
-                                // Try native smooth scroll, fallback to manual animation
-                                let scrolled = false;
                                 try {
                                     window.scrollTo({
                                         top: 0,
                                         behavior: "smooth",
                                     });
-                                    scrolled = true;
                                 } catch (e) {}
-                                if (!scrolled || window.pageYOffset > 10) {
-                                    smoothScrollToTop();
-                                }
                             } else {
                                 setFormOpen(false);
                             }
@@ -196,8 +155,6 @@ function App() {
                         >
                             <ReviewForm
                                 onReviewSubmitted={handleReviewSubmitted}
-                                currentUserName={currentUserName}
-                                currentUserPicture={currentUserPicture}
                             />
                         </motion.div>
                     )}
@@ -213,11 +170,25 @@ function App() {
                         setRefreshTrigger((prev) => prev + 1);
                     }}
                     onScrollComplete={() => setScrollToId(null)}
-                    currentThemeId={currentThemeId}
-                    isDarkMode={isDarkMode}
                 />
             </div>
         </motion.div>
+    );
+}
+
+function App() {
+    const triggerRefreshRef = useRef(null);
+
+    return (
+        <ThemeProvider onThemeApplied={() => triggerRefreshRef.current?.()}>
+            <UserProvider>
+                <AppContent
+                    onRegisterRefresh={(fn) => {
+                        triggerRefreshRef.current = fn;
+                    }}
+                />
+            </UserProvider>
+        </ThemeProvider>
     );
 }
 

@@ -12,6 +12,7 @@ import { useAutoResize } from "../../hooks/useAutoResize";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
 import { useImageUpload } from "../../hooks/useImageUpload";
 import { useReviewDraft } from "../../hooks/useReviewDraft";
+import { useUser } from "../../contexts/UserContext";
 
 import { text, draftKeys } from "../../resources";
 import { getLocalDate } from "../../utils";
@@ -21,11 +22,7 @@ const DRAFT_KEY = draftKeys.newReview;
 const inputClass =
     "w-full border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400";
 
-function ReviewForm({
-    onReviewSubmitted,
-    currentUserName,
-    currentUserPicture,
-}) {
+function ReviewForm({ onReviewSubmitted }) {
     const { getAccessTokenSilently, user } = useAuth0();
 
     const [restaurantName, setRestaurantName] = useState("");
@@ -77,6 +74,7 @@ function ReviewForm({
     const [error, setError] = useState(null);
 
     const isDesktop = useBreakpoint();
+    const { currentUserName, currentUserPicture } = useUser();
 
     const { clearDraft } = useReviewDraft({
         draftKey: DRAFT_KEY,

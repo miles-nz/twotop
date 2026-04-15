@@ -10,6 +10,8 @@ import LoadingOverlay from "../ui/LoadingOverlay";
 import SharedWithModal from "../ui/SharedWithModal";
 import ThemeModal from "../ui/ThemeModal";
 import DarkModeToggle from "./DarkModeToggle";
+import { useTheme } from "../../contexts/ThemeContext";
+import { useUser } from "../../contexts/UserContext";
 
 export default function AvatarDropdown({
     user,
@@ -17,20 +19,29 @@ export default function AvatarDropdown({
     showName = false,
     buttonClassName = "",
     dropdownClassName = "",
-    currentUserName,
-    currentUserPicture,
     onPictureUpdated,
     onNameUpdated,
     mobile = false,
-    isDarkMode,
-    onToggleDarkMode,
-    currentThemeId,
-    onThemeChange,
-    onThemePreview,
-    sharedWith,
-    onSharedWithChange,
 }) {
     const { getAccessTokenSilently } = useAuth0();
+    const {
+        currentThemeId,
+        handleThemeChange,
+        handleThemePreview,
+        isDarkMode,
+        toggleDarkMode,
+    } = useTheme();
+    const {
+        currentUserName,
+        updateCurrentUserName,
+        currentUserPicture,
+        setCurrentUserPicture,
+        sharedWith,
+        handleSharedWithChange,
+    } = useUser();
+
+    console.log(currentUserName);
+
     const [open, setOpen] = useState(false);
     const [cropSrc, setCropSrc] = useState(null);
     const [uploading, setUploading] = useState(false);
@@ -86,6 +97,7 @@ export default function AvatarDropdown({
             );
             const data = await response.json();
             if (!response.ok) throw new Error(data.error);
+            setCurrentUserPicture(data.picture);
             onPictureUpdated?.(data.picture);
             await getAccessTokenSilently({ ignoreCache: true });
         } catch (err) {
@@ -117,6 +129,7 @@ export default function AvatarDropdown({
                 },
             );
             if (!response.ok) throw new Error("Failed to delete picture");
+            setCurrentUserPicture(null);
             onPictureUpdated?.(null);
             await getAccessTokenSilently({ ignoreCache: true });
         } catch (err) {
@@ -143,6 +156,7 @@ export default function AvatarDropdown({
                 },
             );
             if (!response.ok) throw new Error("Failed to update name");
+            updateCurrentUserName(newName);
             onNameUpdated?.(newName);
             await getAccessTokenSilently({ ignoreCache: true });
         } catch (err) {
@@ -185,49 +199,43 @@ export default function AvatarDropdown({
                         transition={{ duration: 0.15 }}
                         className={`absolute right-0 mt-2 w-40 bg-surface-50 border border-surface-200 rounded-lg shadow-lg overflow-hidden z-50 ${dropdownClassName}`}
                     >
-                        {(onToggleDarkMode || onThemeChange) && (
-                            <div className="w-full px-4 py-2 transition-colors flex items-center justify-around">
-                                <div className="flex items-center gap-2">
-                                    {onThemeChange && (
-                                        <button
-                                            onClick={() => {
-                                                setThemeModalOpen(true);
-                                                setOpen(false);
-                                            }}
-                                            className="text-secondary-300 hover:text-text-dark transition-colors"
-                                            aria-label={text.theme}
-                                        >
-                                            <svg
-                                                width="18"
-                                                height="18"
-                                                viewBox="0 0 14 14"
-                                                fill="currentColor"
-                                                className="mx-4"
-                                            >
-                                                {[0, 1, 2].map((row) =>
-                                                    [0, 1, 2].map((col) => (
-                                                        <rect
-                                                            key={`${row}-${col}`}
-                                                            x={col * 5}
-                                                            y={row * 5}
-                                                            width="3.5"
-                                                            height="3.5"
-                                                            rx="0.5"
-                                                        />
-                                                    )),
-                                                )}
-                                            </svg>
-                                        </button>
-                                    )}
-                                    {onToggleDarkMode && (
-                                        <DarkModeToggle
-                                            isDarkMode={isDarkMode}
-                                            onToggle={onToggleDarkMode}
-                                        />
-                                    )}
-                                </div>
+                        <div className="w-full px-4 py-2 transition-colors flex items-center justify-around">
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => {
+                                        setThemeModalOpen(true);
+                                        setOpen(false);
+                                    }}
+                                    className="text-secondary-300 hover:text-text-dark transition-colors"
+                                    aria-label={text.theme}
+                                >
+                                    <svg
+                                        width="18"
+                                        height="18"
+                                        viewBox="0 0 14 14"
+                                        fill="currentColor"
+                                        className="mx-4"
+                                    >
+                                        {[0, 1, 2].map((row) =>
+                                            [0, 1, 2].map((col) => (
+                                                <rect
+                                                    key={`${row}-${col}`}
+                                                    x={col * 5}
+                                                    y={row * 5}
+                                                    width="3.5"
+                                                    height="3.5"
+                                                    rx="0.5"
+                                                />
+                                            )),
+                                        )}
+                                    </svg>
+                                </button>
+                                <DarkModeToggle
+                                    isDarkMode={isDarkMode}
+                                    onToggle={toggleDarkMode}
+                                />
                             </div>
-                        )}
+                        </div>
                         {showName && (
                             <div className="w-full px-4 py-2 hover:bg-surface-100 transition-colors text-left">
                                 <InlineEdit
@@ -299,19 +307,19 @@ export default function AvatarDropdown({
                 <ThemeModal
                     currentThemeId={currentThemeId}
                     onThemeChange={(themeId) => {
-                        onThemeChange(themeId);
+                        handleThemeChange(themeId);
                         setThemeModalOpen(false);
                     }}
-                    onThemePreview={onThemePreview}
+                    onThemePreview={handleThemePreview}
                     onClose={() => setThemeModalOpen(false)}
                     isDarkMode={isDarkMode}
-                    onToggleDarkMode={onToggleDarkMode}
+                    onToggleDarkMode={toggleDarkMode}
                 />
             )}
             {sharedWithModalOpen && (
                 <SharedWithModal
                     sharedWith={sharedWith}
-                    onSharedWithChange={onSharedWithChange}
+                    onSharedWithChange={handleSharedWithChange}
                     onClose={() => setSharedWithModalOpen(false)}
                     getAccessTokenSilently={getAccessTokenSilently}
                     currentUserEmail={user?.email}

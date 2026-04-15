@@ -17,8 +17,10 @@ import {
     formatShortAddress,
 } from "../../utils";
 import { text } from "../../resources";
+import { useTheme } from "../../contexts/ThemeContext";
 
-function ReviewCard({ review, currentUserId, onReviewUpdated, isDarkMode }) {
+function ReviewCard({ review, currentUserId, onReviewUpdated }) {
+    const { isDarkMode } = useTheme();
     const themeSet = isDarkMode ? themes.dark : themes.light;
     const theme = themeSet[review.theme_id] || {};
 

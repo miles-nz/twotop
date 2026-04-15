@@ -509,7 +509,7 @@ app.get("/user", checkJwt, async (req, res) => {
     }
 });
 
-app.get("/user/picture", checkJwt, async (req, res) => {
+app.get("/user/me", checkJwt, async (req, res) => {
     const user_id = req.auth.payload.sub;
     try {
         const token = await getMgmtToken();
@@ -520,7 +520,10 @@ app.get("/user/picture", checkJwt, async (req, res) => {
             },
         );
         const userData = await userResponse.json();
-        res.status(200).json({ picture: userData.picture });
+        res.status(200).json({
+            picture: userData.picture,
+            name: userData.name,
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

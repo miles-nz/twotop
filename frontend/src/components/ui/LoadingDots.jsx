@@ -30,8 +30,8 @@ const resolveColor = (variable) =>
 function LoadingDots({ size = 12, logoColours = false, colourValue = 500 }) {
     const orbitRadius = size / 3;
     const containerSize = orbitRadius * 2 + size;
-    const duration = 1000;
-    const pauseDuration = 200;
+    const duration = 750;
+    const pauseDuration = 100;
     const cycleDuration = duration + pauseDuration;
     const customEase = createEase(2);
     const translationAmount = (3 * size) / 5;

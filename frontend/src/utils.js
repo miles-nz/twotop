@@ -1,3 +1,5 @@
+import { themes } from "./themes";
+
 // Smooth scroll to top fallback for browsers without native support
 export function smoothScrollToTop(duration = 400) {
     const start =
@@ -63,3 +65,11 @@ export const formatShortAddress = (address) => {
     const parts = address.split(",").map((p) => p.trim());
     return parts.slice(-2).join(", ");
 };
+
+export function applyThemeToCss(themeId, isDarkMode) {
+    const themeSet = isDarkMode ? themes.dark : themes.light;
+    const theme = themeSet[themeId] || themeSet["default-theme"];
+    Object.entries(theme).forEach(([key, value]) => {
+        document.documentElement.style.setProperty(key, value);
+    });
+}

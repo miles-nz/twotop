@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
 import { text } from "../../resources";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
 import LoadingDots from "../ui/LoadingDots";
+import { useTheme } from "../../contexts/ThemeContext";
 
 const arrowButtonClasses =
     "absolute top-1/2 -translate-y-1/2 bg-black/50 enabled:hover:bg-black/70 disabled:opacity-30 text-white rounded-full p-2 transition-all duration-200 z-10 enabled:cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400";
@@ -15,6 +16,7 @@ function ImageCarousel({ images }) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loadedImages, setLoadedImages] = useState({});
     const [errorImages, setErrorImages] = useState({});
+    const { currentThemeId } = useTheme();
 
     const handleScroll = () => {
         const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
@@ -78,7 +80,9 @@ function ImageCarousel({ images }) {
                         <div
                             className={`absolute inset-0 bg-surface-200 animate-pulse flex items-center justify-center transition-opacity duration-300 ${loadedImages[index] ? "opacity-0" : "opacity-100"} z-0`}
                         >
-                            <LoadingDots />
+                            <LoadingDots
+                                logoColours={currentThemeId === "default-theme"}
+                            />
                         </div>
                         {errorImages[index] && (
                             <div className="absolute inset-0 bg-surface-200 flex items-center justify-center z-10">

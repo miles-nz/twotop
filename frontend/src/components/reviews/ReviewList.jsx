@@ -5,6 +5,7 @@ import LoadingDots from "../ui/LoadingDots";
 import { ReviewListProvider } from "../../contexts/ReviewListContext";
 import ReviewCard from "../cards/ReviewCard";
 import { text } from "../../resources";
+import { useTheme } from "../../contexts/ThemeContext";
 
 const statusCardClass =
     "bg-surface-50 rounded-2xl shadow-md p-6 text-center border border-surface-200";
@@ -35,10 +36,9 @@ function ReviewList({
     currentUserId,
     onReviewUpdated,
     onScrollComplete,
-    currentThemeId,
-    isDarkMode,
 }) {
     const { getAccessTokenSilently } = useAuth0();
+    const { currentThemeId } = useTheme();
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -155,7 +155,6 @@ function ReviewList({
                         review={review}
                         currentUserId={currentUserId}
                         onReviewUpdated={onReviewUpdated}
-                        isDarkMode={isDarkMode}
                     />
                 ))}
             </div>
