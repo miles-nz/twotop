@@ -73,3 +73,22 @@ export function applyThemeToCss(themeId, isDarkMode) {
         document.documentElement.style.setProperty(key, value);
     });
 }
+
+export function getDeviceType() {
+    const ua = navigator.userAgent;
+    const isTouchDevice = navigator.maxTouchPoints > 0;
+
+    const isTablet =
+        /(ipad)/i.test(ua) ||
+        // iPads on iOS 13+ report as Macintosh but have touch points
+        (/Macintosh/i.test(ua) && isTouchDevice) ||
+        (/android/i.test(ua) && !/mobile/i.test(ua));
+
+    const isMobile =
+        !isTablet &&
+        /android|webos|iphone|ipod|blackberry|iemobile|opera mini/i.test(ua);
+
+    if (isTablet) return "tablet";
+    if (isMobile) return "mobile";
+    return "desktop";
+}

@@ -73,7 +73,7 @@ function ReviewForm({ onReviewSubmitted }) {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState(null);
 
-    const isDesktop = useBreakpoint();
+    const isDesktop = useBreakpoint("md");
     const { currentUserName, currentUserPicture } = useUser();
 
     const { clearDraft } = useReviewDraft({

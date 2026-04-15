@@ -1,19 +1,51 @@
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, Monitor, Smartphone, Tablet } from "lucide-react";
+import SegmentedControl from "../ui/SegmentedControl";
 import { text } from "../../resources";
-import Toggle from "../ui/Toggle";
+import { getDeviceType } from "../../utils";
 
-export default function DarkModeToggle({ isDarkMode, onToggle }) {
+const deviceType = getDeviceType();
+
+const systemIcon =
+    deviceType === "mobile" ? (
+        <Smartphone size={11} />
+    ) : deviceType === "tablet" ? (
+        <Tablet size={11} />
+    ) : (
+        <Monitor size={11} />
+    );
+
+const COLOR_MODE_OPTIONS = [
+    {
+        value: "light",
+        icon: <Sun size={11} />,
+        text: text.colorModeLight,
+    },
+    {
+        value: "dark",
+        icon: <Moon size={11} />,
+        text: text.colorModeDark,
+    },
+    {
+        value: "system",
+        icon: systemIcon,
+        text: text.colorModeSystem,
+    },
+];
+
+export default function DarkModeToggle({
+    colorMode,
+    onColorModeChange,
+    showIcon = true,
+    showText = false,
+}) {
     return (
-        <Toggle
-            value={isDarkMode}
-            onToggle={onToggle}
-            ariaLabel={text.toggleDarkMode}
-        >
-            {isDarkMode ? (
-                <Moon size={10} className="text-secondary-500" />
-            ) : (
-                <Sun size={10} className="text-secondary-500" />
-            )}
-        </Toggle>
+        <SegmentedControl
+            options={COLOR_MODE_OPTIONS}
+            value={colorMode}
+            onChange={onColorModeChange}
+            ariaLabel={text.darkModeToggleLabel}
+            showIcon={showIcon}
+            showText={showText}
+        />
     );
 }

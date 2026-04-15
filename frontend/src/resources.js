@@ -71,8 +71,9 @@ export const text = {
 
     // User preferences
     theme: "Theme",
-    light: "Light",
-    dark: "Dark",
+    colorModeSystem: "System",
+    colorModeLight: "Light",
+    colorModeDark: "Dark",
     toggleDarkMode: "Toggle dark mode",
     editSharedWith: "Review Sharing",
     noSharedReviews: "No one can see your private reviews yet.",

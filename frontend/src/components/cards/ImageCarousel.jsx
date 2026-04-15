@@ -61,7 +61,7 @@ function ImageCarousel({ images }) {
         }
     };
 
-    const isDesktop = useBreakpoint();
+    const isDesktop = useBreakpoint("md");
 
     if (!images || images.length === 0) return null;
 

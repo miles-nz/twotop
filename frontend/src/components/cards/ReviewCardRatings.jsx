@@ -2,7 +2,7 @@ import StarRating from "../ui/StarRating";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
 
 function ReviewCardRatings({ foodRating, drinkRating, ambienceRating }) {
-    const isDesktop = useBreakpoint();
+    const isDesktop = useBreakpoint("md");
 
     if (!foodRating && !drinkRating && !ambienceRating) return null;
 

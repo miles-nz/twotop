@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTheme } from "../../contexts/ThemeContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { themeIds } from "../../themes";
@@ -11,11 +12,10 @@ function ThemeModal({
     onThemeChange,
     onThemePreview,
     onClose,
-    isDarkMode,
-    onToggleDarkMode,
 }) {
     const [selectedThemeId, setSelectedThemeId] = useState(currentThemeId);
     const [originalThemeId] = useState(currentThemeId);
+    const { isDarkMode, colorMode, setColorMode } = useTheme();
 
     const handleSelect = (themeId) => {
         setSelectedThemeId(themeId);
@@ -62,12 +62,11 @@ function ThemeModal({
                             {text.theme}
                         </h2>
                         <div className="flex items-center gap-3">
-                            {onToggleDarkMode && (
-                                <DarkModeToggle
-                                    isDarkMode={isDarkMode}
-                                    onToggle={onToggleDarkMode}
-                                />
-                            )}
+                            <DarkModeToggle
+                                colorMode={colorMode}
+                                onColorModeChange={setColorMode}
+                                showText={true}
+                            />
                             <button
                                 onClick={handleClose}
                                 className="text-text-light hover:text-text-dark transition-colors"

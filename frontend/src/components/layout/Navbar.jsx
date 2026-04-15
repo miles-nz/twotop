@@ -62,7 +62,7 @@ function Navbar({
 
                     <div className="flex items-center gap-6 justify-end">
                         {user ? (
-                            <div className="hidden lg:block">
+                            <div className="hidden md:block">
                                 <AvatarDropdown {...avatarDropdownProps} />
                             </div>
                         ) : (

@@ -28,8 +28,8 @@ export default function AvatarDropdown({
         currentThemeId,
         handleThemeChange,
         handleThemePreview,
-        isDarkMode,
-        toggleDarkMode,
+        colorMode,
+        setColorMode,
     } = useTheme();
     const {
         currentUserName,
@@ -39,8 +39,6 @@ export default function AvatarDropdown({
         sharedWith,
         handleSharedWithChange,
     } = useUser();
-
-    console.log(currentUserName);
 
     const [open, setOpen] = useState(false);
     const [cropSrc, setCropSrc] = useState(null);
@@ -214,7 +212,7 @@ export default function AvatarDropdown({
                                         height="18"
                                         viewBox="0 0 14 14"
                                         fill="currentColor"
-                                        className="mx-4"
+                                        className="mx-2"
                                     >
                                         {[0, 1, 2].map((row) =>
                                             [0, 1, 2].map((col) => (
@@ -231,8 +229,8 @@ export default function AvatarDropdown({
                                     </svg>
                                 </button>
                                 <DarkModeToggle
-                                    isDarkMode={isDarkMode}
-                                    onToggle={toggleDarkMode}
+                                    colorMode={colorMode}
+                                    onColorModeChange={setColorMode}
                                 />
                             </div>
                         </div>
@@ -312,8 +310,6 @@ export default function AvatarDropdown({
                     }}
                     onThemePreview={handleThemePreview}
                     onClose={() => setThemeModalOpen(false)}
-                    isDarkMode={isDarkMode}
-                    onToggleDarkMode={toggleDarkMode}
                 />
             )}
             {sharedWithModalOpen && (

@@ -11,7 +11,7 @@ function ReviewCardCarousel({ images, reviewId }) {
     const { carouselRef, expandedHeight, isCollapsed, setIsCollapsed } =
         useCarousel();
 
-    const isDesktop = useBreakpoint();
+    const isDesktop = useBreakpoint("md");
     const shouldCollapse = isDesktop && preferences.collapseReviewImages;
 
     return (

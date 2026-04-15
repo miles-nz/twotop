@@ -8,7 +8,7 @@ export function ThemeProvider({ children, onThemeApplied }) {
     const { currentThemeId, handleThemeChange, handleThemePreview } =
         useThemePreference();
 
-    const { isDarkMode, toggleDarkMode } = useDarkMode();
+    const { isDarkMode, colorMode, setColorMode } = useDarkMode();
 
     return (
         <ThemeContext.Provider
@@ -19,7 +19,8 @@ export function ThemeProvider({ children, onThemeApplied }) {
                 handleThemePreview: (themeId) =>
                     handleThemePreview(themeId, isDarkMode),
                 isDarkMode,
-                toggleDarkMode,
+                colorMode,
+                setColorMode,
             }}
         >
             {children}
