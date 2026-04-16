@@ -3,6 +3,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { motion } from "framer-motion";
 import { ImagePlus, X } from "lucide-react";
 import ImageCropModal from "../cards/ImageCropModal";
+import PublicToggle from "../layout/PublicToggle";
 import Button from "../ui/Button";
 import LoadingOverlay from "../ui/LoadingOverlay";
 import MarkdownToolbar from "../ui/MarkdownToolbar";
@@ -354,21 +355,7 @@ function ReviewForm({ onReviewSubmitted }) {
                 >
                     {text.markAsPublic}
                 </label>
-                <button
-                    id="publicToggle"
-                    aria-pressed={isPublic}
-                    aria-label={text.markAsPublic}
-                    onClick={() => setIsPublic((prev) => !prev)}
-                    className={`relative w-11 h-6 rounded-full transition-colors duration-200 cursor-pointer focus:outline-none ${
-                        isPublic ? "bg-secondary-500" : "bg-surface-300"
-                    }`}
-                >
-                    <span
-                        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${
-                            isPublic ? "translate-x-5" : "translate-x-0"
-                        }`}
-                    />
-                </button>
+                <PublicToggle isPublic={isPublic} onToggle={setIsPublic} />
             </div>
 
             {(error || uploadError) && (

@@ -46,6 +46,5 @@ export function useDarkMode() {
         }
     }, []);
 
-    // Keep toggleDarkMode for any existing consumers
     return { isDarkMode, colorMode, setColorMode };
 }
