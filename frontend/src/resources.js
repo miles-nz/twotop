@@ -75,7 +75,7 @@ export const text = {
     colorModeLight: "Light",
     colorModeDark: "Dark",
     darkModeToggleLabel: "Dark mode toggle",
-    editSharedWith: "Review Sharing",
+    editSharedWith: "Sharing Settings",
     noSharedReviews: "No one can see your private reviews yet.",
     enterEmailAddress: "Enter email address",
     sharedWithLabel: "Who can see my private reviews",

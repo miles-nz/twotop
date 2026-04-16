@@ -13,6 +13,9 @@ import DarkModeToggle from "./DarkModeToggle";
 import { useTheme } from "../../contexts/ThemeContext";
 import { useUser } from "../../contexts/UserContext";
 
+const menuItemClasses =
+    "w-full px-4 py-2 text-sm hover:bg-surface-200 transition-colors text-left";
+
 export default function AvatarDropdown({
     user,
     onLogout,
@@ -195,7 +198,7 @@ export default function AvatarDropdown({
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -8 }}
                         transition={{ duration: 0.15 }}
-                        className={`absolute right-0 mt-2 w-40 bg-surface-50 border border-surface-200 rounded-lg shadow-lg overflow-hidden z-50 ${dropdownClassName}`}
+                        className={`absolute right-0 mt-2 w-50 bg-surface-50 border border-surface-200 rounded-lg shadow-lg overflow-hidden z-50 ${dropdownClassName}`}
                     >
                         <div className="w-full px-4 py-2 transition-colors flex items-center justify-around">
                             <div className="flex items-center gap-2">
@@ -235,11 +238,11 @@ export default function AvatarDropdown({
                             </div>
                         </div>
                         {showName && (
-                            <div className="w-full px-4 py-2 hover:bg-surface-100 transition-colors text-left">
+                            <div className={menuItemClasses}>
                                 <InlineEdit
                                     value={displayName || ""}
                                     onSave={handleSaveName}
-                                    className="text-sm text-text-dark w-full truncate"
+                                    className="text-text-dark w-full truncate"
                                     inputClassName="text-sm text-text-dark w-full"
                                     displayMode={
                                         mobile
@@ -260,14 +263,14 @@ export default function AvatarDropdown({
                                 fileInputRef.current.click();
                                 setOpen(false);
                             }}
-                            className="w-full px-4 py-2 text-sm text-text-dark hover:bg-surface-100 transition-colors text-left"
+                            className={`text-text-dark ${menuItemClasses}`}
                         >
                             {text.uploadPhoto}
                         </button>
                         {picture && (
                             <button
                                 onClick={handleDeletePicture}
-                                className="w-full px-4 py-2 text-sm text-error-500 hover:bg-surface-100 transition-colors text-left"
+                                className={`text-error-500 ${menuItemClasses}`}
                             >
                                 {text.removePhoto}
                             </button>
@@ -277,7 +280,7 @@ export default function AvatarDropdown({
                                 setSharedWithModalOpen(true);
                                 setOpen(false);
                             }}
-                            className="w-full px-4 py-2 text-sm text-text-dark hover:bg-surface-100 transition-colors text-left"
+                            className={`text-text-dark ${menuItemClasses}`}
                         >
                             {text.editSharedWith}
                         </button>
@@ -286,7 +289,7 @@ export default function AvatarDropdown({
                                 onLogout();
                                 setOpen(false);
                             }}
-                            className="w-full px-4 py-2 text-sm text-text-dark hover:bg-surface-100 transition-colors text-left"
+                            className={`text-text-dark ${menuItemClasses}`}
                         >
                             {text.logOut}
                         </button>

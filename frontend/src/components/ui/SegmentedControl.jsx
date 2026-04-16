@@ -71,7 +71,7 @@ export default function SegmentedControl({
             ref={containerRef}
             role="radiogroup"
             aria-label={ariaLabel}
-            className="relative inline-flex items-center bg-surface-200 rounded-full p-1 cursor-pointer"
+            className="relative inline-flex items-center bg-surface-200 rounded-full p-1 cursor-pointer user-select-none"
             onPointerUp={handleTap}
         >
             {/* Indicator */}

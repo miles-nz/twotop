@@ -7,7 +7,6 @@ const getSystemDark = () =>
     window.matchMedia("(prefers-color-scheme: dark)").matches;
 
 const getInitialMode = () => {
-    // Migrate from legacy boolean key
     const legacy = localStorage.getItem(LEGACY_KEY);
     if (legacy !== null) {
         const migrated = legacy === "true" ? "dark" : "light";
@@ -20,22 +19,17 @@ const getInitialMode = () => {
 
 export function useDarkMode() {
     const [colorMode, setColorModeState] = useState(getInitialMode);
+    const [systemDark, setSystemDark] = useState(getSystemDark);
 
     const isDarkMode =
-        colorMode === "dark" || (colorMode === "system" && getSystemDark());
+        colorMode === "dark" || (colorMode === "system" && systemDark);
 
-    // Listen for system preference changes when in system mode
     useEffect(() => {
         const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-        const handleChange = () => {
-            if (colorMode === "system") {
-                // Force re-render by nudging state
-                setColorModeState((prev) => prev);
-            }
-        };
+        const handleChange = (e) => setSystemDark(e.matches);
         mediaQuery.addEventListener("change", handleChange);
         return () => mediaQuery.removeEventListener("change", handleChange);
-    }, [colorMode]);
+    }, []);
 
     const setColorMode = useCallback((mode) => {
         setColorModeState(mode);
