@@ -211,8 +211,8 @@ export default function AvatarDropdown({
                                     aria-label={text.theme}
                                 >
                                     <svg
-                                        width="18"
-                                        height="18"
+                                        width="20"
+                                        height="20"
                                         viewBox="0 0 14 14"
                                         fill="currentColor"
                                         className="mx-2"
@@ -234,6 +234,7 @@ export default function AvatarDropdown({
                                 <DarkModeToggle
                                     colorMode={colorMode}
                                     onColorModeChange={setColorMode}
+                                    iconOnly={true}
                                 />
                             </div>
                         </div>

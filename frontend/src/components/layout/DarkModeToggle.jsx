@@ -5,47 +5,49 @@ import { getDeviceType } from "../../utils";
 
 const deviceType = getDeviceType();
 
-const systemIcon =
-    deviceType === "mobile" ? (
-        <Smartphone size={11} />
-    ) : deviceType === "tablet" ? (
-        <Tablet size={11} />
-    ) : (
-        <Monitor size={11} />
-    );
-
-const COLOR_MODE_OPTIONS = [
-    {
-        value: "light",
-        icon: <Sun size={11} />,
-        text: text.colorModeLight,
-    },
-    {
-        value: "dark",
-        icon: <Moon size={11} />,
-        text: text.colorModeDark,
-    },
-    {
-        value: "system",
-        icon: systemIcon,
-        text: text.colorModeSystem,
-    },
-];
+const largeIconSize = 16;
+const smallIconSize = 11;
 
 export default function DarkModeToggle({
     colorMode,
     onColorModeChange,
-    showIcon = true,
-    showText = false,
+    iconOnly = false,
 }) {
+    const systemIcon =
+        deviceType === "mobile" ? (
+            <Smartphone size={iconOnly ? largeIconSize : smallIconSize} />
+        ) : deviceType === "tablet" ? (
+            <Tablet size={iconOnly ? largeIconSize : smallIconSize} />
+        ) : (
+            <Monitor size={iconOnly ? largeIconSize : smallIconSize} />
+        );
+
+    const COLOR_MODE_OPTIONS = [
+        {
+            value: "light",
+            icon: <Sun size={iconOnly ? largeIconSize : smallIconSize} />,
+            text: text.colorModeLight,
+        },
+        {
+            value: "dark",
+            icon: <Moon size={iconOnly ? largeIconSize : smallIconSize} />,
+            text: text.colorModeDark,
+        },
+        {
+            value: "system",
+            icon: systemIcon,
+            text: text.colorModeSystem,
+        },
+    ];
+
     return (
         <SegmentedControl
             options={COLOR_MODE_OPTIONS}
             value={colorMode}
             onChange={onColorModeChange}
             ariaLabel={text.darkModeToggleLabel}
-            showIcon={showIcon}
-            showText={showText}
+            showIcon={true}
+            showText={!iconOnly}
         />
     );
 }
