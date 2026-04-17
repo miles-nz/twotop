@@ -307,7 +307,7 @@ function CollaborativeReviewCard({ review, currentUserId, onReviewUpdated }) {
             </div>
 
             {review.image_urls && review.image_urls.length > 0 && (
-                <div className="flex justify-center w-full px-4 pb-2">
+                <div className="flex justify-center w-full px-4 py-3">
                     <div className="w-full max-w-xl aspect-square rounded-2xl overflow-hidden">
                         <ReviewCardCarousel
                             images={review.image_urls}
@@ -332,7 +332,7 @@ function CollaborativeReviewCard({ review, currentUserId, onReviewUpdated }) {
             {isContributor &&
                 !hasContributed &&
                 (addingContribution ? (
-                    <div className="border-t border-surface-200 mx-6 mt-2 pt-4">
+                    <div className="border-t border-surface-200mx-6 mt-2 pt-4">
                         <ContributorForm
                             review={review}
                             onSaved={() => {
