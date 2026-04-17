@@ -135,6 +135,24 @@ const deleteImages = async (urls) => {
     if (error) throw new Error(error.message);
 };
 
+const attachContributions = async (reviews) => {
+    if (!reviews || reviews.length === 0) return reviews;
+    const reviewIds = reviews.map((r) => r.id);
+    const { data: contributions } = await supabase
+        .from("review_contributions")
+        .select("*")
+        .in("review_id", reviewIds);
+    const byReviewId = (contributions || []).reduce((acc, c) => {
+        if (!acc[c.review_id]) acc[c.review_id] = [];
+        acc[c.review_id].push(c);
+        return acc;
+    }, {});
+    return reviews.map((r) => ({
+        ...r,
+        contributions: byReviewId[r.id] || [],
+    }));
+};
+
 // Validation
 const validateReview = (body) => {
     const {
@@ -217,7 +235,6 @@ const getMgmtToken = async () => {
 app.get("/reviews", checkJwt, async (req, res) => {
     const user_id = req.auth.payload.sub;
     try {
-        // Get all users who have shared their private reviews with the current user
         const { data: prefs } = await supabase
             .from("user_preferences")
             .select("user_id, shared_with")
@@ -229,38 +246,47 @@ app.get("/reviews", checkJwt, async (req, res) => {
 
         const sharedByUserIds = (prefs || []).map((p) => p.user_id);
 
-        // Fetch own reviews + reviews shared with current user
-        const { data, error } =
-            sharedByUserIds.length > 0
-                ? await supabase
-                      .from("reviews")
-                      .select("*")
-                      .or(
-                          `user_id.eq.${user_id},user_id.in.(${sharedByUserIds.join(",")})`,
-                      )
-                      .order("visit_date", { ascending: false })
-                : await supabase
-                      .from("reviews")
-                      .select("*")
-                      .eq("user_id", user_id)
-                      .order("visit_date", { ascending: false });
+        // Fetch own reviews + shared reviews + collaborative reviews
+        // where current user is an allowed contributor
+        let query = supabase
+            .from("reviews")
+            .select("*")
+            .order("visit_date", { ascending: false });
+
+        const orConditions = [`user_id.eq.${user_id}`];
+        if (sharedByUserIds.length > 0) {
+            orConditions.push(`user_id.in.(${sharedByUserIds.join(",")})`);
+        }
+        orConditions.push(
+            `allowed_contributors.cs.${JSON.stringify([{ user_id }])}`,
+        );
+
+        const { data, error } = await query.or(orConditions.join(","));
 
         if (error) return res.status(500).json({ error: error.message });
-        res.status(200).json(data);
+
+        const reviews = await attachContributions(data);
+        res.status(200).json(reviews);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
 app.get("/reviews/public", async (req, res) => {
-    const { data, error } = await supabase
-        .from("reviews")
-        .select("*")
-        .eq("is_public", true)
-        .order("visit_date", { ascending: false });
+    try {
+        const { data, error } = await supabase
+            .from("reviews")
+            .select("*")
+            .eq("is_public", true)
+            .order("visit_date", { ascending: false });
 
-    if (error) return res.status(500).json({ error: error.message });
-    res.status(200).json(data);
+        if (error) return res.status(500).json({ error: error.message });
+
+        const reviews = await attachContributions(data);
+        res.status(200).json(reviews);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 app.post(
@@ -288,6 +314,9 @@ app.post(
             reviewer_picture,
             visit_date,
             is_public,
+            is_collaborative,
+            allowed_contributors,
+            theme_id,
         } = req.body;
         const user_id = req.auth.payload.sub;
 
@@ -320,13 +349,18 @@ app.post(
                             visit_date ||
                             new Date().toISOString().split("T")[0],
                         is_public: is_public === "true",
+                        is_collaborative: is_collaborative === "true",
+                        allowed_contributors: allowed_contributors
+                            ? JSON.parse(allowed_contributors)
+                            : [],
                         image_urls,
+                        theme_id: theme_id || "default-theme",
                     },
                 ])
                 .select();
 
             if (error) return res.status(500).json({ error: error.message });
-            res.status(201).json(data[0]);
+            res.status(201).json({ ...data[0], contributions: [] });
         } catch (err) {
             res.status(500).json({ error: err.message });
         }
@@ -362,6 +396,21 @@ app.patch(
         if (req.body.is_public !== undefined) {
             updates.is_public =
                 req.body.is_public === "true" || req.body.is_public === true;
+        }
+
+        if (req.body.is_collaborative !== undefined) {
+            updates.is_collaborative =
+                req.body.is_collaborative === "true" ||
+                req.body.is_collaborative === true;
+        }
+
+        if (
+            req.body.allowed_contributors !== undefined &&
+            updates.is_collaborative !== false
+        ) {
+            updates.allowed_contributors = JSON.parse(
+                req.body.allowed_contributors,
+            );
         }
 
         if (req.body.restaurant_name !== undefined) {
@@ -442,12 +491,66 @@ app.patch(
                 .select();
 
             if (error) return res.status(500).json({ error: error.message });
-            res.status(200).json(data[0]);
+
+            const [reviewWithContributions] = await attachContributions(data);
+            res.status(200).json(reviewWithContributions);
         } catch (err) {
             res.status(500).json({ error: err.message });
         }
     },
 );
+
+app.post("/reviews/:id/contributions", checkJwt, async (req, res) => {
+    const { id } = req.params;
+    const user_id = req.auth.payload.sub;
+
+    const { data: review, error: fetchError } = await supabase
+        .from("reviews")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+    if (fetchError || !review)
+        return res.status(404).json({ error: ERRORS.reviewNotFound });
+
+    const isAllowed = (review.allowed_contributors || []).some(
+        (c) => c.user_id === user_id,
+    );
+    if (!isAllowed) return res.status(403).json({ error: ERRORS.unauthorised });
+
+    const {
+        review_text,
+        food_rating,
+        drink_rating,
+        ambience_rating,
+        reviewer_name,
+        reviewer_picture,
+    } = req.body;
+
+    const contribution = {
+        review_id: id,
+        user_id,
+        reviewer_name: reviewer_name || null,
+        reviewer_picture: reviewer_picture || null,
+        review_text: review_text ? review_text.trim() : null,
+        food_rating: food_rating ?? null,
+        drink_rating: drink_rating ?? null,
+        ambience_rating: ambience_rating ?? null,
+        updated_at: new Date().toISOString(),
+    };
+
+    try {
+        const { data, error } = await supabase
+            .from("review_contributions")
+            .upsert(contribution, { onConflict: "review_id,user_id" })
+            .select();
+
+        if (error) return res.status(500).json({ error: error.message });
+        res.status(200).json(data[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 app.delete("/reviews/:id", checkJwt, async (req, res) => {
     const { id } = req.params;
@@ -474,6 +577,57 @@ app.delete("/reviews/:id", checkJwt, async (req, res) => {
 
         if (deleteError)
             return res.status(500).json({ error: deleteError.message });
+        res.status(200).json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete("/reviews/:id/contributions", checkJwt, async (req, res) => {
+    const { id } = req.params;
+    const user_id = req.auth.payload.sub;
+
+    const { data: review, error: fetchError } = await supabase
+        .from("reviews")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+    if (fetchError || !review)
+        return res.status(404).json({ error: ERRORS.reviewNotFound });
+
+    // Owner cannot leave their own review
+    if (review.user_id === user_id)
+        return res.status(403).json({ error: ERRORS.unauthorised });
+
+    const isAllowed = (review.allowed_contributors || []).some(
+        (c) => c.user_id === user_id,
+    );
+    if (!isAllowed) return res.status(403).json({ error: ERRORS.unauthorised });
+
+    try {
+        // Delete the contribution
+        const { error: deleteError } = await supabase
+            .from("review_contributions")
+            .delete()
+            .eq("review_id", id)
+            .eq("user_id", user_id);
+
+        if (deleteError)
+            return res.status(500).json({ error: deleteError.message });
+
+        // Remove from allowed_contributors
+        const updatedContributors = (review.allowed_contributors || []).filter(
+            (c) => c.user_id !== user_id,
+        );
+        const { error: updateError } = await supabase
+            .from("reviews")
+            .update({ allowed_contributors: updatedContributors })
+            .eq("id", id);
+
+        if (updateError)
+            return res.status(500).json({ error: updateError.message });
+
         res.status(200).json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -524,6 +678,16 @@ app.get("/user/me", checkJwt, async (req, res) => {
             picture: userData.picture,
             name: userData.name,
         });
+        const { error: contributionsError } = await supabase
+            .from("review_contributions")
+            .update({ reviewer_name: name.trim() })
+            .eq("user_id", user_id);
+
+        if (contributionsError)
+            console.error(
+                "Failed to update contribution names:",
+                contributionsError.message,
+            );
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -593,6 +757,18 @@ app.patch(
                     reviewsError.message,
                 );
 
+            // Update reviewer_picture on all existing contributions
+            const { error: contributionsError } = await supabase
+                .from("review_contributions")
+                .update({ reviewer_picture: publicUrl })
+                .eq("user_id", user_id);
+
+            if (contributionsError)
+                console.error(
+                    "Failed to update contribution pictures:",
+                    contributionsError.message,
+                );
+
             // Delete old picture from Supabase if it was uploaded by us
             if (
                 oldPictureUrl &&
@@ -657,6 +833,12 @@ app.delete("/user/picture", checkJwt, async (req, res) => {
         // Update reviewer_picture on all existing reviews
         await supabase
             .from("reviews")
+            .update({ reviewer_picture: null })
+            .eq("user_id", user_id);
+
+        // Update reviewer_picture on all existing contributions
+        await supabase
+            .from("review_contributions")
             .update({ reviewer_picture: null })
             .eq("user_id", user_id);
 

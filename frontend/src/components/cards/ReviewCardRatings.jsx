@@ -1,5 +1,6 @@
 import StarRating from "../ui/StarRating";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
+import { text } from "../../resources";
 
 function ReviewCardRatings({ foodRating, drinkRating, ambienceRating }) {
     const isDesktop = useBreakpoint("md");
@@ -23,16 +24,16 @@ function ReviewCardRatings({ foodRating, drinkRating, ambienceRating }) {
                                 ? "flex flex-col items-center gap-1"
                                 : "flex flex-row items-center gap-4 w-full"
                         }
-                        title="Food"
+                        title={text.foodLabel}
                     >
                         <span
                             className={
                                 isDesktop
-                                    ? "text-xs sm:text-sm text-text-light tracking-wide min-w-17.5 text-left"
+                                    ? "text-xs sm:text-sm text-text-light tracking-wide min-w-17.5 pl-1 text-left"
                                     : "text-xs sm:text-sm text-text-light tracking-wide min-w-17.5 text-center"
                             }
                         >
-                            Food
+                            {text.foodLabel}
                         </span>
                         <div
                             className={
@@ -63,16 +64,16 @@ function ReviewCardRatings({ foodRating, drinkRating, ambienceRating }) {
                                 ? "flex flex-col items-center gap-1"
                                 : "flex flex-row items-center gap-4 w-full"
                         }
-                        title="Drink"
+                        title={text.drinkLabel}
                     >
                         <span
                             className={
                                 isDesktop
-                                    ? "text-xs sm:text-sm text-text-light tracking-wide min-w-17.5 text-left"
+                                    ? "text-xs sm:text-sm text-text-light tracking-wide min-w-17.5 pl-1 text-left"
                                     : "text-xs sm:text-sm text-text-light tracking-wide min-w-17.5 text-center"
                             }
                         >
-                            Drink
+                            {text.drinkLabel}
                         </span>
                         <div
                             className={
@@ -103,7 +104,7 @@ function ReviewCardRatings({ foodRating, drinkRating, ambienceRating }) {
                                 ? "flex flex-col items-center gap-1"
                                 : "flex flex-row items-center gap-4 w-full"
                         }
-                        title="Ambience"
+                        title={text.ambienceLabel}
                     >
                         <span
                             className={
@@ -112,7 +113,7 @@ function ReviewCardRatings({ foodRating, drinkRating, ambienceRating }) {
                                     : "text-xs sm:text-sm text-text-light tracking-wide min-w-17.5 text-center"
                             }
                         >
-                            Ambience
+                            {text.ambienceLabel}
                         </span>
                         <div
                             className={

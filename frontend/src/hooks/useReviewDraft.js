@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { draftKeys } from "../resources";
 
 export function useReviewDraft({
@@ -15,13 +15,15 @@ export function useReviewDraft({
     setRestaurantName,
     setRestaurantAddress,
     setSelectedPlaceId,
-    setvisitDate,
+    setVisitDate,
     setReviewText,
     setFoodRating,
     setDrinkRating,
     setAmbienceRating,
     setIsPublic,
 }) {
+    const isMounted = useRef(false);
+
     // Restore draft on mount
     useEffect(() => {
         try {
@@ -33,7 +35,7 @@ export function useReviewDraft({
                 setRestaurantAddress?.(draft.restaurantAddress);
             if (draft.selectedPlaceId)
                 setSelectedPlaceId?.(draft.selectedPlaceId);
-            if (draft.visitDate) setvisitDate?.(draft.visitDate);
+            if (draft.visitDate) setVisitDate?.(draft.visitDate);
             if (draft.reviewText) setReviewText?.(draft.reviewText);
             if (draft.foodRating) setFoodRating?.(draft.foodRating);
             if (draft.drinkRating) setDrinkRating?.(draft.drinkRating);
@@ -44,8 +46,20 @@ export function useReviewDraft({
         }
     }, []);
 
-    // Save draft on every change
+    // Save draft on every change, skipping the first render and empty forms
     useEffect(() => {
+        if (!isMounted.current) {
+            isMounted.current = true;
+            return;
+        }
+        const hasContent =
+            restaurantName ||
+            restaurantAddress ||
+            reviewText ||
+            foodRating ||
+            drinkRating ||
+            ambienceRating;
+        if (!hasContent) return;
         try {
             const draft = {
                 restaurantName,

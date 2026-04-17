@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { flushSync } from "react-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Button from "./components/ui/Button";
@@ -102,13 +103,8 @@ function AppContent({ onRegisterRefresh }) {
                     <button
                         onClick={() => {
                             if (!formOpen) {
-                                setFormOpen(true);
-                                try {
-                                    window.scrollTo({
-                                        top: 0,
-                                        behavior: "smooth",
-                                    });
-                                } catch (e) {}
+                                flushSync(() => setFormOpen(true));
+                                window.scrollTo({ top: 0, behavior: "smooth" });
                             } else {
                                 setFormOpen(false);
                             }
@@ -147,11 +143,10 @@ function AppContent({ onRegisterRefresh }) {
                 <AnimatePresence>
                     {formOpen && (
                         <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
                             transition={{ duration: 0.3 }}
-                            className="overflow-hidden"
                         >
                             <ReviewForm
                                 onReviewSubmitted={handleReviewSubmitted}

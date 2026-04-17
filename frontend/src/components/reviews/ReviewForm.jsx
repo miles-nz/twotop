@@ -1,20 +1,23 @@
-import { useState, useRef, useMemo, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { motion } from "framer-motion";
 import { ImagePlus, X } from "lucide-react";
 import ImageCropModal from "../cards/ImageCropModal";
-import PublicToggle from "../layout/PublicToggle";
 import Button from "../ui/Button";
 import LoadingOverlay from "../ui/LoadingOverlay";
 import MarkdownToolbar from "../ui/MarkdownToolbar";
 import PlacesSearch from "../ui/PlacesSearch";
-import RatingField from "../ui/RatingField";
+import {
+    FormError,
+    RatingsFields,
+    ContributorPicker,
+} from "../ui/FormComponents";
 import { useAutoResize } from "../../hooks/useAutoResize";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
 import { useImageUpload } from "../../hooks/useImageUpload";
 import { useReviewDraft } from "../../hooks/useReviewDraft";
 import { useUser } from "../../contexts/UserContext";
-
+import { useTheme } from "../../contexts/ThemeContext";
 import { text, draftKeys } from "../../resources";
 import { getLocalDate } from "../../utils";
 
@@ -24,7 +27,7 @@ const inputClass =
     "w-full border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400";
 
 function ReviewForm({ onReviewSubmitted }) {
-    const { getAccessTokenSilently, user } = useAuth0();
+    const { getAccessTokenSilently } = useAuth0();
 
     const [restaurantName, setRestaurantName] = useState("");
     const [restaurantAddress, setRestaurantAddress] = useState("");
@@ -35,6 +38,8 @@ function ReviewForm({ onReviewSubmitted }) {
     const [ambienceRating, setAmbienceRating] = useState(null);
     const [reviewText, setReviewText] = useState("");
     const [isPublic, setIsPublic] = useState(false);
+    const [isCollaborative, setIsCollaborative] = useState(false);
+    const [selectedContributors, setSelectedContributors] = useState([]);
 
     const [draftRestored, setDraftRestored] = useState(() => {
         try {
@@ -56,7 +61,6 @@ function ReviewForm({ onReviewSubmitted }) {
     const [showClearConfirm, setShowClearConfirm] = useState(false);
 
     const textareaRef = useRef(null);
-
     useAutoResize(textareaRef, reviewText);
 
     const {
@@ -75,7 +79,8 @@ function ReviewForm({ onReviewSubmitted }) {
     const [error, setError] = useState(null);
 
     const isDesktop = useBreakpoint("md");
-    const { currentUserName, currentUserPicture } = useUser();
+    const { currentUserName, currentUserPicture, sharedWith } = useUser();
+    const { currentThemeId } = useTheme();
 
     const { clearDraft } = useReviewDraft({
         draftKey: DRAFT_KEY,
@@ -109,13 +114,22 @@ function ReviewForm({ onReviewSubmitted }) {
         setAmbienceRating(null);
         setvisitDate("");
         setIsPublic(false);
+        setIsCollaborative(false);
+        setSelectedContributors([]);
         resetImages();
+    };
+
+    const toggleContributor = (person) => {
+        setSelectedContributors((prev) =>
+            prev.some((c) => c.user_id === person.user_id)
+                ? prev.filter((c) => c.user_id !== person.user_id)
+                : [...prev, person],
+        );
     };
 
     const handleSubmit = async () => {
         setError(null);
         setSubmitting(true);
-
         try {
             const token = await getAccessTokenSilently();
             const formData = new FormData();
@@ -139,6 +153,12 @@ function ReviewForm({ onReviewSubmitted }) {
             formData.append("reviewer_name", currentUserName || "");
             formData.append("reviewer_picture", currentUserPicture || "");
             formData.append("is_public", isPublic);
+            formData.append("is_collaborative", isCollaborative);
+            formData.append(
+                "allowed_contributors",
+                JSON.stringify(selectedContributors),
+            );
+            formData.append("theme_id", currentThemeId);
             images.forEach((image) => formData.append("images", image));
 
             const response = await fetch(
@@ -149,14 +169,11 @@ function ReviewForm({ onReviewSubmitted }) {
                     body: formData,
                 },
             );
-
             const data = await response.json();
-
             if (!response.ok) {
                 setError(data.errors || data.error || text.errorFailedSubmit);
                 return;
             }
-
             clearDraft();
             resetForm();
             setDraftRestored(false);
@@ -261,26 +278,15 @@ function ReviewForm({ onReviewSubmitted }) {
                 <label className="block text-sm font-medium text-text-mid mb-2">
                     {text.ratingsLabel}
                 </label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <RatingField
-                        label={<span>{text.foodLabel}</span>}
-                        value={foodRating}
-                        onChange={setFoodRating}
-                        size={isDesktop ? "sm" : "md"}
-                    />
-                    <RatingField
-                        label={<span>{text.drinksLabel}</span>}
-                        value={drinkRating}
-                        onChange={setDrinkRating}
-                        size={isDesktop ? "sm" : "md"}
-                    />
-                    <RatingField
-                        label={<span>{text.ambienceLabel}</span>}
-                        value={ambienceRating}
-                        onChange={setAmbienceRating}
-                        size={isDesktop ? "sm" : "md"}
-                    />
-                </div>
+                <RatingsFields
+                    foodRating={foodRating}
+                    setFoodRating={setFoodRating}
+                    drinkRating={drinkRating}
+                    setDrinkRating={setDrinkRating}
+                    ambienceRating={ambienceRating}
+                    setAmbienceRating={setAmbienceRating}
+                    size={isDesktop ? "sm" : "md"}
+                />
             </div>
 
             <div className="mb-4">
@@ -321,6 +327,7 @@ function ReviewForm({ onReviewSubmitted }) {
                                     <img
                                         src={URL.createObjectURL(image)}
                                         className="w-6 h-6 object-cover rounded"
+                                        alt=""
                                     />
                                     <button
                                         type="button"
@@ -348,31 +355,49 @@ function ReviewForm({ onReviewSubmitted }) {
                 </div>
             </div>
 
-            <div className="mb-4 flex items-center justify-between bg-surface-100 rounded-lg px-4 py-3 border border-surface-200">
-                <label
-                    htmlFor="publicToggle"
-                    className="text-sm font-medium text-text-dark cursor-pointer"
-                >
-                    {text.markAsPublic}
+            {/* Public + Collaborative checkboxes */}
+            <div className="mb-4 bg-surface-100 rounded-lg border border-surface-200 px-4 py-3 flex flex-col gap-2">
+                <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                        type="checkbox"
+                        checked={isPublic}
+                        onChange={(e) => setIsPublic(e.target.checked)}
+                        className="w-4 h-4 accent-secondary-500 cursor-pointer"
+                    />
+                    <span className="text-sm font-medium text-text-dark">
+                        {text.markAsPublic}
+                    </span>
                 </label>
-                <PublicToggle isPublic={isPublic} onToggle={setIsPublic} />
+                <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                        type="checkbox"
+                        checked={isCollaborative}
+                        onChange={(e) => {
+                            setIsCollaborative(e.target.checked);
+                            if (!e.target.checked) setSelectedContributors([]);
+                        }}
+                        className="w-4 h-4 accent-secondary-500 cursor-pointer"
+                    />
+                    <span className="text-sm font-medium text-text-dark">
+                        {text.collaborative}
+                    </span>
+                </label>
             </div>
 
-            {(error || uploadError) && (
-                <div className="bg-error-50 border border-error-200 rounded-2xl shadow-md p-6 mb-4">
-                    {Array.isArray(error || uploadError) ? (
-                        (error || uploadError).map((err, index) => (
-                            <p key={index} className="text-error-600 text-sm">
-                                {err}
-                            </p>
-                        ))
-                    ) : (
-                        <p className="text-error-600 text-sm">
-                            {error || uploadError}
-                        </p>
-                    )}
+            {isCollaborative && (
+                <div className="mb-4 bg-surface-100 rounded-lg px-4 py-3 border border-surface-200">
+                    <p className="text-sm font-medium text-text-dark mb-3">
+                        {text.selectContributors}
+                    </p>
+                    <ContributorPicker
+                        sharedWith={sharedWith}
+                        selectedContributors={selectedContributors}
+                        onToggle={toggleContributor}
+                    />
                 </div>
             )}
+
+            <FormError error={error || uploadError} />
 
             <div className="flex items-center justify-between">
                 <Button

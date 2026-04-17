@@ -78,13 +78,14 @@ function ReviewList({
 
     useEffect(() => {
         if (!scrollToId) return;
-        const el = document.getElementById(`review-${scrollToId}`);
-        if (el) {
-            setTimeout(() => {
+        const timer = setTimeout(() => {
+            const el = document.getElementById(`review-${scrollToId}`);
+            if (el) {
                 el.scrollIntoView({ behavior: "smooth", block: "center" });
                 onScrollComplete?.();
-            }, 1000);
-        }
+            }
+        }, 1000);
+        return () => clearTimeout(timer);
     }, [scrollToId, reviews]);
 
     if (loading) {

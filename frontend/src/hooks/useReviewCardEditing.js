@@ -31,15 +31,36 @@ export function useReviewCardEditing(
     const [editedAmbienceRating, setEditedAmbienceRating] = useState(
         review.ambience_rating ?? null,
     );
+    const [editedIsCollaborative, setEditedIsCollaborative] = useState(
+        review.is_collaborative ?? false,
+    );
+    const [editedAllowedContributors, setEditedAllowedContributors] = useState(
+        review.allowed_contributors || [],
+    );
 
     const [saveError, setSaveError] = useState(null);
-
-    // Photo editing
     const [addPhotoImages, setAddPhotoImages] = useState([]);
     const [removedPhotoUrls, setRemovedPhotoUrls] = useState([]);
-
     const [saving, setSaving] = useState(false);
     const [draftWasRestored, setDraftWasRestored] = useState(false);
+
+    const handleToggleCollaborative = (val) => {
+        setEditedIsCollaborative(val);
+    };
+
+    const handleRemoveContributor = (userId) => {
+        setEditedAllowedContributors((prev) =>
+            prev.filter((c) => c.user_id !== userId),
+        );
+    };
+
+    const handleAddContributor = (person) => {
+        setEditedAllowedContributors((prev) =>
+            prev.some((c) => c.user_id === person.user_id)
+                ? prev
+                : [...prev, person],
+        );
+    };
 
     // Restore draft only when edit mode opens
     useEffect(() => {
@@ -149,6 +170,8 @@ export function useReviewCardEditing(
         setEditedFoodRating(review.food_rating ?? null);
         setEditedDrinkRating(review.drink_rating ?? null);
         setEditedAmbienceRating(review.ambience_rating ?? null);
+        setEditedIsCollaborative(review.is_collaborative ?? false);
+        setEditedAllowedContributors(review.allowed_contributors || []);
         setAddPhotoImages([]);
         setRemovedPhotoUrls([]);
         clearDraft();
@@ -185,6 +208,11 @@ export function useReviewCardEditing(
             formData.append("drink_rating", editedDrinkRating || "");
             formData.append("ambience_rating", editedAmbienceRating || "");
             formData.append("visit_date", editedVisitDate);
+            formData.append("is_collaborative", editedIsCollaborative);
+            formData.append(
+                "allowed_contributors",
+                JSON.stringify(editedAllowedContributors),
+            );
             if (typeof isPublic === "boolean") {
                 formData.append("is_public", isPublic);
             }
@@ -226,6 +254,11 @@ export function useReviewCardEditing(
         setEditedDrinkRating,
         editedAmbienceRating,
         setEditedAmbienceRating,
+        editedIsCollaborative,
+        editedAllowedContributors,
+        handleToggleCollaborative,
+        handleRemoveContributor,
+        handleAddContributor,
         handleSaveReview,
         addPhotoImages,
         setAddPhotoImages,

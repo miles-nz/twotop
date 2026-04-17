@@ -96,7 +96,7 @@ export const text = {
     dateVisitedLabel: "Date Visited",
     ratingsLabel: "Ratings",
     foodLabel: "Food",
-    drinksLabel: "Drinks",
+    drinkLabel: "Drink",
     ambienceLabel: "Ambience",
     reviewNotesLabel: "Review notes",
     reviewNotesPlaceholder: "Write your review here...",
@@ -106,6 +106,12 @@ export const text = {
     draftRestored: "Draft restored",
     clearDraft: "Clear draft",
     clearDraftConfirm: "Clear draft?",
+    collaborative: "Collaborative",
+    selectContributors: "Select contributors",
+    noSharedWithForCollaboration:
+        "You aren't sharing reviews with anyone yet. Add users to your sharing settings and they will appear here.",
+    addYourReviewLabel: "You have been added as a collaborator on this review.",
+    addYourReview: "Add your review",
 
     // Photos
     photo: "Photo",
@@ -123,11 +129,20 @@ export const text = {
     makePublic: "Make Public",
     makePrivate: "Make Private",
     confirmDeleteReview: "Are you sure you want to delete this review?",
+    leaveCollaboration: "Leave",
+    confirmLeaveCollaboration:
+        "Are you sure you want to leave this collaboration? Your contribution will be permanently deleted.",
 
     // Review list
     noReviews: "No reviews yet.",
     makeGoogleMapsLink: (restaurant_name, place_id) =>
         `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant_name)}&query_place_id=${place_id}`,
+    makeContributorList: (ownerName, contributorNames) => {
+        if (contributorNames.length === 0) return ownerName;
+        if (contributorNames.length === 1)
+            return `${ownerName} & ${contributorNames[0]}`;
+        return `${ownerName} +${contributorNames.length}`;
+    },
 
     // Errors
     errorFormatted: (error) => `Error: ${error}`,

@@ -2,12 +2,12 @@ import { useRef, useState } from "react";
 import { Check, X, ImagePlus } from "lucide-react";
 import MarkdownToolbar from "../ui/MarkdownToolbar";
 import PlacesSearch from "../ui/PlacesSearch";
-import RatingField from "../ui/RatingField";
 import ImageCropModal from "./ImageCropModal";
-import PublicToggle from "../layout/PublicToggle";
+import { RatingsFields, ContributorPicker } from "../ui/FormComponents";
 import { getLocalDate } from "../../utils";
 import { useImageUpload } from "../../hooks/useImageUpload";
 import { useAutoResize } from "../../hooks/useAutoResize";
+import { useUser } from "../../contexts/UserContext";
 import { text } from "../../resources";
 
 function EditReviewUI({ editingState, handleSave, onClose, review }) {
@@ -36,10 +36,22 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
         draftWasRestored,
         resetToSaved,
         saveError,
+        editedIsCollaborative,
+        editedAllowedContributors,
+        handleToggleCollaborative,
+        handleRemoveContributor,
+        handleAddContributor,
     } = editingState;
+
     const textareaRef = useRef(null);
     const [isPublic, setIsPublic] = useState(review.is_public);
     const [draftDismissed, setDraftDismissed] = useState(false);
+    const { sharedWith } = useUser();
+
+    const currentPhotoCount =
+        (review.image_urls?.length || 0) -
+        removedPhotoUrls.length +
+        addPhotoImages.length;
 
     const {
         fileInputRef,
@@ -48,14 +60,7 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
         handleCropConfirm,
         handleCropCancel,
         uploadError,
-    } = useImageUpload(
-        5,
-        () =>
-            (review.image_urls?.length || 0) -
-            removedPhotoUrls.length +
-            addPhotoImages.length,
-        setAddPhotoImages,
-    );
+    } = useImageUpload(5, () => currentPhotoCount, setAddPhotoImages);
 
     useAutoResize(textareaRef, editedReviewText);
 
@@ -89,7 +94,6 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
                 </div>
             )}
 
-            {/* Restaurant Name */}
             <div className="mb-4">
                 <PlacesSearch
                     value={editedName}
@@ -101,7 +105,6 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
                 />
             </div>
 
-            {/* Address */}
             <div className="mb-4">
                 <input
                     type="text"
@@ -112,41 +115,17 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
                 />
             </div>
 
-            {/* Ratings */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
-                <RatingField
-                    label={
-                        <span className="flex items-center justify-center gap-1">
-                            {text.foodLabel}
-                        </span>
-                    }
-                    value={editedFoodRating}
-                    onChange={setEditedFoodRating}
-                    size="sm"
-                />
-                <RatingField
-                    label={
-                        <span className="flex items-center justify-center gap-1">
-                            {text.drinksLabel}
-                        </span>
-                    }
-                    value={editedDrinkRating}
-                    onChange={setEditedDrinkRating}
-                    size="sm"
-                />
-                <RatingField
-                    label={
-                        <span className="flex items-center justify-center gap-1">
-                            {text.ambienceLabel}
-                        </span>
-                    }
-                    value={editedAmbienceRating}
-                    onChange={setEditedAmbienceRating}
-                    size="sm"
+            <div className="mb-4">
+                <RatingsFields
+                    foodRating={editedFoodRating}
+                    setFoodRating={setEditedFoodRating}
+                    drinkRating={editedDrinkRating}
+                    setDrinkRating={setEditedDrinkRating}
+                    ambienceRating={editedAmbienceRating}
+                    setAmbienceRating={setEditedAmbienceRating}
                 />
             </div>
 
-            {/* Visit Date */}
             <div className="mb-3 pr-6.5 md:pr-0">
                 <input
                     type="date"
@@ -157,7 +136,6 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
                 />
             </div>
 
-            {/* Review Text */}
             <MarkdownToolbar
                 textareaRef={textareaRef}
                 value={editedReviewText}
@@ -171,74 +149,68 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
                 className="w-full border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 overflow-hidden text-text-dark"
             />
 
-            {/* Photos */}
             <div className="border border-surface-200 rounded-xl p-4 bg-surface-50 mt-4">
-                <div className="flex items-center justify-between">
-                    <div className="flex flex-wrap gap-2 flex-1">
-                        {review.image_urls &&
-                            review.image_urls
-                                .filter(
-                                    (url) => !removedPhotoUrls.includes(url),
-                                )
-                                .map((url, index) => (
-                                    <div key={index} className="relative">
-                                        <img
-                                            src={url}
-                                            className="w-16 h-16 object-cover rounded-lg"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                handleRemoveExistingPhoto(url)
-                                            }
-                                            className="absolute -top-1 -right-1 bg-surface-300 rounded-full w-4 h-4 flex items-center justify-center cursor-pointer"
-                                        >
-                                            <X size={10} />
-                                        </button>
-                                    </div>
-                                ))}
-                        {addPhotoImages.map((image, index) => (
-                            <div key={index} className="relative">
-                                <img
-                                    src={URL.createObjectURL(image)}
-                                    className="w-16 h-16 object-cover rounded-lg"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        setAddPhotoImages((prev) =>
-                                            prev.filter((_, i) => i !== index),
-                                        )
-                                    }
-                                    className="absolute -top-1 -right-1 bg-surface-300 rounded-full w-4 h-4 flex items-center justify-center cursor-pointer"
-                                >
-                                    <X size={10} />
-                                </button>
-                            </div>
-                        ))}
-                        {(review.image_urls?.length || 0) -
-                            removedPhotoUrls.length +
-                            addPhotoImages.length <
-                            5 && (
-                            <>
-                                <input
-                                    type="file"
-                                    accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/gif,image/avif"
-                                    multiple
-                                    onChange={handleImageChange}
-                                    className="hidden"
-                                    ref={fileInputRef}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => fileInputRef.current.click()}
-                                    className="w-16 h-16 flex items-center justify-center text-secondary-400 hover:text-secondary-600 cursor-pointer transition-colors"
-                                >
-                                    <ImagePlus size={24} />
-                                </button>
-                            </>
-                        )}
-                    </div>
+                <div className="flex flex-wrap gap-2">
+                    {review.image_urls &&
+                        review.image_urls
+                            .filter((url) => !removedPhotoUrls.includes(url))
+                            .map((url, index) => (
+                                <div key={index} className="relative">
+                                    <img
+                                        src={url}
+                                        className="w-16 h-16 object-cover rounded-lg"
+                                        alt=""
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            handleRemoveExistingPhoto(url)
+                                        }
+                                        className="absolute -top-1 -right-1 bg-surface-300 rounded-full w-4 h-4 flex items-center justify-center cursor-pointer"
+                                    >
+                                        <X size={10} />
+                                    </button>
+                                </div>
+                            ))}
+                    {addPhotoImages.map((image, index) => (
+                        <div key={index} className="relative">
+                            <img
+                                src={URL.createObjectURL(image)}
+                                className="w-16 h-16 object-cover rounded-lg"
+                                alt=""
+                            />
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    setAddPhotoImages((prev) =>
+                                        prev.filter((_, i) => i !== index),
+                                    )
+                                }
+                                className="absolute -top-1 -right-1 bg-surface-300 rounded-full w-4 h-4 flex items-center justify-center cursor-pointer"
+                            >
+                                <X size={10} />
+                            </button>
+                        </div>
+                    ))}
+                    {currentPhotoCount < 5 && (
+                        <>
+                            <input
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/gif,image/avif"
+                                multiple
+                                onChange={handleImageChange}
+                                className="hidden"
+                                ref={fileInputRef}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current.click()}
+                                className="w-16 h-16 flex items-center justify-center text-secondary-400 hover:text-secondary-600 cursor-pointer transition-colors"
+                            >
+                                <ImagePlus size={24} />
+                            </button>
+                        </>
+                    )}
                 </div>
                 {uploadError && (
                     <div className="mt-2">
@@ -271,26 +243,65 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
                 <p className="text-error-600 text-sm mt-3">{saveError}</p>
             )}
 
-            {/* Actions & Public Toggle at bottom */}
-            <div className="flex items-center justify-between mt-4">
-                <PublicToggle isPublic={isPublic} onToggle={setIsPublic} />
-                <div className="flex gap-2">
-                    <button
-                        onClick={onClose}
-                        className="text-text-light hover:text-text-mid cursor-pointer transition-colors"
-                    >
-                        <X size={18} className="sm:w-4.5 sm:h-4.5 w-6 h-6" />
-                    </button>
-                    <button
-                        onClick={handleSaveWithPublic}
-                        className="text-secondary-500 hover:text-secondary-600 cursor-pointer transition-colors"
-                    >
-                        <Check
-                            size={18}
-                            className="sm:w-4.5 sm:h-4.5 w-6 h-6"
-                        />
-                    </button>
+            <div className="mt-4 bg-surface-100 rounded-lg border border-surface-200 px-4 py-3 flex flex-col gap-2">
+                <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                        type="checkbox"
+                        checked={isPublic}
+                        onChange={(e) => setIsPublic(e.target.checked)}
+                        className="w-4 h-4 accent-secondary-500 cursor-pointer"
+                    />
+                    <span className="text-sm font-medium text-text-dark">
+                        {text.markAsPublic}
+                    </span>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                        type="checkbox"
+                        checked={editedIsCollaborative}
+                        onChange={(e) =>
+                            handleToggleCollaborative(e.target.checked)
+                        }
+                        className="w-4 h-4 accent-secondary-500 cursor-pointer"
+                    />
+                    <span className="text-sm font-medium text-text-dark">
+                        {text.collaborative}
+                    </span>
+                </label>
+            </div>
+
+            {editedIsCollaborative && (
+                <div className="mt-3 bg-surface-100 rounded-lg border border-surface-200 px-4 py-3">
+                    <p className="text-sm font-medium text-text-dark mb-3">
+                        {text.selectContributors}
+                    </p>
+                    <ContributorPicker
+                        sharedWith={sharedWith}
+                        selectedContributors={editedAllowedContributors}
+                        onToggle={(person) =>
+                            editedAllowedContributors.some(
+                                (c) => c.user_id === person.user_id,
+                            )
+                                ? handleRemoveContributor(person.user_id)
+                                : handleAddContributor(person)
+                        }
+                    />
                 </div>
+            )}
+
+            <div className="flex justify-end gap-2 mt-4">
+                <button
+                    onClick={onClose}
+                    className="text-text-light hover:text-text-mid cursor-pointer transition-colors"
+                >
+                    <X size={18} className="sm:w-4.5 sm:h-4.5 w-6 h-6" />
+                </button>
+                <button
+                    onClick={handleSaveWithPublic}
+                    className="text-secondary-500 hover:text-secondary-600 cursor-pointer transition-colors"
+                >
+                    <Check size={18} className="sm:w-4.5 sm:h-4.5 w-6 h-6" />
+                </button>
             </div>
         </div>
     );
