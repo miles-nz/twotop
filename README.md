@@ -1,6 +1,6 @@
 # TWO:TOP
 
-A personal food review app/blog for a small group of users. Users can write and browse reviews of restaurants and cafés, with star ratings, photos, and per-user colour theming.
+A personal food review app/blog. Users can write and browse reviews of restaurants and cafés, with star ratings, photos, and per-user colour theming.
 
 ## Tech Stack
 

@@ -25,6 +25,7 @@ export default function AvatarDropdown({
     onPictureUpdated,
     onNameUpdated,
     mobile = false,
+    onShowTutorial,
 }) {
     const { getAccessTokenSilently } = useAuth0();
     const {
@@ -284,6 +285,15 @@ export default function AvatarDropdown({
                             className={`text-text-dark ${menuItemClasses}`}
                         >
                             {text.editSharedWith}
+                        </button>
+                        <button
+                            onClick={() => {
+                                onShowTutorial?.();
+                                setOpen(false);
+                            }}
+                            className={`text-text-dark ${menuItemClasses}`}
+                        >
+                            {text.showTutorial}
                         </button>
                         <button
                             onClick={() => {

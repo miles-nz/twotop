@@ -39,10 +39,6 @@ function Avatar({ name, picture, size = "md", title, loading = false }) {
             title={title || name}
         >
             <div className="relative w-full h-full flex items-center justify-center">
-                {(loading ||
-                    (picture && !isDefaultAvatar(picture) && !imageLoaded)) && (
-                    <LoadingDots size={8} colourValue={100} />
-                )}
                 {picture && !isDefaultAvatar(picture) && (
                     <motion.img
                         src={picture}

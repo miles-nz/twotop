@@ -161,7 +161,7 @@ function ReviewCardMenu({
                                         <Eye size={14} />
                                     )}
                                     {review.is_public
-                                        ? text.makePrivate
+                                        ? text.makePersonal
                                         : text.makePublic}
                                 </button>
                                 <button

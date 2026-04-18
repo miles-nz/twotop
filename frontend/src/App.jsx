@@ -6,6 +6,7 @@ import Button from "./components/ui/Button";
 import Navbar from "./components/layout/Navbar";
 import ReviewForm from "./components/reviews/ReviewForm";
 import ReviewList from "./components/reviews/ReviewList";
+import WelcomeTutorial from "./components/tutorial/WelcomeTutorial";
 import { text } from "./resources";
 import { applyThemeToCss } from "./utils";
 import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
@@ -14,13 +15,19 @@ import { UserProvider, useUser } from "./contexts/UserContext";
 function AppContent({ onRegisterRefresh }) {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
     const { currentThemeId, isDarkMode } = useTheme();
-    const { fetchCurrentUser, fetchPreferences } = useUser();
+    const {
+        fetchCurrentUser,
+        fetchPreferences,
+        hasSeenTutorial,
+        markTutorialSeen,
+    } = useUser();
 
     const [formOpen, setFormOpen] = useState(false);
     const [justSubmitted, setJustSubmitted] = useState(false);
     const [isPublicOnly, setIsPublicOnly] = useState(false);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [scrollToId, setScrollToId] = useState(null);
+    const [showTutorial, setShowTutorial] = useState(false);
 
     useEffect(() => {
         onRegisterRefresh(() => setRefreshTrigger((prev) => prev + 1));
@@ -40,20 +47,17 @@ function AppContent({ onRegisterRefresh }) {
         }
     };
 
-    // Apply theme CSS variables
     useEffect(() => {
         const themeId = user ? currentThemeId : "default-theme";
         applyThemeToCss(themeId, isDarkMode);
     }, [user, isDarkMode, currentThemeId]);
 
-    // Fetch user data on login
     useEffect(() => {
         if (!user) return;
         fetchCurrentUser();
         fetchPreferences();
     }, [user, isAuthenticated, getAccessTokenSilently]);
 
-    // Sync dark mode class
     useEffect(() => {
         document.documentElement.classList.toggle("dark", isDarkMode);
     }, [isDarkMode]);
@@ -87,6 +91,14 @@ function AppContent({ onRegisterRefresh }) {
             transition={{ duration: 0.4 }}
             className="min-h-screen w-full bg-surface-100"
         >
+            {(showTutorial || !hasSeenTutorial) && (
+                <WelcomeTutorial
+                    onDismiss={() => {
+                        setShowTutorial(false);
+                        markTutorialSeen();
+                    }}
+                />
+            )}
             <Navbar
                 isPublic={isPublicOnly}
                 onTogglePublic={setIsPublicOnly}
@@ -96,9 +108,9 @@ function AppContent({ onRegisterRefresh }) {
                 onNameUpdated={() => {
                     setRefreshTrigger((prev) => prev + 1);
                 }}
+                onShowTutorial={() => setShowTutorial(true)}
             />
             <div className="max-w-3xl mx-auto pt-6 pb-16 px-4 sm:px-6 lg:px-0">
-                {/* Floating Write a Review Button (desktop only) */}
                 <div className="hidden lg:block">
                     <button
                         onClick={() => {
@@ -122,7 +134,6 @@ function AppContent({ onRegisterRefresh }) {
                         </motion.span>
                     </button>
                 </div>
-                {/* Top button for mobile/tablet */}
                 <div className="mb-6 flex justify-center lg:hidden">
                     <Button
                         onClick={() => setFormOpen((prev) => !prev)}

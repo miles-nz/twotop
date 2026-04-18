@@ -13,6 +13,7 @@ function Navbar({
     onTogglePublic,
     onPictureUpdated,
     onNameUpdated,
+    onShowTutorial,
 }) {
     const { user, logout, isAuthenticated, loginWithRedirect } = useAuth0();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -42,6 +43,7 @@ function Navbar({
         showName: true,
         onPictureUpdated,
         onNameUpdated,
+        onShowTutorial,
     };
 
     return (

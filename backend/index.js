@@ -669,25 +669,13 @@ app.get("/user/me", checkJwt, async (req, res) => {
         const token = await getMgmtToken();
         const userResponse = await fetch(
             `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(user_id)}`,
-            {
-                headers: { Authorization: `Bearer ${token}` },
-            },
+            { headers: { Authorization: `Bearer ${token}` } },
         );
         const userData = await userResponse.json();
         res.status(200).json({
             picture: userData.picture,
             name: userData.name,
         });
-        const { error: contributionsError } = await supabase
-            .from("review_contributions")
-            .update({ reviewer_name: name.trim() })
-            .eq("user_id", user_id);
-
-        if (contributionsError)
-            console.error(
-                "Failed to update contribution names:",
-                contributionsError.message,
-            );
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -905,7 +893,7 @@ app.get("/user/preferences", checkJwt, async (req, res) => {
     try {
         const { data, error } = await supabase
             .from("user_preferences")
-            .select("theme_id, shared_with")
+            .select("theme_id, shared_with, has_seen_tutorial")
             .eq("user_id", user_id)
             .single();
 
@@ -916,6 +904,7 @@ app.get("/user/preferences", checkJwt, async (req, res) => {
         res.status(200).json({
             theme_id: data?.theme_id || "default-theme",
             shared_with: data?.shared_with || [],
+            has_seen_tutorial: data?.has_seen_tutorial || false,
         });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -924,7 +913,7 @@ app.get("/user/preferences", checkJwt, async (req, res) => {
 
 app.patch("/user/preferences", checkJwt, async (req, res) => {
     const user_id = req.auth.payload.sub;
-    const { theme_id, shared_with } = req.body;
+    const { theme_id, shared_with, has_seen_tutorial } = req.body;
 
     if (theme_id !== undefined && typeof theme_id !== "string") {
         return res.status(400).json({ error: "Invalid theme_id" });
@@ -934,9 +923,18 @@ app.patch("/user/preferences", checkJwt, async (req, res) => {
         return res.status(400).json({ error: "Invalid shared_with" });
     }
 
+    if (
+        has_seen_tutorial !== undefined &&
+        typeof has_seen_tutorial !== "boolean"
+    ) {
+        return res.status(400).json({ error: "Invalid has_seen_tutorial" });
+    }
+
     const updates = { updated_at: new Date().toISOString() };
     if (theme_id !== undefined) updates.theme_id = theme_id;
     if (shared_with !== undefined) updates.shared_with = shared_with;
+    if (has_seen_tutorial !== undefined)
+        updates.has_seen_tutorial = has_seen_tutorial;
 
     try {
         const { error: upsertError } = await supabase
@@ -959,6 +957,7 @@ app.patch("/user/preferences", checkJwt, async (req, res) => {
         res.status(200).json({
             ...(theme_id !== undefined && { theme_id }),
             ...(shared_with !== undefined && { shared_with }),
+            ...(has_seen_tutorial !== undefined && { has_seen_tutorial }),
         });
     } catch (err) {
         res.status(500).json({ error: err.message });

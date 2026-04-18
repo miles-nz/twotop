@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 import { useCurrentUser } from "../hooks/useCurrentUser";
-import { useSharedWith } from "../hooks/useSharedWith";
+import { useUserPreferences } from "../hooks/useUserPreferences";
 
 const UserContext = createContext(null);
 
@@ -13,12 +13,13 @@ export function UserProvider({ children }) {
         fetchCurrentUser,
     } = useCurrentUser();
 
-    const { sharedWith, fetchSharedWith, handleSharedWithChange } =
-        useSharedWith();
-
-    const fetchPreferences = async () => {
-        await fetchSharedWith();
-    };
+    const {
+        sharedWith,
+        fetchPreferences,
+        handleSharedWithChange,
+        hasSeenTutorial,
+        markTutorialSeen,
+    } = useUserPreferences();
 
     return (
         <UserContext.Provider
@@ -31,6 +32,8 @@ export function UserProvider({ children }) {
                 sharedWith,
                 handleSharedWithChange,
                 fetchPreferences,
+                hasSeenTutorial,
+                markTutorialSeen,
             }}
         >
             {children}

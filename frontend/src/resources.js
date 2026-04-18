@@ -26,11 +26,9 @@ export const placeholders = [
     "Leafé",
     "Lola",
     "Major Tom",
-    "McCafé",
     "Mission Bay Café",
     "Rosebank Café & Kitchen",
     "Rude Boy",
-    "Starbucks",
     "The Candy Shop",
     "The Federal Store",
     "The Garden Shed",
@@ -38,6 +36,9 @@ export const placeholders = [
     "Twisted Tomato",
     "Winona Forever",
 ];
+
+export const randomPlaceholder = () =>
+    placeholders[Math.floor(Math.random() * placeholders.length)];
 
 export const text = {
     // General
@@ -56,6 +57,9 @@ export const text = {
     deleting: "Deleting...",
     yes: "Yes",
     no: "No",
+    next: "Next",
+    back: "Back",
+    gotIt: "Got it",
 
     // App
     appName1: "two",
@@ -75,10 +79,11 @@ export const text = {
     colorModeLight: "Light",
     colorModeDark: "Dark",
     darkModeToggleLabel: "Dark mode toggle",
-    editSharedWith: "Sharing Settings",
-    noSharedReviews: "No one can see your private reviews yet.",
+    editSharedWith: "My Circle",
+    noSharedReviews: "You haven't added anyone to your circle yet.",
     enterEmailAddress: "Enter email address",
-    sharedWithLabel: "Who can see my private reviews",
+    sharedWithLabel: "People who can see your reviews",
+    showTutorial: "View tutorial",
 
     // Navigation
     writeReview: "Write a Review",
@@ -109,7 +114,7 @@ export const text = {
     collaborative: "Collaborative",
     selectContributors: "Select contributors",
     noSharedWithForCollaboration:
-        "You aren't sharing reviews with anyone yet. Add users to your sharing settings and they will appear here.",
+        "You haven't added anyone to your circle yet. Add users to your circle and they will appear here.",
     addYourReviewLabel: "You have been added as a collaborator on this review.",
     addYourReview: "Add your review",
 
@@ -127,11 +132,11 @@ export const text = {
 
     // Review card menu
     makePublic: "Make Public",
-    makePrivate: "Make Private",
+    makePersonal: "Make Personal",
     confirmDeleteReview: "Are you sure you want to delete this review?",
     leaveCollaboration: "Leave",
     confirmLeaveCollaboration:
-        "Are you sure you want to leave this collaboration? Your contribution will be permanently deleted.",
+        "Are you sure you want to leave this collaboration? Your review will be permanently deleted.",
 
     // Review list
     noReviews: "No reviews yet.",
@@ -166,4 +171,259 @@ export const enums = {
         valueOnly: "valueOnly",
         editWithValueName: "editWithValueName",
     },
+};
+
+const slideText = {
+    writeReview: {
+        title: "Write reviews",
+        sub: "Eat somewhere nice. Rate the food, drinks, and ambience, and share your thoughts.",
+    },
+    sharing: {
+        title: "Share with friends",
+        sub: "Add people to your circle to share your reviews, or post publicly to share with everyone.",
+    },
+    collaborative: {
+        title: "Collaborative reviews",
+        sub: "Invite others who ate with you to add their perspective in the same review.",
+    },
+    themes: {
+        title: "Themes",
+        sub: "Pick a theme. All your reviews will be styled to match, and you can change it whenever you like.",
+    },
+};
+
+const userSets = [
+    [
+        {
+            initials: "AL",
+            name: "A. Linguini",
+            bg: "bg-orange-100",
+            text: "text-orange-700",
+        },
+        {
+            initials: "R",
+            name: "Remy",
+            bg: "bg-blue-100",
+            text: "text-blue-700",
+        },
+        {
+            initials: "AE",
+            name: "Anton E.",
+            bg: "bg-gray-100",
+            text: "text-gray-700",
+        },
+    ],
+    [
+        {
+            initials: "LS",
+            name: "Luke S.",
+            bg: "bg-green-100",
+            text: "text-green-700",
+        },
+        {
+            initials: "BK",
+            name: "Ben K.",
+            bg: "bg-blue-100",
+            text: "text-blue-700",
+        },
+        {
+            initials: "CT",
+            name: "C. Threepio",
+            bg: "bg-yellow-100",
+            text: "text-yellow-700",
+        },
+    ],
+    [
+        {
+            initials: "EB",
+            name: "E. Bennet",
+            bg: "bg-yellow-100",
+            text: "text-yellow-700",
+        },
+        {
+            initials: "FD",
+            name: "F. Darcy",
+            bg: "bg-blue-100",
+            text: "text-blue-700",
+        },
+        {
+            initials: "GW",
+            name: "G. Wickham",
+            bg: "bg-red-100",
+            text: "text-red-700",
+        },
+    ],
+    [
+        {
+            initials: "VB",
+            name: "Violet B.",
+            bg: "bg-violet-100",
+            text: "text-violet-700",
+        },
+        {
+            initials: "VS",
+            name: "Veruca S.",
+            bg: "bg-red-100",
+            text: "text-red-700",
+        },
+        {
+            initials: "MT",
+            name: "Mike T.",
+            bg: "bg-yellow-100",
+            text: "text-yellow-700",
+        },
+    ],
+    [
+        {
+            initials: "FB",
+            name: "Ferris B.",
+            bg: "bg-blue-100",
+            text: "text-blue-700",
+        },
+        {
+            initials: "CF",
+            name: "Cameron F.",
+            bg: "bg-red-100",
+            text: "text-red-700",
+        },
+        {
+            initials: "SP",
+            name: "Sloane P.",
+            bg: "bg-yellow-100",
+            text: "text-yellow-700",
+        },
+    ],
+    [
+        {
+            initials: "FJ",
+            name: "Fred J.",
+            bg: "bg-blue-100",
+            text: "text-blue-700",
+        },
+        {
+            initials: "VD",
+            name: "Velma D.",
+            bg: "bg-orange-100",
+            text: "text-orange-700",
+        },
+        {
+            initials: "NR",
+            name: "Norville R.",
+            bg: "bg-green-100",
+            text: "text-green-700",
+        },
+    ],
+    [
+        {
+            initials: "NL",
+            name: "N. Lim",
+            bg: "bg-purple-100",
+            text: "text-purple-700",
+        },
+        {
+            initials: "JO",
+            name: "J. Oliver",
+            bg: "bg-red-100",
+            text: "text-red-700",
+        },
+        {
+            initials: "AL",
+            name: "A. Langbein",
+            bg: "bg-green-100",
+            text: "text-green-700",
+        },
+    ],
+    [
+        {
+            initials: "NF",
+            name: "Ned F.",
+            bg: "bg-green-100",
+            text: "text-green-700",
+        },
+        {
+            initials: "KB",
+            name: "Kent B.",
+            bg: "bg-blue-100",
+            text: "text-blue-700",
+        },
+        {
+            initials: "MS",
+            name: "Moe S.",
+            bg: "bg-yellow-100",
+            text: "text-yellow-700",
+        },
+    ],
+];
+
+const reviewCardExamples = [
+    {
+        text: "this meal was too hot.",
+        rating: [2],
+        theme: "tomato-sauce",
+    },
+    {
+        text: "this meal was too cold.",
+        rating: [1],
+        theme: "kai-moana",
+    },
+    {
+        text: "this meal was just right.",
+        rating: [5],
+        theme: "manuka-honey",
+    },
+    {
+        text: "we've had one, yes, but what about second breakfast?",
+        rating: [3],
+        theme: "smashed-avo",
+    },
+    {
+        text: "I don't like food, I love it. if I don't love it, I don't swallow.",
+        rating: [1],
+        theme: "blueberry-muffin",
+    },
+    {
+        text: "I drink your milkshake! I drink it up!",
+        rating: [5],
+        theme: "flat-white",
+    },
+    {
+        text: "do you know what they call the quarter pounder with cheese in france?",
+        rating: [3],
+        theme: "pav-lover",
+    },
+    {
+        text: "po-tae-toes. boil em, mash em, stick em in a stew.",
+        rating: [4],
+        theme: "kumara-fries",
+    },
+    {
+        text: "is butter a carb?",
+        rating: [2],
+        theme: "strawberry-wafer",
+    },
+];
+
+const restaurantNameExamples = [
+    "Gusteau's",
+    "Dorsia",
+    "Moe's Tavern",
+    "Mos Eisley Cantina",
+    "The Prancing Pony",
+];
+
+export const tutorialExamples = {
+    slideText,
+    randomUserSet: () => userSets[Math.floor(Math.random() * userSets.length)],
+    randomRestaurantName: () =>
+        restaurantNameExamples[
+            Math.floor(Math.random() * restaurantNameExamples.length)
+        ],
+    reviewCardExamples,
+    reviewTextExample:
+        "Really really good. Really really really good. So good.",
+    reviewTextExampleCollaborator: "I agree, it was really good.",
+    welcomeMessage: [
+        "Welcome to two:top!",
+        "Here's a quick tutorial to get you started.",
+    ],
 };

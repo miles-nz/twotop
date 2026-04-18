@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { X } from "lucide-react";
-import { text, placeholders } from "../../resources";
+import { text, randomPlaceholder } from "../../resources";
 
 const DEBOUNCE_MS = 300;
 
@@ -21,9 +21,7 @@ function PlacesSearch({
     const debounceRef = useRef(null);
     const containerRef = useRef(null);
 
-    const [placeholder] = useState(
-        () => placeholders[Math.floor(Math.random() * placeholders.length)],
-    );
+    const [placeholder] = useState(() => randomPlaceholder());
 
     useEffect(() => {
         if (!open) return;
