@@ -72,7 +72,7 @@ export default function WelcomeTutorial({ onDismiss }) {
     const handleReplay = () => {
         setDone(false);
         setSlideKey((k) => k + 1);
-        if (current === 2) setUserSet(tutorialExamples.randomUserSet());
+        if (current === 2) setUserSet(tutorialExamples.nextUserSet(userSet));
         if (current === 1)
             setRestaurantName(tutorialExamples.randomRestaurantName());
     };

@@ -315,26 +315,6 @@ const userSets = [
     ],
     [
         {
-            initials: "NL",
-            name: "N. Lim",
-            bg: "bg-purple-100",
-            text: "text-purple-700",
-        },
-        {
-            initials: "JO",
-            name: "J. Oliver",
-            bg: "bg-red-100",
-            text: "text-red-700",
-        },
-        {
-            initials: "AL",
-            name: "A. Langbein",
-            bg: "bg-green-100",
-            text: "text-green-700",
-        },
-    ],
-    [
-        {
             initials: "NF",
             name: "Ned F.",
             bg: "bg-green-100",
@@ -426,4 +406,11 @@ export const tutorialExamples = {
         "Welcome to two:top!",
         "Here's a quick tutorial to get you started.",
     ],
+    nextUserSet: (currentSet) => {
+        const currentIndex = userSets.findIndex(
+            (set) => set[0].name === currentSet[0].name,
+        );
+        const nextIndex = (currentIndex + 1) % userSets.length;
+        return userSets[nextIndex];
+    },
 };
