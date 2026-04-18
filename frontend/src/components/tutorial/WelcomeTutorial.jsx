@@ -140,7 +140,7 @@ export default function WelcomeTutorial({ onDismiss }) {
                     </motion.div>
                 </AnimatePresence>
 
-                <div className="px-8 pb-7 flex items-stretch justify-between border-t border-surface-200 pt-4">
+                <div className="px-8 pb-7 flex items-center justify-between border-t border-surface-200 pt-4">
                     <div className="flex gap-1.5">
                         {SLIDES.map((_, i) => (
                             <div
