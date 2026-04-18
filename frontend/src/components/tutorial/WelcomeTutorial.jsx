@@ -90,7 +90,7 @@ export default function WelcomeTutorial({ onDismiss }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4"
+            className="fixed inset-0 z-100 flex items-center justify-center bg-black/70 px-4"
         >
             <motion.div
                 initial={{ opacity: 0, scale: 0.97, y: 8 }}
