@@ -13,9 +13,19 @@ const createCroppedImage = async (imageSrc, croppedAreaPixels) => {
         img.src = imageSrc;
     });
 
+    const MAX_SIZE = 1200;
+    const scale = Math.min(
+        1,
+        MAX_SIZE / croppedAreaPixels.width,
+        MAX_SIZE / croppedAreaPixels.height,
+    );
+
+    const outputWidth = Math.round(croppedAreaPixels.width * scale);
+    const outputHeight = Math.round(croppedAreaPixels.height * scale);
+
     const canvas = document.createElement("canvas");
-    canvas.width = croppedAreaPixels.width;
-    canvas.height = croppedAreaPixels.height;
+    canvas.width = outputWidth;
+    canvas.height = outputHeight;
     const ctx = canvas.getContext("2d");
 
     ctx.drawImage(
@@ -26,8 +36,8 @@ const createCroppedImage = async (imageSrc, croppedAreaPixels) => {
         croppedAreaPixels.height,
         0,
         0,
-        croppedAreaPixels.width,
-        croppedAreaPixels.height,
+        outputWidth,
+        outputHeight,
     );
 
     return new Promise((resolve) => {
@@ -38,7 +48,7 @@ const createCroppedImage = async (imageSrc, croppedAreaPixels) => {
                 );
             },
             "image/jpeg",
-            0.95,
+            0.8,
         );
     });
 };

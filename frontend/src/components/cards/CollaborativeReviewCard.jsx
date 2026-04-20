@@ -311,6 +311,7 @@ function CollaborativeReviewCard({ review, currentUserId, onReviewUpdated }) {
                     <div className="w-full max-w-xl aspect-square rounded-2xl overflow-hidden">
                         <ReviewCardCarousel
                             images={review.image_urls}
+                            lqips={review.image_lqips}
                             reviewId={review.id}
                         />
                     </div>

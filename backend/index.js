@@ -5,6 +5,7 @@ const { auth } = require("express-oauth2-jwt-bearer");
 const supabase = require("./supabase");
 const multer = require("multer");
 const rateLimit = require("express-rate-limit");
+const sharp = require("sharp");
 
 // Config
 const ALLOWED_ORIGINS = [
@@ -119,7 +120,20 @@ const uploadImage = async (file, userId, bucket = REVIEW_IMAGE_BUCKET) => {
         .from(bucket)
         .getPublicUrl(data.path);
 
-    return urlData.publicUrl;
+    const publicUrl = urlData.publicUrl;
+
+    if (bucket !== REVIEW_IMAGE_BUCKET) return { url: publicUrl, lqip: null };
+
+    try {
+        const lqipBuffer = await sharp(file.buffer)
+            .resize(8, 8, { fit: "cover" })
+            .jpeg({ quality: 50 })
+            .toBuffer();
+        const lqip = `data:image/jpeg;base64,${lqipBuffer.toString("base64")}`;
+        return { url: publicUrl, lqip };
+    } catch {
+        return { url: publicUrl, lqip: null };
+    }
 };
 
 const getStoragePath = (url) => {
@@ -321,9 +335,11 @@ app.post(
         const user_id = req.auth.payload.sub;
 
         try {
-            const image_urls = await Promise.all(
+            const uploadResults = await Promise.all(
                 (req.files || []).map((file) => uploadImage(file, user_id)),
             );
+            const image_urls = uploadResults.map((r) => r.url);
+            const image_lqips = uploadResults.map((r) => r.lqip);
 
             const { data, error } = await supabase
                 .from("reviews")
@@ -354,6 +370,7 @@ app.post(
                             ? JSON.parse(allowed_contributors)
                             : [],
                         image_urls,
+                        image_lqips,
                         theme_id: theme_id || "default-theme",
                     },
                 ])
@@ -467,6 +484,14 @@ app.patch(
                 );
                 await deleteImages(removedUrls);
                 updates.image_urls = updatedUrls;
+
+                // Sync lqips to match remaining urls
+                const remainingIndices = (review.image_urls || [])
+                    .map((url, i) => (updatedUrls.includes(url) ? i : -1))
+                    .filter((i) => i !== -1);
+                updates.image_lqips = remainingIndices.map(
+                    (i) => (review.image_lqips || [])[i] || null,
+                );
             }
 
             if (req.files && req.files.length > 0) {
@@ -478,10 +503,16 @@ app.patch(
                 ) {
                     return res.status(400).json({ error: ERRORS.maxPhotos });
                 }
-                const newUrls = await Promise.all(
+                const uploadResults = await Promise.all(
                     req.files.map((file) => uploadImage(file, user_id)),
                 );
+                const newUrls = uploadResults.map((r) => r.url);
+                const newLqips = uploadResults.map((r) => r.lqip);
                 updates.image_urls = [...existingUrls, ...newUrls];
+                updates.image_lqips = [
+                    ...(updates.image_lqips || review.image_lqips || []),
+                    ...newLqips,
+                ];
             }
 
             const { data, error } = await supabase
@@ -709,7 +740,7 @@ app.patch(
             const oldPictureUrl = userData.picture;
 
             // Upload new picture to Supabase Storage
-            const publicUrl = await uploadImage(
+            const { url: publicUrl } = await uploadImage(
                 req.file,
                 user_id,
                 PROFILE_PICTURE_BUCKET,

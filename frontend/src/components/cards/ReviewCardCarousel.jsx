@@ -5,7 +5,7 @@ import { useReviewList } from "../../contexts/ReviewListContext";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
 import { preferences, text } from "../../resources";
 
-function ReviewCardCarousel({ images, reviewId }) {
+function ReviewCardCarousel({ images, lqips, reviewId }) {
     const { expandedId, handleExpand } = useReviewList();
     const isExpanded = expandedId === reviewId;
     const { carouselRef, expandedHeight, isCollapsed, setIsCollapsed } =
@@ -41,7 +41,7 @@ function ReviewCardCarousel({ images, reviewId }) {
                         if ("height" in definition) setIsCollapsed(!isExpanded);
                     }}
                 >
-                    <ImageCarousel images={images} />
+                    <ImageCarousel images={images} lqips={lqips} />
                 </motion.div>
                 {shouldCollapse && isCollapsed && !isExpanded && (
                     <motion.div

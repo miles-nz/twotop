@@ -27,11 +27,16 @@ const resolveColor = (variable) =>
         .getPropertyValue(variable.replace("var(", "").replace(")", "").trim())
         .trim();
 
-function LoadingDots({ size = 12, logoColours = false, colourValue = 500 }) {
+function LoadingDots({
+    size = 12,
+    logoColours = false,
+    colourValue = 500,
+    speed = 1,
+}) {
     const orbitRadius = size / 3;
     const containerSize = orbitRadius * 2 + size;
-    const duration = 750;
-    const pauseDuration = 100;
+    const duration = 750 / speed;
+    const pauseDuration = 100 / speed;
     const cycleDuration = duration + pauseDuration;
     const customEase = createEase(2);
     const translationAmount = (3 * size) / 5;

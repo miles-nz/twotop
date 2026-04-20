@@ -1,16 +1,14 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
 import { text } from "../../resources";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
-import LoadingDots from "../ui/LoadingDots";
 import { useTheme } from "../../contexts/ThemeContext";
 
 const arrowButtonClasses =
     "absolute top-1/2 -translate-y-1/2 bg-black/50 enabled:hover:bg-black/70 disabled:opacity-30 text-white rounded-full p-2 transition-all duration-200 z-10 enabled:cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400";
 
-function ImageCarousel({ images }) {
+function ImageCarousel({ images, lqips }) {
     const scrollRef = useRef(null);
-    const imgRefs = useRef({});
     const [enableLeftArrow, setEnableLeftArrow] = useState(false);
     const [enableRightArrow, setEnableRightArrow] = useState(true);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -32,13 +30,11 @@ function ImageCarousel({ images }) {
     const scroll = (direction) => {
         if (scrollRef.current) {
             const { clientWidth } = scrollRef.current;
-            const scrollTo =
-                direction === "left"
-                    ? scrollRef.current.scrollLeft - clientWidth
-                    : scrollRef.current.scrollLeft + clientWidth;
-
             scrollRef.current.scrollTo({
-                left: scrollTo,
+                left:
+                    direction === "left"
+                        ? scrollRef.current.scrollLeft - clientWidth
+                        : scrollRef.current.scrollLeft + clientWidth,
                 behavior: "smooth",
             });
         }
@@ -47,7 +43,7 @@ function ImageCarousel({ images }) {
     const scrollToIndex = (index) => {
         if (scrollRef.current) {
             const { clientWidth } = scrollRef.current;
-            if (index == 0) {
+            if (index === 0) {
                 setEnableLeftArrow(false);
                 setEnableRightArrow(true);
             } else if (index === images.length - 1) {
@@ -72,45 +68,61 @@ function ImageCarousel({ images }) {
                 ref={scrollRef}
                 onScroll={handleScroll}
             >
-                {images.map((url, index) => (
-                    <div
-                        key={index}
-                        className="shrink-0 w-full snap-center relative aspect-square"
-                    >
+                {images.map((url, index) => {
+                    const lqip = lqips?.[index];
+                    return (
                         <div
-                            className={`absolute inset-0 bg-surface-200 animate-pulse flex items-center justify-center transition-opacity duration-300 ${loadedImages[index] ? "opacity-0" : "opacity-100"} z-0`}
+                            key={index}
+                            className="shrink-0 w-full snap-center relative aspect-square overflow-hidden"
                         >
-                            <LoadingDots
-                                logoColours={currentThemeId === "default-theme"}
+                            {/* LQIP or fallback placeholder */}
+                            <div
+                                className={`absolute inset-0 transition-opacity duration-500 ${loadedImages[index] ? "opacity-0" : "opacity-100"} z-0`}
+                            >
+                                {lqip ? (
+                                    <img
+                                        src={lqip}
+                                        className="absolute inset-0 w-full h-full object-cover"
+                                        style={{
+                                            filter: "blur(8px)",
+                                            transform: "scale(1.1)",
+                                        }}
+                                        aria-hidden
+                                    />
+                                ) : (
+                                    <div className="absolute inset-0 w-full h-full bg-surface-200 animate-pulse" />
+                                )}
+                            </div>
+
+                            {errorImages[index] && (
+                                <div className="absolute inset-0 bg-surface-200 flex items-center justify-center z-10">
+                                    <ImageOff
+                                        size={32}
+                                        className="text-text-light"
+                                    />
+                                </div>
+                            )}
+                            <img
+                                src={url}
+                                className={`w-full h-full object-cover transition-opacity duration-500 ${loadedImages[index] ? "opacity-100" : "opacity-0"} relative z-10`}
+                                alt={`${text.photo} ${index + 1}`}
+                                loading="lazy"
+                                onLoad={() =>
+                                    setLoadedImages((prev) => ({
+                                        ...prev,
+                                        [index]: true,
+                                    }))
+                                }
+                                onError={() =>
+                                    setErrorImages((prev) => ({
+                                        ...prev,
+                                        [index]: true,
+                                    }))
+                                }
                             />
                         </div>
-                        {errorImages[index] && (
-                            <div className="absolute inset-0 bg-surface-200 flex items-center justify-center z-10">
-                                <ImageOff
-                                    size={32}
-                                    className="text-text-light"
-                                />
-                            </div>
-                        )}
-                        <img
-                            src={url}
-                            className={`w-full h-full object-cover transition-opacity duration-300 ${loadedImages[index] ? "opacity-100" : "opacity-0"} relative z-10`}
-                            alt={`${text.photo} ${index + 1}`}
-                            onLoad={() =>
-                                setLoadedImages((prev) => ({
-                                    ...prev,
-                                    [index]: true,
-                                }))
-                            }
-                            onError={() =>
-                                setErrorImages((prev) => ({
-                                    ...prev,
-                                    [index]: true,
-                                }))
-                            }
-                        />
-                    </div>
-                ))}
+                    );
+                })}
             </div>
             {images.length > 1 && (
                 <>
