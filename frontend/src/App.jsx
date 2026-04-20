@@ -208,6 +208,7 @@ function AppContent({ onRegisterRefresh }) {
 
 function App() {
     const triggerRefreshRef = useRef(null);
+    applyThemeToCss("default-theme", false);
 
     return (
         <ThemeProvider>

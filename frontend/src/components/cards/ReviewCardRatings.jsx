@@ -5,131 +5,47 @@ import { text } from "../../resources";
 function ReviewCardRatings({ foodRating, drinkRating, ambienceRating }) {
     const isDesktop = useBreakpoint("md");
 
-    if (!foodRating && !drinkRating && !ambienceRating) return null;
+    const spanClass = isDesktop
+        ? "flex-1 flex flex-col items-center gap-1 border-r border-surface-200 last:border-r-0"
+        : "flex flex-row items-center gap-4 w-full";
+
+    const labelClass = isDesktop
+        ? "text-xs sm:text-sm text-text-light tracking-wide"
+        : "text-xs sm:text-sm text-text-light tracking-wide min-w-17.5 text-center";
+
+    const starWrapperClass = isDesktop
+        ? "flex items-center"
+        : "flex-1 flex items-center justify-end";
+
+    const ratings = [
+        { label: text.foodLabel, value: foodRating },
+        { label: text.drinkLabel, value: drinkRating },
+        { label: text.ambienceLabel, value: ambienceRating },
+    ].filter((r) => r.value);
+
+    if (ratings.length === 0) return null;
 
     return (
-        <div className="px-6 pt-1 pb-4 sm:py-0 sm:pb-4 overflow-x-auto mx-auto">
+        <div className="px-6 pt-1 pb-4 sm:py-0 sm:pb-4 overflow-x-auto mx-auto w-full">
             <div
                 className={
                     isDesktop
-                        ? "flex w-full justify-between items-center"
+                        ? "flex w-full items-center"
                         : "flex flex-col w-full gap-4"
                 }
             >
-                {/* Food Rating */}
-                {foodRating && (
-                    <span
-                        className={
-                            isDesktop
-                                ? "flex flex-col items-center gap-1"
-                                : "flex flex-row items-center gap-4 w-full"
-                        }
-                        title={text.foodLabel}
-                    >
-                        <span
-                            className={
-                                isDesktop
-                                    ? "text-xs sm:text-sm text-text-light tracking-wide min-w-17.5 pl-1 text-left"
-                                    : "text-xs sm:text-sm text-text-light tracking-wide min-w-17.5 text-center"
-                            }
-                        >
-                            {text.foodLabel}
-                        </span>
-                        <div
-                            className={
-                                isDesktop
-                                    ? "flex items-center"
-                                    : "flex-1 flex items-center justify-end"
-                            }
-                        >
+                {ratings.map((r) => (
+                    <span key={r.label} className={spanClass} title={r.label}>
+                        <span className={labelClass}>{r.label}</span>
+                        <div className={starWrapperClass}>
                             <StarRating
-                                value={foodRating}
-                                readOnly
-                                size={isDesktop ? "lg" : "md"}
-                            />
-                            {isDesktop && (drinkRating || ambienceRating) && (
-                                <span
-                                    className="mx-3 h-10 border-l border-surface-200"
-                                    aria-hidden="true"
-                                />
-                            )}
-                        </div>
-                    </span>
-                )}
-                {/* Drink Rating */}
-                {drinkRating && (
-                    <span
-                        className={
-                            isDesktop
-                                ? "flex flex-col items-center gap-1"
-                                : "flex flex-row items-center gap-4 w-full"
-                        }
-                        title={text.drinkLabel}
-                    >
-                        <span
-                            className={
-                                isDesktop
-                                    ? "text-xs sm:text-sm text-text-light tracking-wide min-w-17.5 pl-1 text-left"
-                                    : "text-xs sm:text-sm text-text-light tracking-wide min-w-17.5 text-center"
-                            }
-                        >
-                            {text.drinkLabel}
-                        </span>
-                        <div
-                            className={
-                                isDesktop
-                                    ? "flex items-center"
-                                    : "flex-1 flex items-center justify-end"
-                            }
-                        >
-                            <StarRating
-                                value={drinkRating}
-                                readOnly
-                                size={isDesktop ? "lg" : "md"}
-                            />
-                            {isDesktop && ambienceRating && (
-                                <span
-                                    className="mx-3 h-10 border-l border-surface-200"
-                                    aria-hidden="true"
-                                />
-                            )}
-                        </div>
-                    </span>
-                )}
-                {/* Ambience Rating */}
-                {ambienceRating && (
-                    <span
-                        className={
-                            isDesktop
-                                ? "flex flex-col items-center gap-1"
-                                : "flex flex-row items-center gap-4 w-full"
-                        }
-                        title={text.ambienceLabel}
-                    >
-                        <span
-                            className={
-                                isDesktop
-                                    ? "text-xs sm:text-sm text-text-light tracking-wide min-w-17.5 text-left"
-                                    : "text-xs sm:text-sm text-text-light tracking-wide min-w-17.5 text-center"
-                            }
-                        >
-                            {text.ambienceLabel}
-                        </span>
-                        <div
-                            className={
-                                isDesktop
-                                    ? "flex items-center"
-                                    : "flex-1 flex items-center justify-end"
-                            }
-                        >
-                            <StarRating
-                                value={ambienceRating}
+                                value={r.value}
                                 readOnly
                                 size={isDesktop ? "lg" : "md"}
                             />
                         </div>
                     </span>
-                )}
+                ))}
             </div>
         </div>
     );

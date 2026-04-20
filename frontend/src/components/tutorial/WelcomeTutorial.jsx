@@ -7,6 +7,7 @@ import SlideCollaborative from "./SlideCollaborative";
 import SlideThemes from "./SlideThemes";
 import ReplayButton from "./ReplayButton";
 import { text, tutorialExamples } from "../../resources";
+import { useAuth0 } from "@auth0/auth0-react";
 
 const SLIDES = [
     {
@@ -41,17 +42,33 @@ const SLIDES = [
     },
 ];
 
+// animations for transitioning between slides
+const variants = {
+    enter: (dir) => ({ opacity: 0, x: dir * 24 }),
+    center: { opacity: 1, x: 0 },
+    exit: (dir) => ({ opacity: 0, x: dir * -24 }),
+};
+
 export default function WelcomeTutorial({ onDismiss }) {
     const [current, setCurrent] = useState(0);
     const [direction, setDirection] = useState(1);
     const [slideKey, setSlideKey] = useState(0);
     const [done, setDone] = useState(false);
-    const [userSet, setUserSet] = useState(() =>
-        tutorialExamples.randomUserSet(),
-    );
-    const [restaurantName, setRestaurantName] = useState(() =>
-        tutorialExamples.randomRestaurantName(),
-    );
+
+    const { user } = useAuth0();
+    const email = user?.email ?? null;
+    const [userSet, setUserSet] = useState(() => {
+        return (
+            tutorialExamples.getUserSetForEmail(email) ??
+            tutorialExamples.randomUserSet()
+        );
+    });
+    const [restaurantName, setRestaurantName] = useState(() => {
+        return (
+            tutorialExamples.getRestaurantNameForEmail(email) ??
+            tutorialExamples.randomRestaurantName()
+        );
+    });
 
     const goto = (n) => {
         setDirection(n > current ? 1 : -1);
@@ -78,12 +95,6 @@ export default function WelcomeTutorial({ onDismiss }) {
     };
 
     const { title, sub, Component, hasReplay } = SLIDES[current];
-
-    const variants = {
-        enter: (dir) => ({ opacity: 0, x: dir * 24 }),
-        center: { opacity: 1, x: 0 },
-        exit: (dir) => ({ opacity: 0, x: dir * -24 }),
-    };
 
     const touchStartX = useRef(null);
 

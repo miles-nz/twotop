@@ -32,7 +32,7 @@ function ReviewForm({ onReviewSubmitted }) {
     const [restaurantName, setRestaurantName] = useState("");
     const [restaurantAddress, setRestaurantAddress] = useState("");
     const [selectedPlaceId, setSelectedPlaceId] = useState(null);
-    const [visitDate, setvisitDate] = useState("");
+    const [visitDate, setVisitDate] = useState(getLocalDate());
     const [foodRating, setFoodRating] = useState(null);
     const [drinkRating, setDrinkRating] = useState(null);
     const [ambienceRating, setAmbienceRating] = useState(null);
@@ -40,6 +40,7 @@ function ReviewForm({ onReviewSubmitted }) {
     const [isPublic, setIsPublic] = useState(false);
     const [isCollaborative, setIsCollaborative] = useState(false);
     const [selectedContributors, setSelectedContributors] = useState([]);
+    const [editingAddress, setEditingAddress] = useState(false);
 
     const [draftRestored, setDraftRestored] = useState(() => {
         try {
@@ -62,6 +63,7 @@ function ReviewForm({ onReviewSubmitted }) {
 
     const textareaRef = useRef(null);
     useAutoResize(textareaRef, reviewText);
+    const addressFocusRef = useRef(false);
 
     const {
         images,
@@ -96,7 +98,7 @@ function ReviewForm({ onReviewSubmitted }) {
         setRestaurantName,
         setRestaurantAddress,
         setSelectedPlaceId,
-        setvisitDate,
+        setVisitDate,
         setReviewText,
         setFoodRating,
         setDrinkRating,
@@ -112,11 +114,12 @@ function ReviewForm({ onReviewSubmitted }) {
         setFoodRating(null);
         setDrinkRating(null);
         setAmbienceRating(null);
-        setvisitDate("");
+        setVisitDate(getLocalDate());
         setIsPublic(false);
         setIsCollaborative(false);
         setSelectedContributors([]);
         resetImages();
+        setEditingAddress(false);
     };
 
     const toggleContributor = (person) => {
@@ -189,11 +192,13 @@ function ReviewForm({ onReviewSubmitted }) {
         setRestaurantName(name);
         setRestaurantAddress(address);
         setSelectedPlaceId(place_id);
+        setEditingAddress(false);
     };
 
     const handleClearPlace = () => {
         setSelectedPlaceId(null);
         setRestaurantAddress("");
+        setEditingAddress(false);
     };
 
     return (
@@ -203,7 +208,7 @@ function ReviewForm({ onReviewSubmitted }) {
             transition={{ duration: 0.4 }}
             className="bg-surface-200 rounded-2xl shadow-md p-6 mb-6 border border-surface-200 text-text-dark"
         >
-            <h2 className="text-xl font-bold text-text-mid dark:text-text-light mb-4">
+            <h2 className="text-xl font-bold text-text-mid dark:text-text-dark mb-4">
                 {text.writeReview}
             </h2>
 
@@ -234,20 +239,62 @@ function ReviewForm({ onReviewSubmitted }) {
             </div>
 
             <div className="mb-4">
-                <label
-                    htmlFor="restaurantAddress"
-                    className="block text-sm font-medium text-text-mid mb-1"
-                >
-                    {text.restaurantAddressLabel}
-                </label>
-                <input
-                    id="restaurantAddress"
-                    type="text"
-                    value={restaurantAddress}
-                    onChange={(e) => setRestaurantAddress(e.target.value)}
-                    className={`${inputClass} placeholder-text-light`}
-                    placeholder={text.restaurantAddressPlaceholder}
-                />
+                {!restaurantName ? null : selectedPlaceId &&
+                  restaurantAddress &&
+                  !editingAddress ? (
+                    <div className="flex items-center justify-between px-1 py-1">
+                        <span className="text-sm text-text-light">
+                            {restaurantAddress}
+                        </span>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                addressFocusRef.current = true;
+                                setEditingAddress(true);
+                            }}
+                            className="text-xs text-text-light hover:text-text-mid transition-colors ml-2 shrink-0"
+                        >
+                            {text.edit}
+                        </button>
+                    </div>
+                ) : !selectedPlaceId && !editingAddress ? (
+                    <button
+                        type="button"
+                        onClick={() => {
+                            addressFocusRef.current = true;
+                            setEditingAddress(true);
+                        }}
+                        className="text-xs text-text-light hover:text-text-mid transition-colors"
+                    >
+                        + {text.restaurantAddressLabel}
+                    </button>
+                ) : (
+                    <>
+                        <label
+                            htmlFor="restaurantAddress"
+                            className="block text-sm font-medium text-text-mid mb-1"
+                        >
+                            {text.restaurantAddressLabel}
+                        </label>
+                        <input
+                            id="restaurantAddress"
+                            type="text"
+                            value={restaurantAddress}
+                            onChange={(e) =>
+                                setRestaurantAddress(e.target.value)
+                            }
+                            className={`${inputClass} placeholder-text-light`}
+                            placeholder={text.restaurantAddressPlaceholder}
+                            autoFocus={false}
+                            ref={(el) => {
+                                if (el && addressFocusRef.current) {
+                                    el.focus();
+                                    addressFocusRef.current = false;
+                                }
+                            }}
+                        />
+                    </>
+                )}
             </div>
 
             <div className="mb-4 pr-6.5 md:pr-0">
@@ -261,7 +308,7 @@ function ReviewForm({ onReviewSubmitted }) {
                     id="visitDate"
                     type="date"
                     value={visitDate}
-                    onChange={(e) => setvisitDate(e.target.value)}
+                    onChange={(e) => setVisitDate(e.target.value)}
                     max={getLocalDate()}
                     className={inputClass}
                     style={{

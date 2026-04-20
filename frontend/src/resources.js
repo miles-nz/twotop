@@ -192,6 +192,14 @@ const slideText = {
     },
 };
 
+const specialUsers = (() => {
+    try {
+        return JSON.parse(import.meta.env.VITE_SPECIAL_USERS || "[]");
+    } catch {
+        return [];
+    }
+})();
+
 const userSets = [
     [
         {
@@ -201,8 +209,8 @@ const userSets = [
             text: "text-orange-700",
         },
         {
-            initials: "R",
-            name: "Remy",
+            initials: "RR",
+            name: "Remy R.",
             bg: "bg-blue-100",
             text: "text-blue-700",
         },
@@ -315,22 +323,22 @@ const userSets = [
     ],
     [
         {
-            initials: "NF",
-            name: "Ned F.",
+            initials: "HS",
+            name: "Homer S.",
+            bg: "bg-yellow-100",
+            text: "text-yellow-700",
+        },
+        {
+            initials: "LL",
+            name: "Lenny L.",
             bg: "bg-green-100",
             text: "text-green-700",
         },
         {
-            initials: "KB",
-            name: "Kent B.",
-            bg: "bg-blue-100",
-            text: "text-blue-700",
-        },
-        {
-            initials: "MS",
-            name: "Moe S.",
-            bg: "bg-yellow-100",
-            text: "text-yellow-700",
+            initials: "CC",
+            name: "Carl C.",
+            bg: "bg-pink-100",
+            text: "text-pink-700",
         },
     ],
 ];
@@ -398,6 +406,20 @@ export const tutorialExamples = {
         restaurantNameExamples[
             Math.floor(Math.random() * restaurantNameExamples.length)
         ],
+
+    getUserSetForEmail: (email) => {
+        const specialUser = specialUsers.find((u) => u.email === email);
+        if (!specialUser) return null;
+        return (
+            userSets.find(
+                (set) => set[0].name === specialUser.defaultUserSet,
+            ) ?? null
+        );
+    },
+    getRestaurantNameForEmail: (email) => {
+        const specialUser = specialUsers.find((u) => u.email === email);
+        return specialUser?.defaultRestaurantName ?? null;
+    },
     reviewCardExamples,
     reviewTextExample:
         "Really really good. Really really really good. So good.",

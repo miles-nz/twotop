@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import { X } from "lucide-react";
-import { text, randomPlaceholder } from "../../resources";
+import { Search, X } from "lucide-react";
+import { text } from "../../resources";
+import { useTypingPlaceholder } from "../../hooks/useTypingPlaceholder";
 
 const DEBOUNCE_MS = 300;
 
@@ -21,7 +22,7 @@ function PlacesSearch({
     const debounceRef = useRef(null);
     const containerRef = useRef(null);
 
-    const [placeholder] = useState(() => randomPlaceholder());
+    const placeholder = useTypingPlaceholder();
 
     useEffect(() => {
         if (!open) return;
@@ -103,12 +104,16 @@ function PlacesSearch({
     return (
         <div className="relative" ref={containerRef}>
             <div className="relative">
+                <Search
+                    size={15}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-text-light pointer-events-none"
+                />
                 <input
                     type="text"
                     value={value}
                     onChange={handleChange}
                     maxLength={100}
-                    className={className}
+                    className={`${className} pl-8`}
                     placeholder={text.restaurantNamePlaceholder(placeholder)}
                     autoComplete="off"
                 />
