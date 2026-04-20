@@ -47,6 +47,8 @@ function AppContent({ onRegisterRefresh }) {
         }
     };
 
+    applyThemeToCss(user ? currentThemeId : "default-theme", isDarkMode);
+
     useEffect(() => {
         const themeId = user ? currentThemeId : "default-theme";
         applyThemeToCss(themeId, isDarkMode);
