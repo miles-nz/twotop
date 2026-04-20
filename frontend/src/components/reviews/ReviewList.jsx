@@ -36,6 +36,9 @@ function ReviewList({
     currentUserId,
     onReviewUpdated,
     onScrollComplete,
+    reviewerNameUpdate,
+    reviewerPictureUpdate,
+    reviewerThemeUpdate,
 }) {
     const { getAccessTokenSilently } = useAuth0();
     const { currentThemeId } = useTheme();
@@ -87,6 +90,39 @@ function ReviewList({
         }, 1000);
         return () => clearTimeout(timer);
     }, [scrollToId, reviews]);
+
+    useEffect(() => {
+        if (!reviewerPictureUpdate) return;
+        setReviews((prev) =>
+            prev.map((r) =>
+                r.user_id === reviewerPictureUpdate.userId
+                    ? { ...r, reviewer_picture: reviewerPictureUpdate.picture }
+                    : r,
+            ),
+        );
+    }, [reviewerPictureUpdate]);
+
+    useEffect(() => {
+        if (!reviewerNameUpdate) return;
+        setReviews((prev) =>
+            prev.map((r) =>
+                r.user_id === reviewerNameUpdate.userId
+                    ? { ...r, reviewer_name: reviewerNameUpdate.name }
+                    : r,
+            ),
+        );
+    }, [reviewerNameUpdate]);
+
+    useEffect(() => {
+        if (!reviewerThemeUpdate) return;
+        setReviews((prev) =>
+            prev.map((r) =>
+                r.user_id === reviewerThemeUpdate.userId
+                    ? { ...r, theme_id: reviewerThemeUpdate.themeId }
+                    : r,
+            ),
+        );
+    }, [reviewerThemeUpdate]);
 
     if (loading) {
         return (

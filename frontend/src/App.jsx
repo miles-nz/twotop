@@ -28,6 +28,9 @@ function AppContent({ onRegisterRefresh }) {
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [scrollToId, setScrollToId] = useState(null);
     const [showTutorial, setShowTutorial] = useState(false);
+    const [reviewerPictureUpdate, setReviewerPictureUpdate] = useState(null);
+    const [reviewerNameUpdate, setReviewerNameUpdate] = useState(null);
+    const [reviewerThemeUpdate, setReviewerThemeUpdate] = useState(null);
 
     useEffect(() => {
         onRegisterRefresh(() => setRefreshTrigger((prev) => prev + 1));
@@ -63,6 +66,19 @@ function AppContent({ onRegisterRefresh }) {
     useEffect(() => {
         document.documentElement.classList.toggle("dark", isDarkMode);
     }, [isDarkMode]);
+
+    const prevThemeId = useRef(currentThemeId);
+
+    useEffect(() => {
+        if (currentThemeId === prevThemeId.current) return;
+        prevThemeId.current = currentThemeId;
+        if (user?.sub) {
+            setReviewerThemeUpdate({
+                themeId: currentThemeId,
+                userId: user.sub,
+            });
+        }
+    }, [currentThemeId]);
 
     if (!isAuthenticated) {
         return (
@@ -104,11 +120,14 @@ function AppContent({ onRegisterRefresh }) {
             <Navbar
                 isPublic={isPublicOnly}
                 onTogglePublic={setIsPublicOnly}
-                onPictureUpdated={() => {
-                    setRefreshTrigger((prev) => prev + 1);
+                onPictureUpdated={(newPicture) => {
+                    setReviewerPictureUpdate({
+                        picture: newPicture,
+                        userId: user.sub,
+                    });
                 }}
-                onNameUpdated={() => {
-                    setRefreshTrigger((prev) => prev + 1);
+                onNameUpdated={(newName) => {
+                    setReviewerNameUpdate({ name: newName, userId: user.sub });
                 }}
                 onShowTutorial={() => setShowTutorial(true)}
             />
@@ -178,6 +197,9 @@ function AppContent({ onRegisterRefresh }) {
                         setRefreshTrigger((prev) => prev + 1);
                     }}
                     onScrollComplete={() => setScrollToId(null)}
+                    reviewerPictureUpdate={reviewerPictureUpdate}
+                    reviewerNameUpdate={reviewerNameUpdate}
+                    reviewerThemeUpdate={reviewerThemeUpdate}
                 />
             </div>
         </motion.div>
@@ -188,7 +210,7 @@ function App() {
     const triggerRefreshRef = useRef(null);
 
     return (
-        <ThemeProvider onThemeApplied={() => triggerRefreshRef.current?.()}>
+        <ThemeProvider>
             <UserProvider>
                 <AppContent
                     onRegisterRefresh={(fn) => {

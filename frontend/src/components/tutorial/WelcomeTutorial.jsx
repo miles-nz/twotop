@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import SlideWelcome from "./SlideWelcome";
 import SlideWriteReview from "./SlideWriteReview";
@@ -85,6 +85,22 @@ export default function WelcomeTutorial({ onDismiss }) {
         exit: (dir) => ({ opacity: 0, x: dir * -24 }),
     };
 
+    const touchStartX = useRef(null);
+
+    const handleTouchStart = (e) => {
+        touchStartX.current = e.touches[0].clientX;
+    };
+
+    const handleTouchEnd = (e) => {
+        if (touchStartX.current === null) return;
+        const diff = touchStartX.current - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 50) {
+            if (diff > 0) next();
+            else prev();
+        }
+        touchStartX.current = null;
+    };
+
     return (
         <motion.div
             initial={{ opacity: 0 }}
@@ -98,6 +114,8 @@ export default function WelcomeTutorial({ onDismiss }) {
                 exit={{ opacity: 0, scale: 0.97, y: 8 }}
                 transition={{ duration: 0.25 }}
                 className="bg-surface-50 rounded-2xl w-full max-w-lg overflow-hidden border border-surface-200"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
             >
                 <AnimatePresence mode="wait" custom={direction}>
                     <motion.div
