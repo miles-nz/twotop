@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import SlideWelcome from "./SlideWelcome";
 import SlideWriteReview from "./SlideWriteReview";
@@ -100,6 +100,13 @@ export default function WelcomeTutorial({ onDismiss }) {
         }
         touchStartX.current = null;
     };
+
+    useEffect(() => {
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, []);
 
     return (
         <motion.div
