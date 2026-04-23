@@ -24,7 +24,6 @@ function AppContent({ onRegisterRefresh }) {
 
     const [formOpen, setFormOpen] = useState(false);
     const [justSubmitted, setJustSubmitted] = useState(false);
-    const [isPublicOnly, setIsPublicOnly] = useState(false);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [scrollToId, setScrollToId] = useState(null);
     const [showTutorial, setShowTutorial] = useState(false);
@@ -43,7 +42,7 @@ function AppContent({ onRegisterRefresh }) {
     };
 
     const handleReviewsLoaded = (count) => {
-        if (count === 0 && !isPublicOnly) setFormOpen(true);
+        if (count === 0) setFormOpen(true);
         if (justSubmitted) {
             setFormOpen(false);
             setJustSubmitted(false);
@@ -88,10 +87,7 @@ function AppContent({ onRegisterRefresh }) {
                 transition={{ duration: 0.4 }}
                 className="min-h-screen w-full bg-surface-100"
             >
-                <Navbar
-                    isPublic={isPublicOnly}
-                    onTogglePublic={setIsPublicOnly}
-                />
+                <Navbar />
                 <div className="max-w-3xl mx-auto py-8 px-4">
                     <ReviewList
                         isPublic
@@ -118,8 +114,6 @@ function AppContent({ onRegisterRefresh }) {
                 />
             )}
             <Navbar
-                isPublic={isPublicOnly}
-                onTogglePublic={setIsPublicOnly}
                 onPictureUpdated={(newPicture) => {
                     setReviewerPictureUpdate({
                         picture: newPicture,
@@ -131,47 +125,28 @@ function AppContent({ onRegisterRefresh }) {
                 }}
                 onShowTutorial={() => setShowTutorial(true)}
             />
-            <div className="max-w-3xl mx-auto pt-6 pb-16 px-4 sm:px-6 lg:px-0">
-                <div className="hidden lg:block">
-                    <button
-                        onClick={() => {
-                            if (!formOpen) {
-                                flushSync(() => setFormOpen(true));
-                                window.scrollTo({ top: 0, behavior: "smooth" });
-                            } else {
-                                setFormOpen(false);
-                            }
-                        }}
-                        className="fixed bottom-8 right-8 z-40 bg-secondary-500 hover:bg-secondary-600 text-white rounded-full shadow-lg w-16 h-16 flex items-center justify-center text-3xl font-bold transition-colors duration-200 drop-shadow-lg cursor-pointer"
-                        style={{ boxShadow: "0 4px 24px 0 rgba(0,0,0,0.10)" }}
-                        aria-label={formOpen ? text.close : text.writeReview}
+            <div className="max-w-3xl mx-auto pt-4 pb-16 px-4 sm:px-6 lg:px-0">
+                <button
+                    onClick={() => {
+                        if (!formOpen) {
+                            flushSync(() => setFormOpen(true));
+                            window.scrollTo({ top: 0, behavior: "smooth" });
+                        } else {
+                            setFormOpen(false);
+                        }
+                    }}
+                    className="fixed bottom-8 right-8 z-40 bg-secondary-500 hover:bg-secondary-600 text-white rounded-full shadow-lg w-16 h-16 flex items-center justify-center text-3xl font-bold transition-colors duration-200 drop-shadow-lg cursor-pointer"
+                    style={{ boxShadow: "0 4px 24px 0 rgba(0,0,0,0.10)" }}
+                    aria-label={formOpen ? text.close : text.writeReview}
+                >
+                    <motion.span
+                        animate={{ rotate: formOpen ? 45 : 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="inline-block"
                     >
-                        <motion.span
-                            animate={{ rotate: formOpen ? 45 : 0 }}
-                            transition={{ duration: 0.2 }}
-                            className="inline-block"
-                        >
-                            +
-                        </motion.span>
-                    </button>
-                </div>
-                <div className="mb-6 flex justify-center lg:hidden">
-                    <Button
-                        onClick={() => setFormOpen((prev) => !prev)}
-                        variant="secondary"
-                    >
-                        <span className="flex items-center gap-2">
-                            <motion.span
-                                animate={{ rotate: formOpen ? 45 : 0 }}
-                                transition={{ duration: 0.2 }}
-                                className="inline-block text-lg leading-none"
-                            >
-                                +
-                            </motion.span>
-                            {formOpen ? text.close : text.writeReview}
-                        </span>
-                    </Button>
-                </div>
+                        +
+                    </motion.span>
+                </button>
                 <AnimatePresence>
                     {formOpen && (
                         <motion.div
@@ -189,7 +164,6 @@ function AppContent({ onRegisterRefresh }) {
                 <ReviewList
                     refreshTrigger={refreshTrigger}
                     onReviewsLoaded={handleReviewsLoaded}
-                    isPublic={isPublicOnly}
                     scrollToId={scrollToId}
                     currentUserId={user.sub}
                     onReviewUpdated={(id) => {

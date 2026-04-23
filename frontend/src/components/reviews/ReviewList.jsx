@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import LoadingDots from "../ui/LoadingDots";
 import { ReviewListProvider } from "../../contexts/ReviewListContext";
 import ReviewCard from "../cards/ReviewCard";
+import ReviewSearch from "./ReviewSearch";
+import { useReviewFilter, defaultFilters } from "../../hooks/useReviewFilter";
 import { text } from "../../resources";
 import { useTheme } from "../../contexts/ThemeContext";
 
@@ -45,11 +47,13 @@ function ReviewList({
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [filters, setFilters] = useState(defaultFilters);
 
     useEffect(() => {
         const fetchReviews = async () => {
             setLoading(true);
             setError(null);
+            setFilters(defaultFilters);
             try {
                 let response;
                 if (isPublic) {
@@ -124,6 +128,8 @@ function ReviewList({
         );
     }, [reviewerThemeUpdate]);
 
+    const filteredReviews = useReviewFilter(reviews, filters, currentUserId);
+
     if (loading) {
         return (
             <AnimatePresence mode="wait">
@@ -145,6 +151,7 @@ function ReviewList({
             </AnimatePresence>
         );
     }
+
     if (error) {
         return (
             <AnimatePresence mode="wait">
@@ -163,37 +170,69 @@ function ReviewList({
             </AnimatePresence>
         );
     }
+
     if (reviews.length === 0) {
         return (
-            <AnimatePresence mode="wait">
-                <motion.div
-                    key="no-reviews"
-                    className={
-                        statusCardClass +
-                        " min-h-20 flex items-center justify-center"
-                    }
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                >
-                    <p className="text-text-mid">{text.noReviews}</p>
-                </motion.div>
-            </AnimatePresence>
+            <>
+                {!isPublic && (
+                    <ReviewSearch
+                        filters={filters}
+                        onChange={setFilters}
+                        reviews={reviews}
+                        currentUserId={currentUserId}
+                    />
+                )}
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key="no-reviews"
+                        className={
+                            statusCardClass +
+                            " min-h-20 flex items-center justify-center"
+                        }
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <p className="text-text-mid">{text.noReviews}</p>
+                    </motion.div>
+                </AnimatePresence>
+            </>
         );
     }
 
     return (
         <ReviewListProvider>
+            {!isPublic && (
+                <ReviewSearch
+                    filters={filters}
+                    onChange={setFilters}
+                    reviews={reviews}
+                    currentUserId={currentUserId}
+                />
+            )}
             <div className="flex flex-col gap-4">
-                {reviews.map((review) => (
-                    <ReviewCard
-                        key={review.id}
-                        review={review}
-                        currentUserId={currentUserId}
-                        onReviewUpdated={onReviewUpdated}
-                    />
-                ))}
+                {filteredReviews.length === 0 ? (
+                    <motion.div
+                        className={
+                            statusCardClass +
+                            " min-h-20 flex items-center justify-center"
+                        }
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                    >
+                        <p className="text-text-mid">{text.noReviewsMatch}</p>
+                    </motion.div>
+                ) : (
+                    filteredReviews.map((review) => (
+                        <ReviewCard
+                            key={review.id}
+                            review={review}
+                            currentUserId={currentUserId}
+                            onReviewUpdated={onReviewUpdated}
+                        />
+                    ))
+                )}
             </div>
         </ReviewListProvider>
     );

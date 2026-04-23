@@ -8,20 +8,39 @@ export default function SegmentedControl({
     ariaLabel,
     showIcon = true,
     showText = true,
+    fullWidth = false,
 }) {
     const containerRef = useRef(null);
     const buttonRefs = useRef([]);
     const [segmentWidth, setSegmentWidth] = useState(0);
+    const [dragIndex, setDragIndex] = useState(null);
     const x = useMotionValue(0);
     const isDragging = useRef(false);
 
     const selectedIndex = options.findIndex((o) => o.value === value);
 
     useLayoutEffect(() => {
+        if (fullWidth) return;
         const widths = buttonRefs.current.map((b) => b?.offsetWidth ?? 0);
         const maxWidth = Math.max(...widths);
         if (maxWidth > 0) setSegmentWidth(maxWidth);
-    }, [options, showText, showIcon]);
+    }, [options, showText, showIcon, fullWidth]);
+
+    useLayoutEffect(() => {
+        if (!fullWidth || !containerRef.current) return;
+
+        const calculate = () => {
+            const containerWidth = containerRef.current?.offsetWidth ?? 0;
+            const width = (containerWidth - 8) / options.length;
+            if (width > 0) setSegmentWidth(width);
+        };
+
+        calculate();
+
+        const observer = new ResizeObserver(calculate);
+        observer.observe(containerRef.current);
+        return () => observer.disconnect();
+    }, [options, showText, showIcon, fullWidth]);
 
     useLayoutEffect(() => {
         if (segmentWidth === 0) return;
@@ -36,7 +55,17 @@ export default function SegmentedControl({
         isDragging.current = true;
     };
 
+    const handleDrag = () => {
+        if (segmentWidth === 0) return;
+        const currentIndex = Math.min(
+            Math.max(Math.round(x.get() / segmentWidth), 0),
+            options.length - 1,
+        );
+        setDragIndex(currentIndex);
+    };
+
     const handleDragEnd = () => {
+        setDragIndex(null);
         if (segmentWidth === 0) return;
         const snappedIndex = Math.min(
             Math.max(Math.round(x.get() / segmentWidth), 0),
@@ -71,10 +100,9 @@ export default function SegmentedControl({
             ref={containerRef}
             role="radiogroup"
             aria-label={ariaLabel}
-            className="relative inline-flex items-center bg-surface-200 rounded-full p-1 cursor-pointer user-select-none"
+            className={`relative items-center bg-surface-200 rounded-full p-1 cursor-pointer select-none ${fullWidth ? "flex w-full" : "inline-flex"}`}
             onPointerUp={handleTap}
         >
-            {/* Indicator */}
             {segmentWidth > 0 && (
                 <motion.div
                     drag="x"
@@ -86,26 +114,29 @@ export default function SegmentedControl({
                     dragMomentum={false}
                     style={{ x, width: segmentWidth }}
                     onDragStart={handleDragStart}
+                    onDrag={handleDrag}
                     onDragEnd={handleDragEnd}
                     className="absolute top-1 bottom-1 left-1 bg-surface-50 rounded-full shadow-sm z-10"
                 />
             )}
 
-            {/* Segments -- visual only */}
             {options.map((option, index) => {
-                const isSelected = value === option.value;
+                const isActive =
+                    dragIndex !== null
+                        ? dragIndex === index
+                        : value === option.value;
                 return (
                     <div
                         key={option.value}
                         ref={(el) => (buttonRefs.current[index] = el)}
                         role="radio"
-                        aria-checked={isSelected}
+                        aria-checked={value === option.value}
                         aria-label={option.label ?? option.text}
                         style={
                             segmentWidth ? { width: segmentWidth } : undefined
                         }
                         className={`relative z-20 flex items-center justify-center gap-1 px-2 py-1.5 rounded-full pointer-events-none transition-colors duration-200 ${
-                            isSelected ? "text-text-dark" : "text-text-light"
+                            isActive ? "text-text-dark" : "text-text-light"
                         }`}
                     >
                         {showIcon && option.icon}

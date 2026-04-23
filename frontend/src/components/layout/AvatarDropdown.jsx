@@ -284,7 +284,7 @@ export default function AvatarDropdown({
                             }}
                             className={`text-text-dark ${menuItemClasses}`}
                         >
-                            {text.editSharedWith}
+                            {text.myCircleLabel}
                         </button>
                         <button
                             onClick={() => {

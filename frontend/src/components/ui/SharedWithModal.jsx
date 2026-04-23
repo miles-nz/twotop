@@ -88,7 +88,7 @@ function SharedWithModal({
                     <div className="flex items-center justify-between px-5 py-4 border-b border-surface-200">
                         <div className="flex flex-col gap-0.5">
                             <h2 className="text-sm font-medium text-text-dark">
-                                {text.editSharedWith}
+                                {text.myCircleLabel}
                             </h2>
                             <h3 className="text-xs text-text-light">
                                 {text.sharedWithLabel}

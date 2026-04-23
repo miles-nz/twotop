@@ -89,7 +89,7 @@ export default function SlideSharing({ userSet, onDone = () => {} }) {
         <div className="bg-surface-50 rounded-xl border border-surface-200 p-4 w-10/12 text-xs">
             <div className="flex items-center justify-between mb-3">
                 <div className="text-sm font-semibold text-text-dark">
-                    {text.editSharedWith}
+                    {text.myCircleLabel}
                 </div>
             </div>
             <div className="flex gap-2 mb-3">

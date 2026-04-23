@@ -5,6 +5,7 @@ export const draftKeys = {
 export const preferences = {
     collapseReviewImages: false,
     maxImageSize: 20 * 1024 * 1024,
+    minSearchCharacters: 3,
 };
 
 export const STAR_PATH =
@@ -60,6 +61,10 @@ export const text = {
     next: "Next",
     back: "Back",
     gotIt: "Got it",
+    show: "Show",
+    hide: "Hide",
+    to: "to",
+    other: "other",
 
     // App
     appName1: "two",
@@ -79,18 +84,14 @@ export const text = {
     colorModeLight: "Light",
     colorModeDark: "Dark",
     darkModeToggleLabel: "Dark mode toggle",
-    editSharedWith: "My Circle",
+    myCircleLabel: "My Circle",
     noSharedReviews: "You haven't added anyone to your circle yet.",
     enterEmailAddress: "Enter email address",
     sharedWithLabel: "People who can see your reviews",
     showTutorial: "View tutorial",
 
-    // Navigation
-    writeReview: "Write a Review",
-    publicOnly: "Public Only",
-    public: "Public",
-
     // Review form
+    writeReview: "Write a Review",
     restaurantNameLabel: "Restaurant",
     restaurantNamePlaceholder: (name) => `e.g. ${name}`,
     restaurantAddressLabel: "Address (optional)",
@@ -148,6 +149,27 @@ export const text = {
             return `${ownerName} & ${contributorNames[0]}`;
         return `${ownerName} +${contributorNames.length}`;
     },
+
+    // Search / filters
+    dateRangeLabel: "Date range",
+    specificUserLabel: "Specific user",
+    collaborativeReviewsOnly: "Collaborative reviews only",
+    hasPhotosLabel: "Has photos",
+    hasVerifiedAddressLabel: "Has verified address",
+    clearFilters: "Clear filters",
+    dragToDefine: "Drag to define a range",
+    minAndAbove: (min) => `${min}★ and above`,
+    minToMax: (min, max) => `${min}★ - ${max}★`,
+    newestFirst: "Newest first",
+    oldestFirst: "Oldest first",
+    highestRated: "Highest rated",
+    lowestRated: "Lowest rated",
+    allLabel: "All",
+    mineLabel: "Mine",
+    publicLabel: "Public",
+    showAdvancedFilters: "Show advanced filters",
+    hideAdvancedFilters: "Hide advanced filters",
+    noReviewsMatch: "No reviews match your filters.",
 
     // Errors
     errorFormatted: (error) => `Error: ${error}`,

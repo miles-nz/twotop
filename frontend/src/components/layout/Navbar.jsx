@@ -1,20 +1,13 @@
 import { useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { LogIn, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import Button from "../ui/Button";
 import AvatarDropdown from "./AvatarDropdown";
 import { text } from "../../resources";
-import PublicToggle from "./PublicToggle";
 import Logo from "../ui/Logo";
 
-function Navbar({
-    isPublic = false,
-    onTogglePublic,
-    onPictureUpdated,
-    onNameUpdated,
-    onShowTutorial,
-}) {
+function Navbar({ onPictureUpdated, onNameUpdated, onShowTutorial }) {
     const { user, logout, isAuthenticated, loginWithRedirect } = useAuth0();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -51,17 +44,8 @@ function Navbar({
             {/* Desktop Navbar */}
             <div className="hidden md:block">
                 <div className="max-w-2xl mx-auto px-6 py-4 grid grid-cols-[1fr_auto_1fr] items-center">
-                    <div className="flex items-center gap-6">
-                        {isAuthenticated && (
-                            <PublicToggle
-                                isPublic={isPublic}
-                                onToggle={onTogglePublic}
-                            />
-                        )}
-                    </div>
-
+                    <div />
                     <div className="justify-self-center">{title}</div>
-
                     <div className="flex items-center gap-6 justify-end">
                         {user ? (
                             <div className="hidden md:block">
@@ -104,13 +88,12 @@ function Navbar({
                                 mobile={true}
                             />
                         ) : (
-                            <button
-                                onClick={() => loginWithRedirect()}
-                                className="p-2 rounded-lg transition-colors"
-                                aria-label={text.logIn}
+                            <Button
+                                variant="surface"
+                                onClick={loginWithRedirect}
                             >
-                                <LogIn size={24} className="text-text-dark" />
-                            </button>
+                                {text.logIn}
+                            </Button>
                         )}
                     </div>
                 </div>
@@ -147,29 +130,21 @@ function Navbar({
                                 <div className="flex flex-col h-[calc(100vh-56px)]">
                                     <div className="px-4 py-2 flex-1 overflow-y-auto">
                                         <div className="pt-2 border-t border-surface-200 space-y-4">
-                                            <div className="py-2">
-                                                {isAuthenticated && (
-                                                    <PublicToggle
-                                                        isPublic={isPublic}
-                                                        onToggle={
-                                                            onTogglePublic
+                                            {!isAuthenticated && (
+                                                <div className="py-2">
+                                                    <Button
+                                                        variant="surface"
+                                                        onClick={
+                                                            loginWithRedirect
                                                         }
-                                                    />
-                                                )}
-                                            </div>
+                                                        className="w-full"
+                                                    >
+                                                        {text.logIn}
+                                                    </Button>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
-                                    {!user && (
-                                        <div className="px-4 pb-6 mt-auto">
-                                            <Button
-                                                variant="surface"
-                                                onClick={loginWithRedirect}
-                                                className="w-full"
-                                            >
-                                                {text.logIn}
-                                            </Button>
-                                        </div>
-                                    )}
                                 </div>
                             </motion.div>
                             <motion.button
