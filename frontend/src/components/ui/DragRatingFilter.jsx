@@ -28,6 +28,7 @@ function DragRatingFilter({ label, minValue, maxValue, onChange }) {
     const dragStartRef = useRef(null);
     const isDraggingRef = useRef(false);
     const [hoverValue, setHoverValue] = useState(null);
+    const [isMouseDown, setIsMouseDown] = useState(false);
     const [dragEnd, setDragEnd] = useState(null);
     const [committedMin, setCommittedMin] = useState(minValue);
     const [committedMax, setCommittedMax] = useState(maxValue);
@@ -64,6 +65,7 @@ function DragRatingFilter({ label, minValue, maxValue, onChange }) {
 
     const handleMouseDown = useCallback((e) => {
         e.preventDefault();
+        setIsMouseDown(true);
         const val = getStarValue(e, containerRef);
         if (val === null) return;
         dragStartRef.current = val;
@@ -108,6 +110,7 @@ function DragRatingFilter({ label, minValue, maxValue, onChange }) {
             }
 
             setDragEnd(null);
+            setIsMouseDown(false);
         };
 
         window.addEventListener("mouseup", handleGlobalMouseUp);
@@ -168,7 +171,8 @@ function DragRatingFilter({ label, minValue, maxValue, onChange }) {
             <div className="relative w-fit">
                 <div
                     ref={containerRef}
-                    className="flex cursor-pointer select-none touch-none"
+                    title={text.clickOrDrag}
+                    className={`flex select-none touch-none ${isMouseDown ? "cursor-ew-resize" : "cursor-pointer"}`}
                     onMouseDown={handleMouseDown}
                     onMouseMove={handleMouseMove}
                     onMouseLeave={handleMouseLeave}
@@ -199,7 +203,7 @@ function DragRatingFilter({ label, minValue, maxValue, onChange }) {
                                 else if (leftFilled) fill = "left-half";
                                 else if (rightFilled) fill = "right-half";
                             } else {
-                                // Min only — fill up to activeMin
+                                // Min only - fill up to activeMin
                                 const leftFilled = starLeftEnd <= activeMin;
                                 const rightFilled = starRightEnd <= activeMin;
 
@@ -280,7 +284,7 @@ function DragRatingFilter({ label, minValue, maxValue, onChange }) {
                 )}
             </div>
             <span className="text-xs text-text-light min-h-4">
-                {selectionText ?? text.dragToDefine}
+                {selectionText}
             </span>
         </div>
     );
