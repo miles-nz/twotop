@@ -11,6 +11,8 @@ import { text } from "./resources";
 import { applyThemeToCss } from "./utils";
 import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
 import { UserProvider, useUser } from "./contexts/UserContext";
+import usePullToRefresh from "./hooks/usePullToRefresh";
+import PullToRefreshIndicator from "./components/ui/PullToRefreshIndicator";
 
 function AppContent({ onRegisterRefresh }) {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
@@ -21,6 +23,7 @@ function AppContent({ onRegisterRefresh }) {
         hasSeenTutorial,
         markTutorialSeen,
     } = useUser();
+    const { pullDistance, refreshing } = usePullToRefresh();
 
     const [formOpen, setFormOpen] = useState(false);
     const [justSubmitted, setJustSubmitted] = useState(false);
@@ -87,6 +90,10 @@ function AppContent({ onRegisterRefresh }) {
                 transition={{ duration: 0.4 }}
                 className="min-h-screen w-full bg-surface-100"
             >
+                <PullToRefreshIndicator
+                    pullDistance={pullDistance}
+                    refreshing={refreshing}
+                />
                 <Navbar />
                 <div className="max-w-3xl mx-auto py-8 px-4">
                     <ReviewList
@@ -105,6 +112,10 @@ function AppContent({ onRegisterRefresh }) {
             transition={{ duration: 0.4 }}
             className="min-h-screen w-full bg-surface-100"
         >
+            <PullToRefreshIndicator
+                pullDistance={pullDistance}
+                refreshing={refreshing}
+            />
             {(showTutorial || !hasSeenTutorial) && (
                 <WelcomeTutorial
                     onDismiss={() => {
