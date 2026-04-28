@@ -1,10 +1,11 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, ArrowDown } from "lucide-react";
 import { preferences } from "../../resources";
 
 export default function PullToRefreshIndicator({ pullDistance, refreshing }) {
     const THRESHOLD = preferences.pullRefreshThreshold;
-    const isTriggered = pullDistance >= THRESHOLD || refreshing;
+    const progress = Math.min(pullDistance / THRESHOLD, 1);
+    const isTriggered = progress >= 1 || refreshing;
 
     if (pullDistance === 0 && !refreshing) return null;
 
@@ -17,41 +18,64 @@ export default function PullToRefreshIndicator({ pullDistance, refreshing }) {
         >
             <AnimatePresence>
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    transition={{ duration: 0.15 }}
+                    initial={{ opacity: 0, scale: 0.6 }}
+                    animate={{
+                        opacity: refreshing ? 1 : progress,
+                        scale: refreshing ? 1 : 0.6 + progress * 0.4,
+                    }}
+                    exit={{ opacity: 0, scale: 0.6 }}
+                    transition={
+                        isTriggered
+                            ? { type: "spring", stiffness: 400, damping: 15 }
+                            : { duration: 0 }
+                    }
                     className="w-8 h-8 rounded-full bg-surface-50 shadow-sm flex items-center justify-center border border-surface-200"
                 >
-                    <motion.div
-                        key={refreshing ? "refreshing" : "pulling"}
-                        animate={{
-                            rotate: refreshing
-                                ? 360
-                                : Math.min(
-                                      (pullDistance / THRESHOLD) * 360,
-                                      360,
-                                  ),
-                        }}
-                        transition={
-                            refreshing
-                                ? {
-                                      duration: 0.6,
-                                      repeat: Infinity,
-                                      ease: "linear",
-                                  }
-                                : { duration: 0 }
-                        }
-                    >
-                        <RefreshCw
-                            size={16}
-                            className={
-                                isTriggered
-                                    ? "text-secondary-500"
-                                    : "text-text-light"
-                            }
-                        />
-                    </motion.div>
+                    <AnimatePresence mode="wait">
+                        {!isTriggered ? (
+                            <motion.div
+                                key="arrow"
+                                initial={{ opacity: 0, scale: 0.6 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.6 }}
+                                transition={{ duration: 0.15 }}
+                            >
+                                <ArrowDown
+                                    size={16}
+                                    className="text-text-light"
+                                />
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                key={refreshing ? "refreshing" : "triggered"}
+                                initial={{ opacity: 0, scale: 0.6 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.6 }}
+                                transition={{ duration: 0.15 }}
+                            >
+                                <motion.div
+                                    key={
+                                        refreshing ? "refreshing" : "triggered"
+                                    }
+                                    animate={{ rotate: refreshing ? 360 : 0 }}
+                                    transition={
+                                        refreshing
+                                            ? {
+                                                  duration: 0.6,
+                                                  repeat: Infinity,
+                                                  ease: "linear",
+                                              }
+                                            : { duration: 0 }
+                                    }
+                                >
+                                    <RefreshCw
+                                        size={16}
+                                        className="text-secondary-500"
+                                    />
+                                </motion.div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </motion.div>
             </AnimatePresence>
         </div>
