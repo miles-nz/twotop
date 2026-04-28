@@ -1,24 +1,63 @@
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Bell } from "lucide-react";
 import Button from "../ui/Button";
 import AvatarDropdown from "./AvatarDropdown";
+import NotificationDropdown from "./NotificationDropdown";
 import { text } from "../../resources";
 import Logo from "../ui/Logo";
+import useNotifications from "../../hooks/useNotifications";
+import { useUser } from "../../contexts/UserContext";
 
-function Navbar({ onPictureUpdated, onNameUpdated, onShowTutorial }) {
-    const { user, logout, isAuthenticated, loginWithRedirect } = useAuth0();
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+function BellButton({
+    user,
+    unreadCount,
+    notifOpen,
+    onBellClick,
+    notifications,
+    loading,
+    onResolve,
+    onClose,
+}) {
+    if (!user) return null;
 
-    const handleTitleClick = () => {
-        window.location.href = "/";
-    };
+    return (
+        <div className="relative">
+            <button
+                onClick={onBellClick}
+                className="p-1.5 text-text-light hover:text-text-dark transition-colors"
+                aria-label={text.notifications}
+            >
+                <Bell size={20} />
+                {unreadCount > 0 && (
+                    <span
+                        className="absolute top-1 right-1 w-2 h-2 rounded-full"
+                        style={{ backgroundColor: "#960200" }}
+                    />
+                )}
+            </button>
+            <AnimatePresence>
+                {notifOpen && (
+                    <NotificationDropdown
+                        notifications={notifications}
+                        loading={loading}
+                        onResolve={onResolve}
+                        onClose={onClose}
+                    />
+                )}
+            </AnimatePresence>
+        </div>
+    );
+}
 
-    const title = (
+function NavbarTitle() {
+    return (
         <div
             className="tracking-tight cursor-pointer touch-manipulation"
-            onClick={handleTitleClick}
+            onClick={() => {
+                window.location.href = "/";
+            }}
         >
             <Logo
                 size={50}
@@ -28,29 +67,71 @@ function Navbar({ onPictureUpdated, onNameUpdated, onShowTutorial }) {
             />
         </div>
     );
+}
 
-    const avatarDropdownProps = {
-        user,
-        onLogout: () =>
-            logout({ logoutParams: { returnTo: window.location.origin } }),
-        showName: true,
-        onPictureUpdated,
-        onNameUpdated,
-        onShowTutorial,
-    };
+function Navbar({ onPictureUpdated, onNameUpdated, onShowTutorial }) {
+    const { user, logout, isAuthenticated, loginWithRedirect } = useAuth0();
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [notifOpen, setNotifOpen] = useState(false);
+    const { fetchPreferences } = useUser();
+
+    const {
+        notifications,
+        loading,
+        fetchNotifications,
+        markNonActionableAsRead,
+        resolveRequest,
+        unreadCount,
+    } = useNotifications({
+        onFriendAccepted: fetchPreferences,
+        enabled: !!user,
+    });
+
+    const handleBellClick = useCallback(async () => {
+        if (!notifOpen) {
+            const fetched = await fetchNotifications();
+            if (fetched) markNonActionableAsRead(fetched);
+        }
+        setNotifOpen((v) => !v);
+    }, [notifOpen, fetchNotifications, markNonActionableAsRead]);
+
+    const handleCloseNotif = useCallback(() => setNotifOpen(false), []);
+
+    const avatarDropdownProps = useMemo(
+        () => ({
+            user,
+            onLogout: () =>
+                logout({ logoutParams: { returnTo: window.location.origin } }),
+            showName: true,
+            onPictureUpdated,
+            onNameUpdated,
+            onShowTutorial,
+        }),
+        [user, logout, onPictureUpdated, onNameUpdated, onShowTutorial],
+    );
 
     return (
         <nav className="bg-surface-50 border-b border-surface-200 shadow-sm sticky top-0 z-50">
-            {/* Desktop Navbar */}
+            {/* Desktop */}
             <div className="hidden md:block">
                 <div className="max-w-2xl mx-auto px-6 py-4 grid grid-cols-[1fr_auto_1fr] items-center">
                     <div />
-                    <div className="justify-self-center">{title}</div>
-                    <div className="flex items-center gap-6 justify-end">
+                    <div className="justify-self-center">
+                        <NavbarTitle />
+                    </div>
+                    <div className="flex items-center gap-3 justify-end">
+                        <BellButton
+                            user={user}
+                            unreadCount={unreadCount}
+                            notifOpen={notifOpen}
+                            onBellClick={handleBellClick}
+                            notifications={notifications}
+                            loading={loading}
+                            onResolve={resolveRequest}
+                            onClose={handleCloseNotif}
+                        />
                         {user ? (
-                            <div className="hidden md:block">
-                                <AvatarDropdown {...avatarDropdownProps} />
-                            </div>
+                            <AvatarDropdown {...avatarDropdownProps} />
                         ) : (
                             <Button
                                 variant="surface"
@@ -63,7 +144,7 @@ function Navbar({ onPictureUpdated, onNameUpdated, onShowTutorial }) {
                 </div>
             </div>
 
-            {/* Mobile Navbar */}
+            {/* Mobile */}
             <div className="md:hidden sticky top-0 z-50">
                 <div className="px-4 py-3 flex items-center justify-between bg-surface-50 border-b border-surface-200">
                     <div className="w-20 flex items-center">
@@ -79,9 +160,21 @@ function Navbar({ onPictureUpdated, onNameUpdated, onShowTutorial }) {
                         </button>
                     </div>
 
-                    <div className="flex-1 flex justify-center">{title}</div>
+                    <div className="flex-1 flex justify-center">
+                        <NavbarTitle />
+                    </div>
 
-                    <div className="w-20 flex items-center justify-end">
+                    <div className="w-24 flex items-center justify-end gap-2">
+                        <BellButton
+                            user={user}
+                            unreadCount={unreadCount}
+                            notifOpen={notifOpen}
+                            onBellClick={handleBellClick}
+                            notifications={notifications}
+                            loading={loading}
+                            onResolve={resolveRequest}
+                            onClose={handleCloseNotif}
+                        />
                         {user ? (
                             <AvatarDropdown
                                 {...avatarDropdownProps}
@@ -98,7 +191,6 @@ function Navbar({ onPictureUpdated, onNameUpdated, onShowTutorial }) {
                     </div>
                 </div>
 
-                {/* Mobile Menu */}
                 <AnimatePresence>
                     {mobileMenuOpen && (
                         <>
@@ -160,7 +252,6 @@ function Navbar({ onPictureUpdated, onNameUpdated, onShowTutorial }) {
                     )}
                 </AnimatePresence>
 
-                {/* Mobile Menu Overlay */}
                 <AnimatePresence>
                     {mobileMenuOpen && (
                         <motion.div

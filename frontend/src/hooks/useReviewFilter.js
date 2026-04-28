@@ -102,7 +102,7 @@ const passesUserFilter = (review, userFilter, currentUserId) => {
                     (c) => c.user_id === currentUserId,
                 )
             );
-        case "circle":
+        case "friends":
             return review.user_id !== currentUserId && !review.is_public;
         case "public":
             return review.is_public === true;

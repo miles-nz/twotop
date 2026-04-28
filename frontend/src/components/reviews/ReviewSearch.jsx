@@ -26,7 +26,7 @@ const SORT_OPTIONS = [
 const USER_FILTER_OPTIONS = [
     { value: "all", label: text.allLabel },
     { value: "mine", label: text.mineLabel },
-    { value: "circle", label: text.myCircleLabel },
+    { value: "friends", label: text.friendsLabel },
     { value: "public", label: text.publicLabel },
 ];
 

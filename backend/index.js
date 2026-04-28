@@ -55,6 +55,11 @@ const ERRORS = {
     userNameRequired: "Name is required.",
     userNotFound: "No user found with that email address.",
     invalidEmail: "A valid email address is required.",
+    friendRequestSelf: "You cannot send a friend request to yourself.",
+    friendRequestExists:
+        "You've already sent a request to this person (or they've sent one to you!)",
+    friendRequestNotFound: "Friend request not found.",
+    notificationNotFound: "Notification not found.",
 };
 
 // Multer setup
@@ -70,11 +75,19 @@ const upload = multer({
     },
 });
 
-// Rate limiter for Google Places API routes
 const placesRateLimit = rateLimit({
     windowMs: 60 * 1000,
     max: 100,
     message: { error: "Too many searches, please try again shortly." },
+    standardHeaders: true,
+    legacyHeaders: false,
+    validate: { xForwardedForHeader: false },
+});
+
+const friendRequestRateLimit = rateLimit({
+    windowMs: 60 * 1000,
+    max: 10,
+    message: { error: "Too many friend requests, please try again shortly." },
     standardHeaders: true,
     legacyHeaders: false,
     validate: { xForwardedForHeader: false },
@@ -150,7 +163,7 @@ const deleteImages = async (urls) => {
 };
 
 const attachContributions = async (reviews) => {
-    if (!reviews || reviews.length === 0) return reviews;
+    if (!reviews?.length) return reviews ?? [];
     const reviewIds = reviews.map((r) => r.id);
     const { data: contributions } = await supabase
         .from("review_contributions")
@@ -239,6 +252,8 @@ const getMgmtToken = async () => {
         },
     );
     const data = await response.json();
+    if (!data.access_token)
+        throw new Error("Failed to retrieve management token");
     mgmtToken = data.access_token;
     // Cache for 23 hours (token lasts 24)
     mgmtTokenExpiry = Date.now() + 23 * 60 * 60 * 1000;
@@ -703,6 +718,15 @@ app.get("/user/me", checkJwt, async (req, res) => {
             { headers: { Authorization: `Bearer ${token}` } },
         );
         const userData = await userResponse.json();
+
+        // Ensure user_preferences row exists
+        await supabase
+            .from("user_preferences")
+            .upsert(
+                { user_id, updated_at: new Date().toISOString() },
+                { onConflict: "user_id", ignoreDuplicates: true },
+            );
+
         res.status(200).json({
             picture: userData.picture,
             name: userData.name,
@@ -1093,6 +1117,459 @@ app.get("/places/details", checkJwt, async (req, res) => {
             name: data.displayName?.text || "",
             address: parts.join(", "),
         });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post(
+    "/friends/request",
+    checkJwt,
+    friendRequestRateLimit,
+    async (req, res) => {
+        const sender_id = req.auth.payload.sub;
+        const { email } = req.body;
+
+        if (!email || !EMAIL_REGEX.test(email)) {
+            return res.status(400).json({ error: ERRORS.invalidEmail });
+        }
+
+        try {
+            // Look up receiver by email
+            const token = await getMgmtToken();
+            const response = await fetch(
+                `https://${process.env.AUTH0_DOMAIN}/api/v2/users-by-email?email=${encodeURIComponent(email)}`,
+                { headers: { Authorization: `Bearer ${token}` } },
+            );
+            const users = await response.json();
+
+            if (!users || users.length === 0) {
+                return res.status(404).json({ error: ERRORS.userNotFound });
+            }
+
+            const receiver = users[0];
+            const receiver_id = receiver.user_id;
+
+            if (sender_id === receiver_id) {
+                return res
+                    .status(400)
+                    .json({ error: ERRORS.friendRequestSelf });
+            }
+
+            // Check no existing request in either direction
+            const { data: existing } = await supabase
+                .from("friend_requests")
+                .select("id, status")
+                .or(
+                    `and(sender_id.eq.${sender_id},receiver_id.eq.${receiver_id}),and(sender_id.eq.${receiver_id},receiver_id.eq.${sender_id})`,
+                )
+                .maybeSingle();
+
+            if (existing) {
+                return res
+                    .status(409)
+                    .json({ error: ERRORS.friendRequestExists });
+            }
+
+            // Create the request
+            const { data: request, error: insertError } = await supabase
+                .from("friend_requests")
+                .insert({ sender_id, receiver_id, status: "pending" })
+                .select()
+                .single();
+
+            if (insertError) {
+                return res.status(500).json({ error: insertError.message });
+            }
+
+            // Notify the receiver
+            const senderResponse = await fetch(
+                `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(sender_id)}`,
+                { headers: { Authorization: `Bearer ${token}` } },
+            );
+            const senderData = await senderResponse.json();
+
+            await supabase.from("notifications").insert({
+                user_id: receiver_id,
+                type: "friend_request",
+                data: {
+                    request_id: request.id,
+                    sender_id,
+                    sender_name: senderData.name,
+                    sender_picture: senderData.picture,
+                },
+            });
+
+            res.status(201).json({ success: true, request_id: request.id });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    },
+);
+
+app.patch("/friends/request/:id", checkJwt, async (req, res) => {
+    const user_id = req.auth.payload.sub;
+    const { id } = req.params;
+    const { action } = req.body; // "accept" | "decline"
+
+    if (!["accept", "decline"].includes(action)) {
+        return res
+            .status(400)
+            .json({ error: "Action must be accept or decline." });
+    }
+
+    try {
+        const { data: request, error: fetchError } = await supabase
+            .from("friend_requests")
+            .select("*")
+            .eq("id", id)
+            .maybeSingle();
+
+        if (fetchError || !request) {
+            return res
+                .status(404)
+                .json({ error: ERRORS.friendRequestNotFound });
+        }
+
+        if (request.receiver_id !== user_id) {
+            return res.status(403).json({ error: ERRORS.unauthorised });
+        }
+
+        if (request.status !== "pending") {
+            return res
+                .status(409)
+                .json({ error: "Request is no longer pending." });
+        }
+
+        if (action === "decline") {
+            await supabase.from("friend_requests").delete().eq("id", id);
+            // Delete the notification for this request
+            await supabase
+                .from("notifications")
+                .delete()
+                .eq("type", "friend_request")
+                .contains("data", { request_id: id });
+
+            return res.status(200).json({ success: true });
+        }
+
+        // Accept: mutual shared_with update
+        const sender_id = request.sender_id;
+
+        // Fetch both users' current shared_with
+        const { data: prefs } = await supabase
+            .from("user_preferences")
+            .select("user_id, shared_with")
+            .in("user_id", [sender_id, user_id]);
+
+        const senderPrefs = prefs?.find((p) => p.user_id === sender_id);
+        const receiverPrefs = prefs?.find((p) => p.user_id === user_id);
+
+        // Fetch both users' Auth0 profiles for name/picture
+        const token = await getMgmtToken();
+        const [senderRes, receiverRes] = await Promise.all([
+            fetch(
+                `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(sender_id)}`,
+                { headers: { Authorization: `Bearer ${token}` } },
+            ),
+            fetch(
+                `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(user_id)}`,
+                { headers: { Authorization: `Bearer ${token}` } },
+            ),
+        ]);
+        const [senderData, receiverData] = await Promise.all([
+            senderRes.json(),
+            receiverRes.json(),
+        ]);
+
+        const senderEntry = {
+            user_id: sender_id,
+            name: senderData.name,
+            picture: senderData.picture,
+        };
+        const receiverEntry = {
+            user_id,
+            name: receiverData.name,
+            picture: receiverData.picture,
+        };
+
+        const senderSharedWith = senderPrefs?.shared_with || [];
+        const receiverSharedWith = receiverPrefs?.shared_with || [];
+
+        // Add each other if not already present
+        const senderUpdated = senderSharedWith.some(
+            (u) => u.user_id === user_id,
+        )
+            ? senderSharedWith
+            : [...senderSharedWith, receiverEntry];
+
+        const receiverUpdated = receiverSharedWith.some(
+            (u) => u.user_id === sender_id,
+        )
+            ? receiverSharedWith
+            : [...receiverSharedWith, senderEntry];
+
+        await Promise.all([
+            supabase.from("user_preferences").upsert(
+                {
+                    user_id: sender_id,
+                    shared_with: senderUpdated,
+                    updated_at: new Date().toISOString(),
+                },
+                { onConflict: "user_id" },
+            ),
+            supabase.from("user_preferences").upsert(
+                {
+                    user_id,
+                    shared_with: receiverUpdated,
+                    updated_at: new Date().toISOString(),
+                },
+                { onConflict: "user_id" },
+            ),
+        ]);
+
+        // Mark request as accepted
+        await supabase
+            .from("friend_requests")
+            .update({ status: "accepted" })
+            .eq("id", id);
+
+        // Delete the friend_request notification, notify the sender of acceptance
+        await supabase
+            .from("notifications")
+            .delete()
+            .eq("type", "friend_request")
+            .contains("data", { request_id: id });
+
+        // Delete any previous friend_accepted notifications from receiver to sender
+        await supabase
+            .from("notifications")
+            .delete()
+            .eq("user_id", sender_id)
+            .eq("type", "friend_accepted")
+            .contains("data", { friend_id: user_id });
+
+        // Insert fresh notification
+        await supabase.from("notifications").insert([
+            {
+                user_id: sender_id,
+                type: "friend_accepted",
+                data: {
+                    friend_id: user_id,
+                    friend_name: receiverData.name,
+                    friend_picture: receiverData.picture,
+                },
+            },
+        ]);
+
+        res.status(200).json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete("/friends/request/:id", checkJwt, async (req, res) => {
+    const user_id = req.auth.payload.sub;
+    const { id } = req.params;
+
+    try {
+        const { data: request, error: fetchError } = await supabase
+            .from("friend_requests")
+            .select("*")
+            .eq("id", id)
+            .maybeSingle();
+
+        if (fetchError || !request) {
+            return res
+                .status(404)
+                .json({ error: ERRORS.friendRequestNotFound });
+        }
+
+        if (request.sender_id !== user_id) {
+            return res.status(403).json({ error: ERRORS.unauthorised });
+        }
+
+        if (request.status !== "pending") {
+            return res
+                .status(409)
+                .json({ error: "Request is no longer pending." });
+        }
+
+        await supabase.from("friend_requests").delete().eq("id", id);
+
+        // Clean up the notification on the receiver's side
+        await supabase
+            .from("notifications")
+            .delete()
+            .eq("type", "friend_request")
+            .contains("data", { request_id: id });
+
+        res.status(200).json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get("/friends/requests/pending", checkJwt, async (req, res) => {
+    const user_id = req.auth.payload.sub;
+    try {
+        const { data, error } = await supabase
+            .from("friend_requests")
+            .select("id, receiver_id, created_at")
+            .eq("sender_id", user_id)
+            .eq("status", "pending");
+
+        if (error) return res.status(500).json({ error: error.message });
+
+        // Fetch receiver names/pictures from Auth0
+        const token = await getMgmtToken();
+        const enriched = await Promise.all(
+            (data || []).map(async (r) => {
+                try {
+                    const userRes = await fetch(
+                        `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(r.receiver_id)}`,
+                        { headers: { Authorization: `Bearer ${token}` } },
+                    );
+                    const user = await userRes.json();
+                    return {
+                        id: r.id,
+                        receiver_id: r.receiver_id,
+                        receiver_name: user.name,
+                        receiver_picture: user.picture,
+                        created_at: r.created_at,
+                    };
+                } catch {
+                    return {
+                        id: r.id,
+                        receiver_id: r.receiver_id,
+                        receiver_name: "Unknown",
+                        receiver_picture: null,
+                        created_at: r.created_at,
+                    };
+                }
+            }),
+        );
+
+        res.status(200).json(enriched);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete("/friends/:friendId", checkJwt, async (req, res) => {
+    const user_id = req.auth.payload.sub;
+    const { friendId } = req.params;
+
+    try {
+        // Fetch both users' current shared_with
+        const { data: prefs } = await supabase
+            .from("user_preferences")
+            .select("user_id, shared_with")
+            .in("user_id", [user_id, friendId]);
+
+        const myPrefs = prefs?.find((p) => p.user_id === user_id);
+        const theirPrefs = prefs?.find((p) => p.user_id === friendId);
+
+        const myUpdated = (myPrefs?.shared_with || []).filter(
+            (u) => u.user_id !== friendId,
+        );
+        const theirUpdated = (theirPrefs?.shared_with || []).filter(
+            (u) => u.user_id !== user_id,
+        );
+
+        // Update both users' shared_with
+        await Promise.all([
+            supabase.from("user_preferences").upsert(
+                {
+                    user_id,
+                    shared_with: myUpdated,
+                    updated_at: new Date().toISOString(),
+                },
+                { onConflict: "user_id" },
+            ),
+            supabase.from("user_preferences").upsert(
+                {
+                    user_id: friendId,
+                    shared_with: theirUpdated,
+                    updated_at: new Date().toISOString(),
+                },
+                { onConflict: "user_id" },
+            ),
+        ]);
+
+        // Delete any friend requests between the two users in either direction
+        await supabase
+            .from("friend_requests")
+            .delete()
+            .or(
+                `and(sender_id.eq.${user_id},receiver_id.eq.${friendId}),and(sender_id.eq.${friendId},receiver_id.eq.${user_id})`,
+            );
+
+        res.status(200).json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get("/notifications", checkJwt, async (req, res) => {
+    const user_id = req.auth.payload.sub;
+    try {
+        const { data, error } = await supabase
+            .from("notifications")
+            .select("*")
+            .eq("user_id", user_id)
+            .order("read", { ascending: true })
+            .order("created_at", { ascending: false });
+
+        if (error) return res.status(500).json({ error: error.message });
+        res.status(200).json(data || []);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.patch("/notifications/read-batch", checkJwt, async (req, res) => {
+    const user_id = req.auth.payload.sub;
+    const { ids } = req.body;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+        return res
+            .status(400)
+            .json({ error: "ids must be a non-empty array." });
+    }
+
+    try {
+        const { error } = await supabase
+            .from("notifications")
+            .update({ read: true })
+            .in("id", ids)
+            .eq("user_id", user_id); // ensure ownership
+
+        if (error) return res.status(500).json({ error: error.message });
+        res.status(200).json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.patch("/notifications/:id/read", checkJwt, async (req, res) => {
+    const user_id = req.auth.payload.sub;
+    const { id } = req.params;
+
+    try {
+        const { data, error } = await supabase
+            .from("notifications")
+            .update({ read: true })
+            .eq("id", id)
+            .eq("user_id", user_id) // ensure ownership
+            .select()
+            .maybeSingle();
+
+        if (error) return res.status(500).json({ error: error.message });
+        if (!data)
+            return res.status(404).json({ error: ERRORS.notificationNotFound });
+
+        res.status(200).json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

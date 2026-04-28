@@ -56,6 +56,9 @@ export const text = {
     done: "Done",
     saving: "Saving...",
     deleting: "Deleting...",
+    sending: "Sending...",
+    pending: "Pending",
+    cancelling: "Canceling...",
     yes: "Yes",
     no: "No",
     next: "Next",
@@ -65,6 +68,10 @@ export const text = {
     hide: "Hide",
     to: "to",
     other: "other",
+    accept: "Accept",
+    decline: "Decline",
+    dismiss: "Dismiss",
+    send: "Send",
 
     // App
     appName1: "two",
@@ -84,11 +91,22 @@ export const text = {
     colorModeLight: "Light",
     colorModeDark: "Dark",
     darkModeToggleLabel: "Dark mode toggle",
-    myCircleLabel: "My Circle",
-    noSharedReviews: "You haven't added anyone to your circle yet.",
-    enterEmailAddress: "Enter email address",
-    sharedWithLabel: "People who can see your reviews",
+    friendsLabel: "Friends",
+    noSharedReviews: "You haven't added any friends yet.",
+    addFriendInputPlaceholder: "Enter a user's email address...",
     showTutorial: "View tutorial",
+    profile: "Profile",
+
+    // Notifications / Friend Requests
+    notifications: "Notifications",
+    noNotifications: "No notifications",
+    sentYouAFriendRequest: " sent you a friend request.",
+    acceptedYourFriendRequest: " accepted your friend request.",
+    requestAccepted: "Request accepted!",
+    requestDeclined: "Request declined.",
+    friendRequestLabel:
+        "Send a friend request to people you want to share reviews with.",
+    friendRequestSent: "Friend request sent!",
 
     // Review form
     writeReview: "Write a Review",
@@ -115,7 +133,7 @@ export const text = {
     collaborative: "Collaborative",
     selectContributors: "Select contributors",
     noSharedWithForCollaboration:
-        "You haven't added anyone to your circle yet. Add users to your circle and they will appear here.",
+        "You haven't added friends yet. Add friends and they will appear here.",
     addYourReviewLabel: "You have been added as a collaborator on this review.",
     addYourReview: "Add your review",
 
@@ -173,6 +191,7 @@ export const text = {
 
     // Errors
     errorFormatted: (error) => `Error: ${error}`,
+    errorPleaseTryAgain: "Please try again.",
     errorGeneric: "Something went wrong, please try again",
     errorFailedSubmit: "Failed to submit review.",
     errorFailedSave: "Failed to save review. Please try again.",
@@ -183,8 +202,9 @@ export const text = {
         "Search unavailable. You can still enter the restaurant name and address manually.",
     invalidEmail: "Please enter a valid email address.",
     userNotFound: "User not found.",
-    alreadyHasAccess: "This user already has access.",
-    ownReviewAccess: "You can already see your own reviews.",
+    selfFriendRequest: "You're already your own friend!",
+    errorFailedRemoveFriend: "Failed to remove friend.",
+    errorFailedCancelRequest: "Failed to cancel request.",
 };
 
 export const enums = {
@@ -202,7 +222,7 @@ const slideText = {
     },
     sharing: {
         title: "Share with friends",
-        sub: "Add people to your circle to share your reviews, or post publicly to share with everyone.",
+        sub: "Add friends to share your reviews, or post publicly to share with everyone.",
     },
     collaborative: {
         title: "Collaborative reviews",

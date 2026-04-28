@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import LoadingDots from "./LoadingDots";
 import { isDefaultAvatar } from "../../utils";
 import { motion } from "framer-motion";
 
@@ -31,6 +30,7 @@ function Avatar({ name, picture, size = "md", title, loading = false }) {
         sm: "w-6 h-6 text-xs",
         md: "w-8 h-8 text-sm",
         lg: "w-10 h-10 text-base",
+        xl: "w-50 h-50 text-2xl",
     };
 
     return (

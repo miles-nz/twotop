@@ -2,12 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Avatar from "../ui/Avatar";
-import ImageCropModal from "../cards/ImageCropModal";
-import { text, enums } from "../../resources";
+import { text } from "../../resources";
 import { isDefaultAvatar } from "../../utils";
-import InlineEdit from "../ui/InlineEdit";
-import LoadingOverlay from "../ui/LoadingOverlay";
-import SharedWithModal from "../ui/SharedWithModal";
+import EditProfileModal from "../modals/EditProfileModal";
+import FriendsModal from "../ui/FriendsModal";
 import ThemeModal from "../ui/ThemeModal";
 import DarkModeToggle from "./DarkModeToggle";
 import { useTheme } from "../../contexts/ThemeContext";
@@ -45,13 +43,12 @@ export default function AvatarDropdown({
     } = useUser();
 
     const [open, setOpen] = useState(false);
-    const [cropSrc, setCropSrc] = useState(null);
     const [uploading, setUploading] = useState(false);
     const [savingName, setSavingName] = useState(false);
     const [themeModalOpen, setThemeModalOpen] = useState(false);
-    const [sharedWithModalOpen, setSharedWithModalOpen] = useState(false);
+    const [friendsModalOpen, setFriendsModalOpen] = useState(false);
+    const [editProfileModalOpen, setEditProfileModalOpen] = useState(false);
     const dropdownRef = useRef(null);
-    const fileInputRef = useRef(null);
 
     const picture = isDefaultAvatar(currentUserPicture)
         ? null
@@ -75,15 +72,7 @@ export default function AvatarDropdown({
         };
     }, [open]);
 
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const url = URL.createObjectURL(file);
-        setCropSrc(url);
-        e.target.value = "";
-    };
-
-    const handleUpload = async (file) => {
+    const handleUploadPicture = async (file) => {
         setUploading(true);
         try {
             const token = await getAccessTokenSilently();
@@ -106,17 +95,7 @@ export default function AvatarDropdown({
             console.error("Failed to upload profile picture:", err);
         } finally {
             setUploading(false);
-            setCropSrc(null);
-            setOpen(false);
         }
-    };
-
-    const handleCropConfirm = (croppedFile) => {
-        handleUpload(croppedFile);
-    };
-
-    const handleCropCancel = () => {
-        setCropSrc(null);
     };
 
     const handleDeletePicture = async () => {
@@ -138,7 +117,6 @@ export default function AvatarDropdown({
             console.error("Failed to delete profile picture:", err);
         } finally {
             setUploading(false);
-            setOpen(false);
         }
     };
 
@@ -170,13 +148,6 @@ export default function AvatarDropdown({
 
     return (
         <div className={`relative ${mobile ? "p-1.5" : ""}`} ref={dropdownRef}>
-            <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/gif,image/avif"
-                onChange={handleFileChange}
-                className="hidden"
-                ref={fileInputRef}
-            />
             <button
                 onClick={() => setOpen((v) => !v)}
                 className={`flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity ${buttonClassName}`}
@@ -192,6 +163,7 @@ export default function AvatarDropdown({
                     loading={uploading || currentUserPicture === undefined}
                 />
             </button>
+
             <AnimatePresence>
                 {open && (
                     <motion.div
@@ -210,6 +182,7 @@ export default function AvatarDropdown({
                                     }}
                                     className="text-secondary-300 hover:text-text-dark transition-colors"
                                     aria-label={text.theme}
+                                    title={text.theme}
                                 >
                                     <svg
                                         width="20"
@@ -239,61 +212,23 @@ export default function AvatarDropdown({
                                 />
                             </div>
                         </div>
-                        {showName && (
-                            <div className={menuItemClasses}>
-                                <InlineEdit
-                                    value={displayName || ""}
-                                    onSave={handleSaveName}
-                                    className="text-text-dark w-full truncate"
-                                    inputClassName="text-sm text-text-dark w-full"
-                                    displayMode={
-                                        mobile
-                                            ? enums.inlineEditDisplayMode
-                                                  .valueWithPencil
-                                            : enums.inlineEditDisplayMode
-                                                  .editWithValueName
-                                    }
-                                    valueName="name"
-                                    hoverEffects={false}
-                                    showConfirmButton={mobile}
-                                    onSaveComplete={() => setOpen(false)}
-                                />
-                            </div>
-                        )}
                         <button
                             onClick={() => {
-                                fileInputRef.current.click();
+                                setEditProfileModalOpen(true);
                                 setOpen(false);
                             }}
                             className={`text-text-dark ${menuItemClasses}`}
                         >
-                            {text.uploadPhoto}
-                        </button>
-                        {picture && (
-                            <button
-                                onClick={handleDeletePicture}
-                                className={`text-error-500 ${menuItemClasses}`}
-                            >
-                                {text.removePhoto}
-                            </button>
-                        )}
-                        <button
-                            onClick={() => {
-                                setSharedWithModalOpen(true);
-                                setOpen(false);
-                            }}
-                            className={`text-text-dark ${menuItemClasses}`}
-                        >
-                            {text.myCircleLabel}
+                            {text.profile}
                         </button>
                         <button
                             onClick={() => {
-                                onShowTutorial?.();
+                                setFriendsModalOpen(true);
                                 setOpen(false);
                             }}
                             className={`text-text-dark ${menuItemClasses}`}
                         >
-                            {text.showTutorial}
+                            {text.friendsLabel}
                         </button>
                         <button
                             onClick={() => {
@@ -307,14 +242,35 @@ export default function AvatarDropdown({
                     </motion.div>
                 )}
             </AnimatePresence>
-            {cropSrc && (
-                <ImageCropModal
-                    imageSrc={cropSrc}
-                    onConfirm={handleCropConfirm}
-                    onCancel={handleCropCancel}
+
+            {editProfileModalOpen && (
+                <EditProfileModal
+                    user={user}
+                    currentUserName={currentUserName}
+                    currentUserPicture={currentUserPicture}
+                    onSaveName={handleSaveName}
+                    onUploadPicture={handleUploadPicture}
+                    onDeletePicture={handleDeletePicture}
+                    onClose={() => setEditProfileModalOpen(false)}
+                    uploading={uploading}
+                    savingName={savingName}
+                    onShowTutorial={() => {
+                        onShowTutorial?.();
+                        setEditProfileModalOpen(false);
+                    }}
                 />
             )}
-            <LoadingOverlay isVisible={uploading || savingName} />
+
+            {friendsModalOpen && (
+                <FriendsModal
+                    sharedWith={sharedWith}
+                    onSharedWithChange={handleSharedWithChange}
+                    onClose={() => setFriendsModalOpen(false)}
+                    getAccessTokenSilently={getAccessTokenSilently}
+                    currentUserEmail={user?.email}
+                />
+            )}
+
             {themeModalOpen && (
                 <ThemeModal
                     currentThemeId={currentThemeId}
@@ -324,15 +280,6 @@ export default function AvatarDropdown({
                     }}
                     onThemePreview={handleThemePreview}
                     onClose={() => setThemeModalOpen(false)}
-                />
-            )}
-            {sharedWithModalOpen && (
-                <SharedWithModal
-                    sharedWith={sharedWith}
-                    onSharedWithChange={handleSharedWithChange}
-                    onClose={() => setSharedWithModalOpen(false)}
-                    getAccessTokenSilently={getAccessTokenSilently}
-                    currentUserEmail={user?.email}
                 />
             )}
         </div>
