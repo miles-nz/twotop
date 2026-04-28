@@ -16,9 +16,8 @@ export default function NotificationDropdown({
         const handleClickOutside = (e) => {
             if (ref.current && !ref.current.contains(e.target)) onClose();
         };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () =>
-            document.removeEventListener("mousedown", handleClickOutside);
+        document.addEventListener("click", handleClickOutside);
+        return () => document.removeEventListener("click", handleClickOutside);
     }, [onClose]);
 
     return (

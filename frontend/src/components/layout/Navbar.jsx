@@ -25,8 +25,11 @@ function BellButton({
     return (
         <div className="relative">
             <button
-                onClick={onBellClick}
-                className="p-1.5 text-text-light hover:text-text-dark transition-colors"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onBellClick();
+                }}
+                className="p-1.5 text-text-light hover:text-text-dark transition-colors cursor-pointer"
                 aria-label={text.notifications}
             >
                 <Bell size={20} />
@@ -89,10 +92,12 @@ function Navbar({ onPictureUpdated, onNameUpdated, onShowTutorial }) {
 
     const handleBellClick = useCallback(async () => {
         if (!notifOpen) {
+            setNotifOpen(true);
             const fetched = await fetchNotifications();
             if (fetched) markNonActionableAsRead(fetched);
+        } else {
+            setNotifOpen(false);
         }
-        setNotifOpen((v) => !v);
     }, [notifOpen, fetchNotifications, markNonActionableAsRead]);
 
     const handleCloseNotif = useCallback(() => setNotifOpen(false), []);

@@ -30,7 +30,7 @@ function ThemePreview({ themeId, isActive, onClick, isDarkMode }) {
             aria-label={themeId}
         >
             <div
-                className={`rounded-xl overflow-hidden transition-all duration-150 ${
+                className={`rounded-xl overflow-hidden transition-all duration-150 cursor-pointer ${
                     isActive ? "scale-108" : "group-hover:scale-102"
                 }`}
                 style={{

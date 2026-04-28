@@ -180,7 +180,7 @@ export default function AvatarDropdown({
                                         setThemeModalOpen(true);
                                         setOpen(false);
                                     }}
-                                    className="text-secondary-300 hover:text-text-dark transition-colors"
+                                    className="text-secondary-300 hover:text-text-dark transition-colors cursor-pointer"
                                     aria-label={text.theme}
                                     title={text.theme}
                                 >
