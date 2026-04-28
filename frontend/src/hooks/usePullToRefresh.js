@@ -38,6 +38,8 @@ export default function usePullToRefresh() {
                 setPullDistance(0);
                 return;
             }
+            // Stop Safari's native overscroll from competing
+            e.preventDefault();
             // Resistance so it feels natural
             const distance = Math.min(delta * 0.5, MAX_PULL);
             pullDistanceRef.current = distance;
@@ -55,6 +57,7 @@ export default function usePullToRefresh() {
                     window.location.reload();
                 }, 500); // brief delay so spinner is visible before reload
             } else {
+                pullDistanceRef.current = 0;
                 setPullDistance(0);
             }
         };
@@ -63,7 +66,7 @@ export default function usePullToRefresh() {
             passive: true,
         });
         document.addEventListener("touchmove", handleTouchMove, {
-            passive: true,
+            passive: false, // must be non-passive to allow preventDefault
         });
         document.addEventListener("touchend", handleTouchEnd);
 
