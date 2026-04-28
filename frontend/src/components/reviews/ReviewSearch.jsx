@@ -283,6 +283,7 @@ export default function ReviewSearch({
                             ? "bg-secondary-500 text-white border-secondary-500"
                             : "bg-surface-50 text-text-mid border-surface-300 hover:bg-surface-100"
                     }`}
+                    aria-label={text.filtersLabel}
                 >
                     <SlidersHorizontal size={18} />
                     <span className="w-3 flex items-center justify-center text-xs">

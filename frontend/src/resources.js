@@ -150,6 +150,7 @@ export const text = {
     goToImage: (index, length) => `Go to image ${index + 1} of ${length}`,
 
     // Review card menu
+    reviewCardMenu: "Review card menu",
     makePublic: "Make Public",
     makePersonal: "Make Personal",
     confirmDeleteReview: "Are you sure you want to delete this review?",
@@ -188,6 +189,7 @@ export const text = {
     showAdvancedFilters: "Show advanced filters",
     hideAdvancedFilters: "Hide advanced filters",
     noReviewsMatch: "No reviews match your filters.",
+    filtersLabel: "Filters",
 
     // Errors
     errorFormatted: (error) => `Error: ${error}`,

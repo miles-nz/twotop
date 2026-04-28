@@ -80,6 +80,7 @@ function ContributorMenu({ review, onEdit, onReviewUpdated }) {
                 ref={buttonRef}
                 onClick={handleOpenMenu}
                 className="flex items-center text-text-light hover:text-text-mid cursor-pointer transition-colors"
+                aria-label={text.reviewCardMenu}
             >
                 <MoreHorizontal size={18} />
             </button>

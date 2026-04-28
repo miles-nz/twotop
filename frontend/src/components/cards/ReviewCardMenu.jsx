@@ -112,6 +112,7 @@ function ReviewCardMenu({
             <button
                 ref={buttonRef}
                 onClick={handleOpenMenu}
+                aria-label={text.reviewCardMenu}
                 className="flex items-center text-text-light hover:text-text-mid cursor-pointer transition-colors"
             >
                 <MoreHorizontal size={22} />
