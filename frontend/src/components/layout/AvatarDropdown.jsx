@@ -12,7 +12,7 @@ import { useTheme } from "../../contexts/ThemeContext";
 import { useUser } from "../../contexts/UserContext";
 
 const menuItemClasses =
-    "w-full px-4 py-2 text-sm hover:bg-surface-200 transition-colors text-left";
+    "w-full px-4 py-2 text-sm hover:bg-surface-200 transition-colors text-left cursor-pointer";
 
 export default function AvatarDropdown({
     user,
