@@ -45,7 +45,7 @@ export default function ListsPage({ refreshTrigger }) {
             {/* Floating + button */}
             <button
                 onClick={() => setCreateModalOpen(true)}
-                className="fixed bottom-18 sm:bottom-8 right-4 sm:right-8 z-40 bg-secondary-500 hover:bg-secondary-600 text-white rounded-full shadow-lg w-16 h-16 flex items-center justify-center text-3xl font-bold transition-colors duration-200 drop-shadow-lg cursor-pointer"
+                className="fixed bottom-22 sm:bottom-8 right-4 sm:right-8 z-40 bg-secondary-500 hover:bg-secondary-600 text-white rounded-full shadow-lg w-16 h-16 flex items-center justify-center text-3xl font-bold transition-colors duration-200 drop-shadow-lg cursor-pointer"
                 style={{ boxShadow: "0 4px 24px 0 rgba(0,0,0,0.10)" }}
                 aria-label={text.createList}
             >
