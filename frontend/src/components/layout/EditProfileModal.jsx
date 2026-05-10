@@ -4,7 +4,7 @@ import { X, Camera } from "lucide-react";
 import { text, enums } from "../../resources";
 import Avatar from "../ui/Avatar";
 import InlineEdit from "../ui/InlineEdit";
-import ImageCropModal from "../cards/ImageCropModal";
+import ImageCropModal from "../reviews/ImageCropModal";
 import LoadingOverlay from "../ui/LoadingOverlay";
 import { isDefaultAvatar } from "../../utils";
 

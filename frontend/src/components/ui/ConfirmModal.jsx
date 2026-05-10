@@ -1,6 +1,6 @@
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import Button from "../ui/Button";
+import Button from "./Button";
 import { text } from "../../resources";
 
 function ConfirmModal({ isOpen, onConfirm, onCancel, message, deleting }) {

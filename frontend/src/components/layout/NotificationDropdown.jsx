@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
-import NotificationItem from "../ui/NotificationItem";
+import NotificationItem from "../layout/NotificationItem";
 import { text } from "../../resources";
 
 export default function NotificationDropdown({

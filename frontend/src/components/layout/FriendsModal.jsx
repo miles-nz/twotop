@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Trash2, Clock } from "lucide-react";
 import { text } from "../../resources";
-import Avatar from "./Avatar";
+import Avatar from "../ui/Avatar";
 
 function FriendsModal({
     sharedWith,

@@ -1,4 +1,4 @@
-import Avatar from "./Avatar";
+import Avatar from "../ui/Avatar";
 import { text } from "../../resources";
 
 export default function CollaboratorAvatars({ owner, contributors }) {

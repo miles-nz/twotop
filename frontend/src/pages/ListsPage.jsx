@@ -3,8 +3,8 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { List } from "lucide-react";
 import { text } from "../resources";
-import ListCard from "../components/cards/ListCard";
-import CreateListModal from "../components/modals/CreateListModal";
+import ListCard from "../components/lists/ListCard";
+import CreateListModal from "../components/lists/CreateListModal";
 import LoadingDots from "../components/ui/LoadingDots";
 import { useTheme } from "../contexts/ThemeContext";
 

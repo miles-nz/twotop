@@ -1,9 +1,9 @@
 import { useRef, useState } from "react";
 import { Check, X, ImagePlus } from "lucide-react";
-import MarkdownToolbar from "../ui/MarkdownToolbar";
+import MarkdownToolbar from "./MarkdownToolbar";
 import PlacesSearch from "../ui/PlacesSearch";
 import ImageCropModal from "./ImageCropModal";
-import { RatingsFields, ContributorPicker } from "../ui/FormComponents";
+import { RatingsFields, ContributorPicker } from "./FormComponents";
 import { getLocalDate } from "../../utils";
 import { useImageUpload } from "../../hooks/useImageUpload";
 import { useAutoResize } from "../../hooks/useAutoResize";

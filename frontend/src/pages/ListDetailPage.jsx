@@ -4,16 +4,16 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { text, enums } from "../resources";
 import InlineEdit from "../components/ui/InlineEdit";
 import PlacesSearch from "../components/ui/PlacesSearch";
-import SortableItem from "../components/ui/SortableItem";
+import SortableItem from "../components/lists/SortableItem";
 import useSortableList from "../hooks/useSortableList";
-import ShareListModal from "../components/modals/ShareListModal";
+import ShareListModal from "../components/lists/ShareListModal";
 import LoadingOverlay from "../components/ui/LoadingOverlay";
 import { useTheme } from "../contexts/ThemeContext";
 import LoadingDots from "../components/ui/LoadingDots";
 import { useUser } from "../contexts/UserContext";
-import RestaurantRow from "../components/ui/RestaurantRow";
-import DescriptionEdit from "../components/ui/DescriptionEdit";
-import ListDetailHeader from "../components/ui/ListDetailHeader";
+import RestaurantRow from "../components/lists/RestaurantRow";
+import DescriptionEdit from "../components/lists/DescriptionEdit";
+import ListDetailHeader from "../components/lists/ListDetailHeader";
 
 export default function ListDetailPage() {
     const { id } = useParams();

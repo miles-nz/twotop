@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { text } from "../../resources";
-import Toggle from "./Toggle";
+import Toggle from "../ui/Toggle";
 import { getOS } from "../../utils";
 
 const ShareIcon = ["ios", "macos"].includes(getOS()) ? Share : Share2;

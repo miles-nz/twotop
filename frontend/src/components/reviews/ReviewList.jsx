@@ -3,7 +3,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { motion, AnimatePresence } from "framer-motion";
 import LoadingDots from "../ui/LoadingDots";
 import { ReviewListProvider } from "../../contexts/ReviewListContext";
-import ReviewCard from "../cards/ReviewCard";
+import ReviewCard from "../reviews/ReviewCard";
 import ReviewSearch from "./ReviewSearch";
 import { useReviewFilter, defaultFilters } from "../../hooks/useReviewFilter";
 import { text } from "../../resources";

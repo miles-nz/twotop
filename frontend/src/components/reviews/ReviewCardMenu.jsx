@@ -12,7 +12,7 @@ import { text } from "../../resources";
 import { createPortal } from "react-dom";
 import { useRef, useState, useEffect } from "react";
 import { useDeleteReview } from "../../hooks/useDeleteReview";
-import ConfirmModal from "../modals/ConfirmModal";
+import ConfirmModal from "../ui/ConfirmModal";
 import LoadingOverlay from "../ui/LoadingOverlay";
 
 function ReviewCardMenu({

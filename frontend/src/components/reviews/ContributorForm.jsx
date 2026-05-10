@@ -1,8 +1,8 @@
 import { useState, useRef } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { Check, X } from "lucide-react";
-import { RatingsFields } from "../ui/FormComponents";
-import MarkdownToolbar from "../ui/MarkdownToolbar";
+import { RatingsFields } from "./FormComponents";
+import MarkdownToolbar from "./MarkdownToolbar";
 import { useAutoResize } from "../../hooks/useAutoResize";
 import { useUser } from "../../contexts/UserContext";
 import { text } from "../../resources";

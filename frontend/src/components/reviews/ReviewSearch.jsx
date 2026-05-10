@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Checkbox from "../ui/Checkbox";
-import DragRatingFilter from "../ui/DragRatingFilter";
+import DragRatingFilter from "../reviews/DragRatingFilter";
 import SegmentedControl from "../ui/SegmentedControl";
 import { text } from "../../resources";
 

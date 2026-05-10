@@ -1,4 +1,4 @@
-import Avatar from "./Avatar";
+import Avatar from "../ui/Avatar";
 import RatingField from "./RatingField";
 import { text } from "../../resources";
 

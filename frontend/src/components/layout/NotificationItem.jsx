@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import Avatar from "./Avatar";
+import Avatar from "../ui/Avatar";
 import { text } from "../../resources";
 import { Eye, PenLine } from "lucide-react";
 import { formatNotificationTime } from "../../utils";

@@ -2,7 +2,7 @@ import { useTheme } from "../../contexts/ThemeContext";
 import { themes } from "../../themes";
 import { motion } from "framer-motion";
 import SingleReviewCard from "./SingleReviewCard";
-import CollaborativeReviewCard from "./CollaborativeReviewCard";
+import CollaborativeReviewCard from "../reviews/CollaborativeReviewCard";
 
 function ReviewCard({ review, currentUserId, onReviewUpdated }) {
     const { isDarkMode } = useTheme();

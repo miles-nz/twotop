@@ -2,16 +2,12 @@ import { useState, useRef } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { motion } from "framer-motion";
 import { ImagePlus, X } from "lucide-react";
-import ImageCropModal from "../cards/ImageCropModal";
+import ImageCropModal from "./ImageCropModal";
 import Button from "../ui/Button";
 import LoadingOverlay from "../ui/LoadingOverlay";
-import MarkdownToolbar from "../ui/MarkdownToolbar";
+import MarkdownToolbar from "./MarkdownToolbar";
 import PlacesSearch from "../ui/PlacesSearch";
-import {
-    FormError,
-    RatingsFields,
-    ContributorPicker,
-} from "../ui/FormComponents";
+import { FormError, RatingsFields, ContributorPicker } from "./FormComponents";
 import { useAutoResize } from "../../hooks/useAutoResize";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
 import { useImageUpload } from "../../hooks/useImageUpload";
