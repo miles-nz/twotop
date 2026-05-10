@@ -1,5 +1,5 @@
 import { motion, useAnimationFrame, useMotionValue } from "framer-motion";
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 
 const createEase =
     (sharpness = 5) =>
@@ -41,41 +41,28 @@ function LoadingDots({
     const customEase = createEase(2);
     const translationAmount = (3 * size) / 5;
 
-    const resolvedColorsRef = useRef({});
-
-    useEffect(() => {
-        resolvedColorsRef.current = {
-            top: logoColours
-                ? resolveColor("--color-logo-primary")
-                : resolveColor(`--color-secondary-${colourValue}`),
-            bottom: logoColours
-                ? resolveColor("--color-logo-secondary")
-                : resolveColor(`--color-secondary-${colourValue}`),
-            topMid: logoColours
-                ? resolveColor("--color-logo-primary")
-                : resolveColor(
-                      `--color-secondary-${Math.max(colourValue - 200, 100)}`,
-                  ),
-            bottomMid: logoColours
-                ? resolveColor("--color-logo-secondary")
-                : resolveColor(
-                      `--color-secondary-${Math.max(colourValue - 200, 100)}`,
-                  ),
-        };
-    }, [logoColours, colourValue]);
+    const resolvedTop = logoColours
+        ? resolveColor("--color-logo-primary")
+        : resolveColor(`--color-secondary-${colourValue}`);
+    const resolvedBottom = logoColours
+        ? resolveColor("--color-logo-secondary")
+        : resolveColor(`--color-secondary-${colourValue}`);
+    const resolvedTopMid = logoColours
+        ? resolveColor("--color-logo-primary")
+        : resolveColor(`--color-secondary-${Math.max(colourValue - 200, 100)}`);
+    const resolvedBottomMid = logoColours
+        ? resolveColor("--color-logo-secondary")
+        : resolveColor(`--color-secondary-${Math.max(colourValue - 200, 100)}`);
 
     const topX = useMotionValue(0);
     const topY = useMotionValue(0);
     const bottomX = useMotionValue(0);
     const bottomY = useMotionValue(0);
     const elapsed = useRef(0);
-    const topColor = useMotionValue("");
-    const bottomColor = useMotionValue("");
+    const topColor = useMotionValue(resolvedTop);
+    const bottomColor = useMotionValue(resolvedBottom);
 
     useAnimationFrame((_, delta) => {
-        const { top, bottom, topMid, bottomMid } = resolvedColorsRef.current;
-        if (!top) return;
-
         elapsed.current = (elapsed.current + delta) % (cycleDuration * 2);
 
         const cycleProgress = elapsed.current % cycleDuration;
@@ -92,8 +79,12 @@ function LoadingDots({
                 : (1 - easedProgress) * translationAmount;
 
         const colorProgress = Math.sin(easedProgress * Math.PI);
-        topColor.set(interpolateColor(top, topMid, colorProgress));
-        bottomColor.set(interpolateColor(bottom, bottomMid, colorProgress));
+        topColor.set(
+            interpolateColor(resolvedTop, resolvedTopMid, colorProgress),
+        );
+        bottomColor.set(
+            interpolateColor(resolvedBottom, resolvedBottomMid, colorProgress),
+        );
 
         const topOrbitCX = containerSize / 2 + orbitRadius;
         const topOrbitCY = size / 5 + orbitRadius;
