@@ -98,7 +98,7 @@ export const text = {
     darkModeToggleLabel: "Dark mode toggle",
     friendsLabel: "Friends",
     noSharedReviews: "You haven't added any friends yet.",
-    addFriendInputPlaceholder: "Enter a user's email address...",
+    addFriendInputPlaceholder: "Enter a user's email address",
     showTutorial: "View tutorial",
     profile: "Profile",
 
@@ -271,7 +271,7 @@ export const enums = {
 const slideText = {
     writeReview: {
         title: "Write reviews",
-        sub: "Eat somewhere nice. Rate the food, drinks, and ambience, and share your thoughts.",
+        sub: "Grab a nice meal, then rate the food, drinks, and ambience, and share your thoughts.",
     },
     sharing: {
         title: "Share with friends",

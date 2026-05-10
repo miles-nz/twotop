@@ -86,7 +86,7 @@ export default function SlideSharing({ userSet, onDone = () => {} }) {
     }, []);
 
     return (
-        <div className="bg-surface-50 rounded-xl border border-surface-200 p-4 w-10/12 text-xs">
+        <div className="bg-surface-50 rounded-xl border border-surface-200 p-4 w-11/12 text-xs">
             <div className="flex items-center justify-between mb-3">
                 <div className="text-sm font-semibold text-text-dark">
                     {text.friendsLabel}
