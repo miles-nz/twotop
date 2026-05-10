@@ -1,4 +1,5 @@
 import { themes } from "./themes";
+import { text } from "./resources";
 
 // Smooth scroll to top fallback for browsers without native support
 export function smoothScrollToTop(duration = 400) {
@@ -40,7 +41,7 @@ export const formatVisitDate = (dateString) => {
     const diffMs = now - date;
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0 || diffDays === -1) return "Today";
+    if (diffDays === 0 || diffDays === -1) return text.today;
 
     return date.toLocaleDateString(undefined, {
         day: "numeric",
@@ -57,10 +58,10 @@ export const formatNotificationTime = (createdAt) => {
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return "Just now";
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
+    if (diffMins < 1) return text.justNow;
+    if (diffMins < 60) return text.minutesAgo(diffMins);
+    if (diffHours < 24) return text.hoursAgo(diffHours);
+    if (diffDays < 7) return text.daysAgo(diffDays);
     return date.toLocaleDateString();
 };
 

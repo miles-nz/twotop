@@ -245,6 +245,13 @@ export const text = {
     selfFriendRequest: "You're already your own friend!",
     errorFailedRemoveFriend: "Failed to remove friend.",
     errorFailedCancelRequest: "Failed to cancel request.",
+
+    // Time / Utils
+    today: "Today",
+    justNow: "Just now",
+    minutesAgo: (n) => `${n}m ago`,
+    hoursAgo: (n) => `${n}h ago`,
+    daysAgo: (n) => `${n}d ago`,
 };
 
 export const enums = {
