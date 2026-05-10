@@ -39,7 +39,7 @@ export default function RestaurantRow({
                 <div className="min-w-0">
                     <p
                         className={`text-sm font-medium truncate ${
-                            restaurant.checked
+                            isChecklist && restaurant.checked
                                 ? " text-text-light"
                                 : "text-text-dark"
                         }`}
