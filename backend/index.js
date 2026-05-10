@@ -1782,7 +1782,7 @@ app.get("/lists", checkJwt, async (req, res) => {
 
 app.post("/lists", checkJwt, async (req, res) => {
     const user_id = req.auth.payload.sub;
-    const { name, description } = req.body;
+    const { name, description, is_checklist } = req.body;
 
     if (!name || typeof name !== "string" || name.trim().length === 0) {
         return res.status(400).json({ error: "List name is required." });
@@ -1800,6 +1800,7 @@ app.post("/lists", checkJwt, async (req, res) => {
                 user_id,
                 name: name.trim(),
                 description: description?.trim() || null,
+                is_checklist: is_checklist === true,
             })
             .select()
             .single();
@@ -1819,7 +1820,7 @@ app.post("/lists", checkJwt, async (req, res) => {
 app.patch("/lists/:id", checkJwt, async (req, res) => {
     const user_id = req.auth.payload.sub;
     const { id } = req.params;
-    const { name, description } = req.body;
+    const { name, description, is_checklist } = req.body;
 
     const { data: list, error: fetchError } = await supabase
         .from("lists")
@@ -1846,6 +1847,8 @@ app.patch("/lists/:id", checkJwt, async (req, res) => {
     }
     if (description !== undefined)
         updates.description = description?.trim() || null;
+    if (is_checklist !== undefined)
+        updates.is_checklist = is_checklist === true;
 
     try {
         const { data, error } = await supabase
@@ -1957,6 +1960,60 @@ app.post("/lists/:id/restaurants", checkJwt, async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
+app.patch(
+    "/lists/:id/restaurants/:restaurantId/check",
+    checkJwt,
+    async (req, res) => {
+        const user_id = req.auth.payload.sub;
+        const { id, restaurantId } = req.params;
+        const { checked } = req.body;
+
+        if (typeof checked !== "boolean") {
+            return res
+                .status(400)
+                .json({ error: "checked must be a boolean." });
+        }
+
+        const { data: list, error: fetchError } = await supabase
+            .from("lists")
+            .select("*")
+            .eq("id", id)
+            .maybeSingle();
+
+        if (fetchError || !list)
+            return res.status(404).json({ error: "List not found." });
+
+        const isOwner = list.user_id === user_id;
+        if (!isOwner) {
+            const { data: share } = await supabase
+                .from("list_shares")
+                .select("permission")
+                .eq("list_id", id)
+                .eq("user_id", user_id)
+                .maybeSingle();
+
+            if (!share || share.permission !== "edit") {
+                return res.status(403).json({ error: ERRORS.unauthorised });
+            }
+        }
+
+        try {
+            const { data, error } = await supabase
+                .from("list_restaurants")
+                .update({ checked })
+                .eq("id", restaurantId)
+                .eq("list_id", id)
+                .select()
+                .single();
+
+            if (error) return res.status(500).json({ error: error.message });
+            res.status(200).json(data);
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    },
+);
 
 app.delete(
     "/lists/:id/restaurants/:restaurantId",

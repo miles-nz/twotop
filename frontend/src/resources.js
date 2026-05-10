@@ -228,6 +228,11 @@ export const text = {
     listNoRestaurantsYet: "Search for restaurants to add them to your list.",
     addDescription: "Add description",
     owner: "Owner",
+    checklistMode: "Checklist mode",
+    checklistModeDescription: "Track which restaurants you've visited",
+    check: "Mark as visited",
+    uncheck: "Mark as not visited",
+    checklistProgress: (checked, total) => `${checked}/${total} visited`,
 
     // Errors
     errorFormatted: (error) => `Error: ${error}`,

@@ -4,6 +4,7 @@ import { X, Trash2 } from "lucide-react";
 import { text } from "../../resources";
 import { useAutoResize } from "../../hooks/useAutoResize";
 import PlacesSearch from "../ui/PlacesSearch";
+import Toggle from "../ui/Toggle";
 import { useAuth0 } from "@auth0/auth0-react";
 
 export default function CreateListModal({ onClose, onCreated }) {
@@ -13,6 +14,7 @@ export default function CreateListModal({ onClose, onCreated }) {
     const [restaurants, setRestaurants] = useState([]);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState(null);
+    const [isChecklist, setIsChecklist] = useState(false);
 
     const descriptionRef = useRef(null);
     useAutoResize(descriptionRef, description, { shrinkOnBlur: true });
@@ -63,6 +65,7 @@ export default function CreateListModal({ onClose, onCreated }) {
                     body: JSON.stringify({
                         name: name.trim(),
                         description: description.trim() || null,
+                        is_checklist: isChecklist,
                     }),
                 },
             );
@@ -170,6 +173,22 @@ export default function CreateListModal({ onClose, onCreated }) {
                                 placeholder={text.listDescriptionPlaceholder}
                                 rows={1}
                                 className="text-sm border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-dark placeholder-text-light resize-none overflow-hidden"
+                            />
+                        </div>
+                        {/* Checklist mode */}
+                        <div className="flex items-center justify-between">
+                            <div className="flex flex-col gap-0.5">
+                                <span className="text-xs font-medium text-text-light uppercase tracking-wide">
+                                    {text.checklistMode}
+                                </span>
+                                <span className="text-xs text-text-light">
+                                    {text.checklistModeDescription}
+                                </span>
+                            </div>
+                            <Toggle
+                                value={isChecklist}
+                                onToggle={setIsChecklist}
+                                ariaLabel={text.checklistMode}
                             />
                         </div>
                         {/* Add restaurants */}

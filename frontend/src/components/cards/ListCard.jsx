@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { List, Users, Eye, PenLine } from "lucide-react";
+import { List, Users, Eye, PenLine, SquareCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { text } from "../../resources";
 import Avatar from "../ui/Avatar";
@@ -46,10 +46,21 @@ export default function ListCard({ list }) {
 
             {/* Footer stats */}
             <div className="flex items-center gap-4 mt-2 shrink-0">
-                <span className="flex items-center gap-1.5 text-xs text-text-light">
-                    <List size={13} />
-                    {text.restaurantCount(restaurantCount)}
-                </span>
+                {list.is_checklist ? (
+                    <span className="flex items-center gap-1.5 text-xs text-text-light">
+                        <SquareCheck size={13} />
+                        {text.checklistProgress(
+                            list.restaurants?.filter((r) => r.checked).length ??
+                                0,
+                            restaurantCount,
+                        )}
+                    </span>
+                ) : (
+                    <span className="flex items-center gap-1.5 text-xs text-text-light">
+                        <List size={13} />
+                        {text.restaurantCount(restaurantCount)}
+                    </span>
+                )}
                 {shareCount > 0 && (
                     <span className="flex items-center gap-1.5 text-xs text-text-light">
                         <Users size={13} />
