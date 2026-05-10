@@ -4,8 +4,8 @@ import { text } from "../../resources";
 
 export default function BottomNav() {
     const baseClass =
-        "flex flex-col items-center gap-1 px-6 py-2 transition-colors";
-    const activeClass = "text-secondary-500";
+        "flex flex-col items-center gap-1 px-6 py-4 transition-colors";
+    const activeClass = "text-text-dark";
     const inactiveClass = "text-text-light";
 
     return (

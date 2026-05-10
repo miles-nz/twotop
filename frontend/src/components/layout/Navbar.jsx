@@ -144,7 +144,7 @@ function Navbar({
                                     className={({ isActive }) =>
                                         `flex items-center gap-1.5 text-sm font-medium transition-colors ${
                                             isActive
-                                                ? "text-secondary-700"
+                                                ? "text-text-dark"
                                                 : "text-text-light hover:text-text-dark"
                                         }`
                                     }
@@ -157,7 +157,7 @@ function Navbar({
                                     className={({ isActive }) =>
                                         `flex items-center gap-1.5 text-sm font-medium transition-colors ${
                                             isActive
-                                                ? "text-secondary-700"
+                                                ? "text-text-dark"
                                                 : "text-text-light hover:text-text-dark"
                                         }`
                                     }
