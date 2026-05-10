@@ -180,6 +180,77 @@ const attachContributions = async (reviews) => {
     }));
 };
 
+const notifyListUpdated = async (listId, editorUserId, ownerUserId) => {
+    try {
+        const COOLDOWN_MINUTES = 10;
+        const now = new Date();
+
+        // Check last notification time for this editor on this list
+        const { data: existing } = await supabase
+            .from("list_edit_notifications")
+            .select("last_notified_at")
+            .eq("list_id", listId)
+            .eq("editor_user_id", editorUserId)
+            .maybeSingle();
+
+        const lastNotified = existing?.last_notified_at
+            ? new Date(existing.last_notified_at)
+            : null;
+
+        const withinCooldown =
+            lastNotified && (now - lastNotified) / 1000 / 60 < COOLDOWN_MINUTES;
+
+        if (withinCooldown) return;
+
+        // Fetch editor name
+        const token = await getMgmtToken();
+        const editorRes = await fetch(
+            `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(editorUserId)}`,
+            { headers: { Authorization: `Bearer ${token}` } },
+        );
+        const editorData = await editorRes.json();
+
+        // Fetch list name
+        const { data: list } = await supabase
+            .from("lists")
+            .select("name")
+            .eq("id", listId)
+            .maybeSingle();
+
+        // Delete any existing unread list_updated notification for this editor/list combo
+        await supabase
+            .from("notifications")
+            .delete()
+            .eq("type", "list_updated")
+            .contains("data", { list_id: listId, editor_id: editorUserId });
+
+        // Insert fresh notification
+        await supabase.from("notifications").insert({
+            user_id: ownerUserId,
+            type: "list_updated",
+            data: {
+                list_id: listId,
+                list_name: list?.name || "a list",
+                editor_id: editorUserId,
+                editor_name: editorData.name,
+                editor_picture: editorData.picture,
+            },
+        });
+
+        // Upsert cooldown record
+        await supabase.from("list_edit_notifications").upsert(
+            {
+                list_id: listId,
+                editor_user_id: editorUserId,
+                last_notified_at: now.toISOString(),
+            },
+            { onConflict: "list_id,editor_user_id" },
+        );
+    } catch (err) {
+        console.error("Failed to send list update notification:", err);
+    }
+};
+
 // Validation
 const validateReview = (body) => {
     const {
@@ -1568,6 +1639,681 @@ app.patch("/notifications/:id/read", checkJwt, async (req, res) => {
         if (error) return res.status(500).json({ error: error.message });
         if (!data)
             return res.status(404).json({ error: ERRORS.notificationNotFound });
+
+        res.status(200).json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get("/lists", checkJwt, async (req, res) => {
+    const user_id = req.auth.payload.sub;
+    try {
+        // Fetch own lists
+        const { data: ownLists, error: ownError } = await supabase
+            .from("lists")
+            .select("*")
+            .eq("user_id", user_id)
+            .order("created_at", { ascending: false });
+
+        if (ownError) return res.status(500).json({ error: ownError.message });
+
+        // Fetch shared lists
+        const { data: shares, error: sharesError } = await supabase
+            .from("list_shares")
+            .select("list_id, permission")
+            .eq("user_id", user_id);
+
+        if (sharesError)
+            return res.status(500).json({ error: sharesError.message });
+
+        let sharedLists = [];
+        if (shares && shares.length > 0) {
+            const sharedListIds = shares.map((s) => s.list_id);
+            const { data: fetchedSharedLists, error: sharedError } =
+                await supabase
+                    .from("lists")
+                    .select("*")
+                    .in("id", sharedListIds)
+                    .order("created_at", { ascending: false });
+
+            if (sharedError)
+                return res.status(500).json({ error: sharedError.message });
+
+            // Attach permission to each shared list
+            sharedLists = (fetchedSharedLists || []).map((list) => ({
+                ...list,
+                permission:
+                    shares.find((s) => s.list_id === list.id)?.permission ||
+                    "view",
+            }));
+        }
+
+        // Attach restaurants and shares to all lists
+        const allLists = [
+            ...(ownLists || []).map((l) => ({ ...l, permission: "owner" })),
+            ...sharedLists,
+        ];
+
+        if (allLists.length === 0) return res.status(200).json([]);
+
+        const listIds = allLists.map((l) => l.id);
+
+        const { data: restaurants } = await supabase
+            .from("list_restaurants")
+            .select("*")
+            .in("list_id", listIds)
+            .order("position", { ascending: true });
+
+        const { data: listShares } = await supabase
+            .from("list_shares")
+            .select("*")
+            .in("list_id", listIds);
+
+        // Collect all unique user IDs needed for Auth0 profile lookups
+        const userIdsToFetch = new Set();
+        sharedLists.forEach((l) => userIdsToFetch.add(l.user_id));
+        (listShares || []).forEach((s) => userIdsToFetch.add(s.user_id));
+
+        // Fetch all profiles in parallel, once per unique user
+        const token = await getMgmtToken();
+        const profileMap = {};
+        await Promise.all(
+            [...userIdsToFetch].map(async (uid) => {
+                try {
+                    const res = await fetch(
+                        `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(uid)}`,
+                        { headers: { Authorization: `Bearer ${token}` } },
+                    );
+                    const data = await res.json();
+                    profileMap[uid] = {
+                        name: data.name,
+                        picture: data.picture,
+                    };
+                } catch {
+                    profileMap[uid] = { name: null, picture: null };
+                }
+            }),
+        );
+
+        // Enrich shared lists with owner name/picture
+        sharedLists = sharedLists.map((list) => ({
+            ...list,
+            owner_name: profileMap[list.user_id]?.name || null,
+            owner_picture: profileMap[list.user_id]?.picture || null,
+        }));
+
+        // Enrich shares with name/picture
+        const enrichedShares = (listShares || []).map((share) => ({
+            ...share,
+            name: profileMap[share.user_id]?.name || null,
+            picture: profileMap[share.user_id]?.picture || null,
+        }));
+
+        const restaurantsByList = (restaurants || []).reduce((acc, r) => {
+            if (!acc[r.list_id]) acc[r.list_id] = [];
+            acc[r.list_id].push(r);
+            return acc;
+        }, {});
+
+        const sharesByList = (enrichedShares || []).reduce((acc, s) => {
+            if (!acc[s.list_id]) acc[s.list_id] = [];
+            acc[s.list_id].push(s);
+            return acc;
+        }, {});
+
+        // Rebuild allLists with enriched shared lists
+        const enrichedAllLists = [
+            ...(ownLists || []).map((l) => ({ ...l, permission: "owner" })),
+            ...sharedLists,
+        ];
+
+        const result = enrichedAllLists.map((l) => ({
+            ...l,
+            restaurants: restaurantsByList[l.id] || [],
+            shares: sharesByList[l.id] || [],
+        }));
+
+        res.status(200).json(result);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post("/lists", checkJwt, async (req, res) => {
+    const user_id = req.auth.payload.sub;
+    const { name, description } = req.body;
+
+    if (!name || typeof name !== "string" || name.trim().length === 0) {
+        return res.status(400).json({ error: "List name is required." });
+    }
+    if (name.trim().length > 100) {
+        return res
+            .status(400)
+            .json({ error: "List name must be 100 characters or less." });
+    }
+
+    try {
+        const { data, error } = await supabase
+            .from("lists")
+            .insert({
+                user_id,
+                name: name.trim(),
+                description: description?.trim() || null,
+            })
+            .select()
+            .single();
+
+        if (error) return res.status(500).json({ error: error.message });
+        res.status(201).json({
+            ...data,
+            restaurants: [],
+            shares: [],
+            permission: "owner",
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.patch("/lists/:id", checkJwt, async (req, res) => {
+    const user_id = req.auth.payload.sub;
+    const { id } = req.params;
+    const { name, description } = req.body;
+
+    const { data: list, error: fetchError } = await supabase
+        .from("lists")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+
+    if (fetchError || !list)
+        return res.status(404).json({ error: "List not found." });
+    if (list.user_id !== user_id)
+        return res.status(403).json({ error: ERRORS.unauthorised });
+
+    const updates = { updated_at: new Date().toISOString() };
+    if (name !== undefined) {
+        if (!name || name.trim().length === 0) {
+            return res.status(400).json({ error: "List name is required." });
+        }
+        if (name.trim().length > 100) {
+            return res
+                .status(400)
+                .json({ error: "List name must be 100 characters or less." });
+        }
+        updates.name = name.trim();
+    }
+    if (description !== undefined)
+        updates.description = description?.trim() || null;
+
+    try {
+        const { data, error } = await supabase
+            .from("lists")
+            .update(updates)
+            .eq("id", id)
+            .select()
+            .single();
+
+        if (error) return res.status(500).json({ error: error.message });
+        res.status(200).json(data);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete("/lists/:id", checkJwt, async (req, res) => {
+    const user_id = req.auth.payload.sub;
+    const { id } = req.params;
+
+    const { data: list, error: fetchError } = await supabase
+        .from("lists")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+
+    if (fetchError || !list)
+        return res.status(404).json({ error: "List not found." });
+    if (list.user_id !== user_id)
+        return res.status(403).json({ error: ERRORS.unauthorised });
+
+    try {
+        // ON DELETE CASCADE handles list_restaurants, list_shares, list_edit_notifications
+        const { error } = await supabase.from("lists").delete().eq("id", id);
+        if (error) return res.status(500).json({ error: error.message });
+        res.status(200).json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post("/lists/:id/restaurants", checkJwt, async (req, res) => {
+    const user_id = req.auth.payload.sub;
+    const { id } = req.params;
+    const { place_id, restaurant_name, restaurant_address } = req.body;
+
+    if (!restaurant_name || restaurant_name.trim().length === 0) {
+        return res.status(400).json({ error: "Restaurant name is required." });
+    }
+
+    const { data: list, error: fetchError } = await supabase
+        .from("lists")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+
+    if (fetchError || !list)
+        return res.status(404).json({ error: "List not found." });
+
+    // Check permission — owner or editor
+    const isOwner = list.user_id === user_id;
+    if (!isOwner) {
+        const { data: share } = await supabase
+            .from("list_shares")
+            .select("permission")
+            .eq("list_id", id)
+            .eq("user_id", user_id)
+            .maybeSingle();
+
+        if (!share || share.permission !== "edit") {
+            return res.status(403).json({ error: ERRORS.unauthorised });
+        }
+    }
+
+    try {
+        // Get current max position
+        const { data: lastItem } = await supabase
+            .from("list_restaurants")
+            .select("position")
+            .eq("list_id", id)
+            .order("position", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+        const position = lastItem ? lastItem.position + 1 : 0;
+
+        const { data, error } = await supabase
+            .from("list_restaurants")
+            .insert({
+                list_id: id,
+                place_id: place_id || null,
+                restaurant_name: restaurant_name.trim(),
+                restaurant_address: restaurant_address?.trim() || null,
+                added_by: user_id,
+                position,
+            })
+            .select()
+            .single();
+
+        if (error) return res.status(500).json({ error: error.message });
+
+        // Notify owner if editor added a restaurant
+        if (!isOwner) {
+            await notifyListUpdated(id, user_id, list.user_id);
+        }
+
+        res.status(201).json(data);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete(
+    "/lists/:id/restaurants/:restaurantId",
+    checkJwt,
+    async (req, res) => {
+        const user_id = req.auth.payload.sub;
+        const { id, restaurantId } = req.params;
+
+        const { data: list, error: fetchError } = await supabase
+            .from("lists")
+            .select("*")
+            .eq("id", id)
+            .maybeSingle();
+
+        if (fetchError || !list)
+            return res.status(404).json({ error: "List not found." });
+
+        const isOwner = list.user_id === user_id;
+        if (!isOwner) {
+            const { data: share } = await supabase
+                .from("list_shares")
+                .select("permission")
+                .eq("list_id", id)
+                .eq("user_id", user_id)
+                .maybeSingle();
+
+            if (!share || share.permission !== "edit") {
+                return res.status(403).json({ error: ERRORS.unauthorised });
+            }
+        }
+
+        try {
+            const { error } = await supabase
+                .from("list_restaurants")
+                .delete()
+                .eq("id", restaurantId)
+                .eq("list_id", id);
+
+            if (error) return res.status(500).json({ error: error.message });
+
+            if (!isOwner) {
+                await notifyListUpdated(id, user_id, list.user_id);
+            }
+
+            res.status(200).json({ success: true });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    },
+);
+
+app.patch("/lists/:id/restaurants/reorder", checkJwt, async (req, res) => {
+    const user_id = req.auth.payload.sub;
+    const { id } = req.params;
+    const { order } = req.body; // array of { id, position }
+
+    if (!Array.isArray(order) || order.length === 0) {
+        return res
+            .status(400)
+            .json({ error: "Order must be a non-empty array." });
+    }
+
+    const { data: list, error: fetchError } = await supabase
+        .from("lists")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+
+    if (fetchError || !list)
+        return res.status(404).json({ error: "List not found." });
+
+    const isOwner = list.user_id === user_id;
+    if (!isOwner) {
+        const { data: share } = await supabase
+            .from("list_shares")
+            .select("permission")
+            .eq("list_id", id)
+            .eq("user_id", user_id)
+            .maybeSingle();
+
+        if (!share || share.permission !== "edit") {
+            return res.status(403).json({ error: ERRORS.unauthorised });
+        }
+    }
+
+    try {
+        await Promise.all(
+            order.map(({ id: restaurantId, position }) =>
+                supabase
+                    .from("list_restaurants")
+                    .update({ position })
+                    .eq("id", restaurantId)
+                    .eq("list_id", id),
+            ),
+        );
+
+        if (!isOwner) {
+            await notifyListUpdated(id, user_id, list.user_id);
+        }
+
+        res.status(200).json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post("/lists/:id/share", checkJwt, async (req, res) => {
+    const user_id = req.auth.payload.sub;
+    const { id } = req.params;
+    const { user_id: receiverId, permission } = req.body;
+
+    if (!receiverId) {
+        return res.status(400).json({ error: "user_id is required." });
+    }
+
+    if (!["view", "edit"].includes(permission)) {
+        return res
+            .status(400)
+            .json({ error: "Permission must be view or edit." });
+    }
+
+    const { data: list, error: fetchError } = await supabase
+        .from("lists")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+
+    if (fetchError || !list)
+        return res.status(404).json({ error: "List not found." });
+
+    const isOwner = list.user_id === user_id;
+
+    if (!isOwner) {
+        const { data: share } = await supabase
+            .from("list_shares")
+            .select("permission")
+            .eq("list_id", id)
+            .eq("user_id", user_id)
+            .maybeSingle();
+
+        if (!share || share.permission !== "edit") {
+            return res.status(403).json({ error: ERRORS.unauthorised });
+        }
+
+        if (permission === "edit") {
+            return res
+                .status(403)
+                .json({ error: "Only the list owner can grant edit access." });
+        }
+    }
+
+    if (receiverId === user_id) {
+        return res
+            .status(400)
+            .json({ error: "You cannot share a list with yourself." });
+    }
+
+    const { data: existing } = await supabase
+        .from("list_shares")
+        .select("id")
+        .eq("list_id", id)
+        .eq("user_id", receiverId)
+        .maybeSingle();
+
+    if (existing) {
+        return res
+            .status(409)
+            .json({ error: "This list is already shared with that user." });
+    }
+
+    try {
+        const token = await getMgmtToken();
+
+        const sharerResponse = await fetch(
+            `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(user_id)}`,
+            { headers: { Authorization: `Bearer ${token}` } },
+        );
+        const sharerData = await sharerResponse.json();
+
+        await supabase.from("notifications").insert({
+            user_id: receiverId,
+            type: "list_shared",
+            data: {
+                list_id: id,
+                list_name: list.name,
+                sharer_id: user_id,
+                sharer_name: sharerData.name,
+                sharer_picture: sharerData.picture,
+                permission,
+            },
+        });
+
+        res.status(201).json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.patch("/lists/share/:notificationId/accept", checkJwt, async (req, res) => {
+    const user_id = req.auth.payload.sub;
+    const { notificationId } = req.params;
+
+    const { data: notification, error: fetchError } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("id", notificationId)
+        .eq("user_id", user_id)
+        .maybeSingle();
+
+    if (fetchError || !notification) {
+        return res.status(404).json({ error: ERRORS.notificationNotFound });
+    }
+
+    if (notification.type !== "list_shared") {
+        return res.status(400).json({ error: "Invalid notification type." });
+    }
+
+    const { list_id, permission, sharer_id, list_name } = notification.data;
+
+    try {
+        // Add share
+        const { error: shareError } = await supabase
+            .from("list_shares")
+            .insert({ list_id, user_id, permission });
+
+        if (shareError)
+            return res.status(500).json({ error: shareError.message });
+
+        // Mark notification as read and delete it
+        await supabase.from("notifications").delete().eq("id", notificationId);
+
+        // Notify sharer of acceptance
+        const token = await getMgmtToken();
+        const acceptorRes = await fetch(
+            `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(user_id)}`,
+            { headers: { Authorization: `Bearer ${token}` } },
+        );
+        const acceptorData = await acceptorRes.json();
+
+        await supabase.from("notifications").insert({
+            user_id: sharer_id,
+            type: "list_share_accepted",
+            data: {
+                list_id,
+                list_name,
+                acceptor_id: user_id,
+                acceptor_name: acceptorData.name,
+                acceptor_picture: acceptorData.picture,
+            },
+        });
+
+        res.status(200).json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.patch(
+    "/lists/share/:notificationId/decline",
+    checkJwt,
+    async (req, res) => {
+        const user_id = req.auth.payload.sub;
+        const { notificationId } = req.params;
+
+        const { data: notification, error: fetchError } = await supabase
+            .from("notifications")
+            .select("*")
+            .eq("id", notificationId)
+            .eq("user_id", user_id)
+            .maybeSingle();
+
+        if (fetchError || !notification) {
+            return res.status(404).json({ error: ERRORS.notificationNotFound });
+        }
+
+        if (notification.type !== "list_shared") {
+            return res
+                .status(400)
+                .json({ error: "Invalid notification type." });
+        }
+
+        try {
+            await supabase
+                .from("notifications")
+                .delete()
+                .eq("id", notificationId);
+            res.status(200).json({ success: true });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    },
+);
+
+app.delete("/lists/:id/share/:userId", checkJwt, async (req, res) => {
+    const user_id = req.auth.payload.sub;
+    const { id, userId } = req.params;
+
+    const { data: list, error: fetchError } = await supabase
+        .from("lists")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+
+    if (fetchError || !list)
+        return res.status(404).json({ error: "List not found." });
+
+    const isOwner = list.user_id === user_id;
+    const isSelf = userId === user_id;
+
+    // Owner can remove anyone, shared user can only remove themselves
+    if (!isOwner && !isSelf) {
+        return res.status(403).json({ error: ERRORS.unauthorised });
+    }
+
+    try {
+        const { error } = await supabase
+            .from("list_shares")
+            .delete()
+            .eq("list_id", id)
+            .eq("user_id", userId);
+
+        if (error) return res.status(500).json({ error: error.message });
+
+        // Notify owner if a shared user left
+        if (isSelf && !isOwner) {
+            const token = await getMgmtToken();
+            const leaverRes = await fetch(
+                `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(user_id)}`,
+                { headers: { Authorization: `Bearer ${token}` } },
+            );
+            const leaverData = await leaverRes.json();
+
+            // Use Supabase picture if available (more up to date than Auth0)
+            const { data: reviewData } = await supabase
+                .from("reviews")
+                .select("reviewer_name, reviewer_picture")
+                .eq("user_id", user_id)
+                .limit(1)
+                .maybeSingle();
+
+            const leaverName = reviewData?.reviewer_name || leaverData.name;
+            const leaverPicture =
+                reviewData?.reviewer_picture || leaverData.picture;
+
+            await supabase.from("notifications").insert({
+                user_id: list.user_id,
+                type: "list_updated",
+                data: {
+                    list_id: id,
+                    list_name: list.name,
+                    editor_id: user_id,
+                    editor_name: leaverName,
+                    editor_picture: leaverPicture,
+                    is_leave: true,
+                },
+            });
+        }
 
         res.status(200).json({ success: true });
     } catch (err) {

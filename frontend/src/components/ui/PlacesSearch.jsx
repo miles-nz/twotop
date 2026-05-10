@@ -7,20 +7,26 @@ import { useTypingPlaceholder } from "../../hooks/useTypingPlaceholder";
 const DEBOUNCE_MS = 300;
 
 function PlacesSearch({
-    value,
-    onChange,
-    onPlaceSelected,
+    value: controlledValue,
+    onChange: controlledOnChange,
     onClearPlace,
     selectedPlaceId,
+    resetOnSelect = false,
+    showTypingPlaceholder = true,
+    onPlaceSelected,
     className = "",
 }) {
     const { getAccessTokenSilently } = useAuth0();
+    const [internalValue, setInternalValue] = useState("");
     const [suggestions, setSuggestions] = useState([]);
     const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
     const [searchError, setSearchError] = useState(false);
     const debounceRef = useRef(null);
     const containerRef = useRef(null);
+
+    const isControlled = controlledValue !== undefined;
+    const value = isControlled ? controlledValue : internalValue;
 
     const placeholder = useTypingPlaceholder();
 
@@ -41,7 +47,11 @@ function PlacesSearch({
 
     const handleChange = (e) => {
         const val = e.target.value;
-        onChange(val);
+        if (isControlled) {
+            controlledOnChange(val);
+        } else {
+            setInternalValue(val);
+        }
 
         clearTimeout(debounceRef.current);
 
@@ -74,6 +84,10 @@ function PlacesSearch({
         }, DEBOUNCE_MS);
     };
 
+    useEffect(() => {
+        return () => clearTimeout(debounceRef.current);
+    }, []);
+
     const handleSelect = async (suggestion) => {
         setOpen(false);
         setSuggestions([]);
@@ -84,19 +98,37 @@ function PlacesSearch({
                 { headers: { Authorization: `Bearer ${token}` } },
             );
             const data = await response.json();
-            onPlaceSelected(data.name, data.address, data.place_id);
+            if (resetOnSelect) {
+                setInternalValue("");
+                onPlaceSelected({
+                    name: data.name,
+                    address: data.address,
+                    place_id: data.place_id,
+                });
+            } else {
+                onPlaceSelected(data.name, data.address, data.place_id);
+            }
         } catch (err) {
             console.error("Places details error:", err);
-            onPlaceSelected(
-                suggestion.name,
-                suggestion.address,
-                suggestion.place_id,
-            );
+            if (resetOnSelect) {
+                setInternalValue("");
+                onPlaceSelected({
+                    name: suggestion.name,
+                    address: suggestion.address,
+                    place_id: suggestion.place_id,
+                });
+            } else {
+                onPlaceSelected(
+                    suggestion.name,
+                    suggestion.address,
+                    suggestion.place_id,
+                );
+            }
         }
     };
 
     const handleClear = () => {
-        onClearPlace();
+        onClearPlace?.();
         setSuggestions([]);
         setOpen(false);
     };
@@ -114,7 +146,11 @@ function PlacesSearch({
                     onChange={handleChange}
                     maxLength={100}
                     className={`${className} pl-8`}
-                    placeholder={text.restaurantNamePlaceholder(placeholder)}
+                    placeholder={
+                        showTypingPlaceholder
+                            ? text.restaurantNamePlaceholder(placeholder)
+                            : text.searchRestaurant
+                    }
                     autoComplete="off"
                 />
                 {selectedPlaceId && (

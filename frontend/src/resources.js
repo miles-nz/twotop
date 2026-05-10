@@ -60,6 +60,8 @@ export const text = {
     sending: "Sending...",
     pending: "Pending",
     cancelling: "Canceling...",
+    loading: "Loading...",
+    uploading: "Uploading...",
     yes: "Yes",
     no: "No",
     next: "Next",
@@ -81,6 +83,8 @@ export const text = {
     get appName() {
         return `${this.appName1}${this.appNameSeparator}${this.appName2}`;
     },
+    reviews: "Reviews",
+    lists: "Lists",
 
     // Auth
     logIn: "Log In",
@@ -108,6 +112,11 @@ export const text = {
     friendRequestLabel:
         "Send a friend request to people you want to share reviews with.",
     friendRequestSent: "Friend request sent!",
+    sharedAListWithYou: " shared a list with you: ",
+    acceptedYourListShare: " accepted your invite to ",
+    updatedYourList: " made changes to ",
+    leftYourList: " left your list ",
+    viewList: "View list",
 
     // Review form
     writeReview: "Write a Review",
@@ -137,13 +146,13 @@ export const text = {
         "You haven't added friends yet. Add friends and they will appear here.",
     addYourReviewLabel: "You have been added as a collaborator on this review.",
     addYourReview: "Add your review",
+    searchRestaurant: "Search restaurant...",
 
     // Photos
     photo: "Photo",
     photoCount: (count) =>
         `${count} ${count === 1 ? "photo" : "photos"} - tap to view`,
     cropPhoto: "Crop Photo",
-    uploading: "Uploading...",
     uploadPhoto: "Upload photo",
     removePhoto: "Remove photo",
     nextImage: "Next image",
@@ -191,6 +200,34 @@ export const text = {
     hideAdvancedFilters: "Hide advanced filters",
     noReviewsMatch: "No reviews match your filters.",
     filtersLabel: "Filters",
+
+    // Lists
+    createList: "Create List",
+    listNameLabel: "Name",
+    listNamePlaceholder: "e.g. Best Cafés",
+    listDescriptionLabel: "Description (optional)",
+    listDescriptionPlaceholder: "e.g. My favourite cafés in Auckland",
+    listAddRestaurantsLabel: "Add restaurants",
+    restaurantCount: (count) =>
+        `${count} ${count === 1 ? "restaurant" : "restaurants"}`,
+    sharedWithCount: (count) => `${count} ${count === 1 ? "person" : "people"}`,
+    canEdit: "Can edit",
+    canView: "Can view",
+    noLists: "You haven't created any lists yet. Tap + to get started.",
+    shareList: "Share list",
+    deleteList: "Delete list",
+    leaveList: "Leave list",
+    confirmDeleteList: "Delete this list?",
+    confirmLeaveList: "Leave this list?",
+    noRestaurantsEdit: "No restaurants yet. Search above to add one.",
+    noRestaurantsView: "No restaurants on this list yet.",
+    permissionLabel: "Permission",
+    allFriendsShared: "All your friends already have access to this list.",
+    noFriendsToShare: "Add friends first before sharing a list.",
+    notSharedYet: "This list hasn't been shared with anyone yet.",
+    listNoRestaurantsYet: "Search for restaurants to add them to your list.",
+    addDescription: "Add description",
+    owner: "Owner",
 
     // Errors
     errorFormatted: (error) => `Error: ${error}`,
@@ -437,11 +474,15 @@ const reviewCardExamples = [
 ];
 
 const restaurantNameExamples = [
-    "Gusteau's",
+    "Chez Quis",
+    "Dex's Diner",
     "Dorsia",
+    "Gusteau's",
+    "Los Pollos Hermanos",
     "Moe's Tavern",
     "Mos Eisley Cantina",
     "The Prancing Pony",
+    "The Winchester",
 ];
 
 export const tutorialExamples = {

@@ -3,6 +3,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 
 export default function useNotifications({
     onFriendAccepted,
+    onListShareAccepted,
     enabled = true,
 } = {}) {
     const { getAccessTokenSilently } = useAuth0();
@@ -59,7 +60,10 @@ export default function useNotifications({
     const markNonActionableAsRead = useCallback(
         async (notifs) => {
             const toMark = notifs.filter(
-                (n) => n.type !== "friend_request" && !n.read,
+                (n) =>
+                    n.type !== "friend_request" &&
+                    n.type !== "list_shared" &&
+                    !n.read,
             );
             if (toMark.length === 0) return;
             try {
@@ -98,21 +102,49 @@ export default function useNotifications({
     );
 
     const resolveRequest = useCallback(
-        async (requestId, action, notificationId) => {
+        async (
+            requestId,
+            action,
+            notificationId,
+            notificationType = "friend_request",
+        ) => {
             try {
                 const token = await getAccessTokenSilently();
-                const res = await fetch(
-                    `${import.meta.env.VITE_API_URL}/friends/request/${requestId}`,
-                    {
+
+                if (notificationType === "list_shared") {
+                    const endpoint =
+                        action === "accept"
+                            ? `${import.meta.env.VITE_API_URL}/lists/share/${notificationId}/accept`
+                            : `${import.meta.env.VITE_API_URL}/lists/share/${notificationId}/decline`;
+
+                    const res = await fetch(endpoint, {
                         method: "PATCH",
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            "Content-Type": "application/json",
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                    if (!res.ok)
+                        throw new Error("Failed to resolve list share");
+
+                    if (action === "accept") {
+                        onListShareAccepted?.();
+                    }
+                } else {
+                    const res = await fetch(
+                        `${import.meta.env.VITE_API_URL}/friends/request/${requestId}`,
+                        {
+                            method: "PATCH",
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({ action }),
                         },
-                        body: JSON.stringify({ action }),
-                    },
-                );
-                if (!res.ok) throw new Error("Failed to resolve request");
+                    );
+                    if (!res.ok) throw new Error("Failed to resolve request");
+
+                    if (action === "accept") {
+                        onFriendAccepted?.();
+                    }
+                }
 
                 setNotifications((prev) =>
                     prev.map((n) =>
@@ -121,15 +153,11 @@ export default function useNotifications({
                             : n,
                     ),
                 );
-
-                if (action === "accept") {
-                    onFriendAccepted?.();
-                }
             } catch (err) {
-                console.error("Failed to resolve friend request:", err);
+                console.error("Failed to resolve request:", err);
             }
         },
-        [getAccessTokenSilently, onFriendAccepted],
+        [getAccessTokenSilently, onFriendAccepted, onListShareAccepted],
     );
 
     const unreadCount = notifications.filter((n) => !n.read).length;

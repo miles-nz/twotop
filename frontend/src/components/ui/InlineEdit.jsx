@@ -12,6 +12,8 @@ function InlineEdit({
     hoverEffects = true,
     valueName = "value",
     showConfirmButton = false,
+    allowEmpty = false,
+    emptyPlaceholder = null,
 }) {
     const [editing, setEditing] = useState(false);
     const [inputValue, setInputValue] = useState(value);
@@ -22,7 +24,12 @@ function InlineEdit({
 
     const handleSave = () => {
         const trimmed = inputValue.trim();
-        if (!trimmed || trimmed === value) {
+        if (!allowEmpty && !trimmed) {
+            setInputValue(value);
+            setEditing(false);
+            return;
+        }
+        if (trimmed === value) {
             setInputValue(value);
             setEditing(false);
             return;
@@ -61,22 +68,43 @@ function InlineEdit({
     ) : (
         <button
             onClick={() => setEditing(true)}
-            className={`text-left ${hoverEffects ? "hover:opacity-70 transition-opacity" : ""} ${className}`}
+            className={`text-left cursor-pointer group ${hoverEffects ? "transition-colors" : ""} ${className}`}
         >
-            {/* Value followed by pencil icon (e.g. "John Doe ✏️") */}
+            {/* Value followed by pencil icon */}
             {displayMode === enums.inlineEditDisplayMode.valueWithPencil && (
                 <div className="flex items-center gap-1.5">
-                    <span className="text-text-dark">{value}</span>
-                    <Pencil size={11} className="text-text-light" />
+                    {value ? (
+                        <>
+                            <span
+                                className={`${hoverEffects ? "group-hover:text-secondary-500 transition-colors" : "text-text-dark"}`}
+                            >
+                                {value}
+                            </span>
+                            <Pencil
+                                size={11}
+                                className={`${hoverEffects ? "text-text-light group-hover:text-secondary-500 transition-colors" : "text-text-light"}`}
+                            />
+                        </>
+                    ) : emptyPlaceholder ? (
+                        <span className="text-text-light hover:text-text-dark transition-colors text-xs">
+                            {emptyPlaceholder}
+                        </span>
+                    ) : null}
                 </div>
             )}
-            {/* Value only (e.g. "John Doe") */}
+            {/* Value only */}
             {displayMode === enums.inlineEditDisplayMode.valueOnly && (
-                <span className="text-text-dark">{value}</span>
+                <span
+                    className={`${hoverEffects ? "group-hover:text-secondary-500 transition-colors" : "text-text-dark"}`}
+                >
+                    {value || emptyPlaceholder}
+                </span>
             )}
-            {/* Edit <valueName> (e.g. "Edit Name") */}
+            {/* Edit <valueName> */}
             {displayMode === enums.inlineEditDisplayMode.editWithValueName && (
-                <span className="text-text-dark">
+                <span
+                    className={`${hoverEffects ? "group-hover:text-secondary-500 transition-colors" : "text-text-dark"}`}
+                >
                     {text.editLabel(valueName)}
                 </span>
             )}

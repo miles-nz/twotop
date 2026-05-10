@@ -7,6 +7,7 @@ import { text } from "../../resources";
 export default function NotificationDropdown({
     notifications,
     loading,
+    onMarkAsRead,
     onResolve,
     onClose,
 }) {
@@ -58,6 +59,7 @@ export default function NotificationDropdown({
                             key={n.id}
                             notification={n}
                             onResolve={onResolve}
+                            onMarkAsRead={onMarkAsRead}
                         />
                     ))}
             </div>

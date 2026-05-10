@@ -1,7 +1,8 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Bell } from "lucide-react";
+import { Menu, X, Bell, NotebookText, List } from "lucide-react";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import Button from "../ui/Button";
 import AvatarDropdown from "./AvatarDropdown";
 import NotificationDropdown from "./NotificationDropdown";
@@ -19,6 +20,7 @@ function BellButton({
     loading,
     onResolve,
     onClose,
+    onMarkAsRead,
 }) {
     if (!user) return null;
 
@@ -45,6 +47,7 @@ function BellButton({
                     <NotificationDropdown
                         notifications={notifications}
                         loading={loading}
+                        onMarkAsRead={onMarkAsRead}
                         onResolve={onResolve}
                         onClose={onClose}
                     />
@@ -55,12 +58,11 @@ function BellButton({
 }
 
 function NavbarTitle() {
+    const navigate = useNavigate();
     return (
         <div
             className="tracking-tight cursor-pointer touch-manipulation"
-            onClick={() => {
-                window.location.href = "/";
-            }}
+            onClick={() => navigate("/")}
         >
             <Logo
                 size={50}
@@ -72,7 +74,12 @@ function NavbarTitle() {
     );
 }
 
-function Navbar({ onPictureUpdated, onNameUpdated, onShowTutorial }) {
+function Navbar({
+    onPictureUpdated,
+    onNameUpdated,
+    onShowTutorial,
+    onListShareAccepted,
+}) {
     const { user, logout, isAuthenticated, loginWithRedirect } = useAuth0();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [notifOpen, setNotifOpen] = useState(false);
@@ -82,13 +89,21 @@ function Navbar({ onPictureUpdated, onNameUpdated, onShowTutorial }) {
         notifications,
         loading,
         fetchNotifications,
+        markAsRead,
         markNonActionableAsRead,
         resolveRequest,
         unreadCount,
     } = useNotifications({
         onFriendAccepted: fetchPreferences,
+        onListShareAccepted,
         enabled: !!user,
     });
+
+    const location = useLocation();
+
+    useEffect(() => {
+        if (user) fetchNotifications();
+    }, [location.pathname, fetchNotifications]);
 
     const handleBellClick = useCallback(async () => {
         if (!notifOpen) {
@@ -120,7 +135,39 @@ function Navbar({ onPictureUpdated, onNameUpdated, onShowTutorial }) {
             {/* Desktop */}
             <div className="hidden md:block">
                 <div className="max-w-2xl mx-auto px-6 py-4 grid grid-cols-[1fr_auto_1fr] items-center">
-                    <div />
+                    <div>
+                        {user && (
+                            <div className="flex items-center gap-4">
+                                <NavLink
+                                    to="/"
+                                    end
+                                    className={({ isActive }) =>
+                                        `flex items-center gap-1.5 text-sm font-medium transition-colors ${
+                                            isActive
+                                                ? "text-secondary-500"
+                                                : "text-text-light hover:text-text-dark"
+                                        }`
+                                    }
+                                >
+                                    <NotebookText size={16} />
+                                    {text.reviews}
+                                </NavLink>
+                                <NavLink
+                                    to="/lists"
+                                    className={({ isActive }) =>
+                                        `flex items-center gap-1.5 text-sm font-medium transition-colors ${
+                                            isActive
+                                                ? "text-secondary-500"
+                                                : "text-text-light hover:text-text-dark"
+                                        }`
+                                    }
+                                >
+                                    <List size={16} />
+                                    {text.lists}
+                                </NavLink>
+                            </div>
+                        )}
+                    </div>
                     <div className="justify-self-center">
                         <NavbarTitle />
                     </div>
@@ -132,6 +179,7 @@ function Navbar({ onPictureUpdated, onNameUpdated, onShowTutorial }) {
                             onBellClick={handleBellClick}
                             notifications={notifications}
                             loading={loading}
+                            onMarkAsRead={markAsRead}
                             onResolve={resolveRequest}
                             onClose={handleCloseNotif}
                         />
@@ -177,6 +225,7 @@ function Navbar({ onPictureUpdated, onNameUpdated, onShowTutorial }) {
                             onBellClick={handleBellClick}
                             notifications={notifications}
                             loading={loading}
+                            onMarkAsRead={markAsRead}
                             onResolve={resolveRequest}
                             onClose={handleCloseNotif}
                         />
