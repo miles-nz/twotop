@@ -108,3 +108,16 @@ export function getDeviceType() {
     if (isMobile) return "mobile";
     return "desktop";
 }
+
+export function getOS() {
+    const ua = navigator.userAgent;
+
+    if (/iPhone|iPod/.test(ua)) return "ios";
+    if (/iPad/.test(ua)) return "ios";
+    // iPad on iOS 13+ - must have both Macintosh AND high touch points (5 = full multitouch)
+    if (/Macintosh/.test(ua) && navigator.maxTouchPoints >= 5) return "ios";
+    if (/android/i.test(ua)) return "android";
+    if (/win/i.test(ua)) return "windows";
+    if (/mac/i.test(ua)) return "macos";
+    return "other";
+}

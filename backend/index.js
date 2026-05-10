@@ -1908,7 +1908,7 @@ app.post("/lists/:id/restaurants", checkJwt, async (req, res) => {
     if (fetchError || !list)
         return res.status(404).json({ error: "List not found." });
 
-    // Check permission — owner or editor
+    // Check permission - owner or editor
     const isOwner = list.user_id === user_id;
     if (!isOwner) {
         const { data: share } = await supabase
@@ -1924,16 +1924,22 @@ app.post("/lists/:id/restaurants", checkJwt, async (req, res) => {
     }
 
     try {
-        // Get current max position
-        const { data: lastItem } = await supabase
+        // Shift all existing positions up by 1 to insert new item at position 0
+        const { data: existing } = await supabase
             .from("list_restaurants")
-            .select("position")
-            .eq("list_id", id)
-            .order("position", { ascending: false })
-            .limit(1)
-            .maybeSingle();
+            .select("id, position")
+            .eq("list_id", id);
 
-        const position = lastItem ? lastItem.position + 1 : 0;
+        if (existing && existing.length > 0) {
+            await Promise.all(
+                existing.map((r) =>
+                    supabase
+                        .from("list_restaurants")
+                        .update({ position: r.position + 1 })
+                        .eq("id", r.id),
+                ),
+            );
+        }
 
         const { data, error } = await supabase
             .from("list_restaurants")
@@ -1943,7 +1949,7 @@ app.post("/lists/:id/restaurants", checkJwt, async (req, res) => {
                 restaurant_name: restaurant_name.trim(),
                 restaurant_address: restaurant_address?.trim() || null,
                 added_by: user_id,
-                position,
+                position: 0,
             })
             .select()
             .single();
@@ -2064,6 +2070,67 @@ app.delete(
         }
     },
 );
+
+app.patch("/lists/:id/restaurants/sort-checked", checkJwt, async (req, res) => {
+    const user_id = req.auth.payload.sub;
+    const { id } = req.params;
+
+    const { data: list, error: fetchError } = await supabase
+        .from("lists")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+
+    if (fetchError || !list)
+        return res.status(404).json({ error: "List not found." });
+
+    const isOwner = list.user_id === user_id;
+    if (!isOwner) {
+        const { data: share } = await supabase
+            .from("list_shares")
+            .select("permission")
+            .eq("list_id", id)
+            .eq("user_id", user_id)
+            .maybeSingle();
+
+        if (!share || share.permission !== "edit") {
+            return res.status(403).json({ error: ERRORS.unauthorised });
+        }
+    }
+
+    try {
+        const { data: restaurants, error } = await supabase
+            .from("list_restaurants")
+            .select("id, position, checked")
+            .eq("list_id", id)
+            .order("position", { ascending: true });
+
+        if (error) return res.status(500).json({ error: error.message });
+
+        // Split into unchecked and checked, preserving relative order within each
+        const unchecked = restaurants.filter((r) => !r.checked);
+        const checked = restaurants.filter((r) => r.checked);
+        const sorted = [...unchecked, ...checked];
+
+        // Update positions
+        await Promise.all(
+            sorted.map((r, i) =>
+                supabase
+                    .from("list_restaurants")
+                    .update({ position: i })
+                    .eq("id", r.id),
+            ),
+        );
+
+        if (!isOwner) {
+            await notifyListUpdated(id, user_id, list.user_id);
+        }
+
+        res.status(200).json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 app.patch("/lists/:id/restaurants/reorder", checkJwt, async (req, res) => {
     const user_id = req.auth.payload.sub;

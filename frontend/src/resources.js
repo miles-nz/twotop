@@ -233,6 +233,7 @@ export const text = {
     check: "Mark as visited",
     uncheck: "Mark as not visited",
     checklistProgress: (checked, total) => `${checked}/${total} visited`,
+    moveCheckedToBottom: "Move checked to bottom",
 
     // Errors
     errorFormatted: (error) => `Error: ${error}`,

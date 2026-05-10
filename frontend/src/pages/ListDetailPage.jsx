@@ -183,7 +183,7 @@ export default function ListDetailPage() {
                 },
             );
             const data = await res.json();
-            if (res.ok) setRestaurants((prev) => [...prev, data]);
+            if (res.ok) setRestaurants((prev) => [data, ...prev]);
         } catch (err) {
             console.error("Failed to add restaurant:", err);
         }
@@ -292,6 +292,25 @@ export default function ListDetailPage() {
         }
     };
 
+    const handleSortChecked = async () => {
+        const unchecked = restaurants.filter((r) => !r.checked);
+        const checked = restaurants.filter((r) => r.checked);
+        setRestaurants([...unchecked, ...checked]);
+        try {
+            const token = await getAccessTokenSilently();
+            await fetch(
+                `${import.meta.env.VITE_API_URL}/lists/${id}/restaurants/sort-checked`,
+                {
+                    method: "PATCH",
+                    headers: { Authorization: `Bearer ${token}` },
+                },
+            );
+        } catch (err) {
+            console.error("Failed to sort checked items:", err);
+            setRestaurants(restaurants);
+        }
+    };
+
     if (loading) {
         return (
             <div className="max-w-3xl mx-auto pt-11 pb-24 px-4 sm:px-6 lg:px-0 flex justify-center py-12">
@@ -322,6 +341,8 @@ export default function ListDetailPage() {
                     onLeaveConfirm={() => setConfirmLeave(true)}
                     onLeaveCancel={() => setConfirmLeave(false)}
                     onLeave={handleLeaveList}
+                    onSortChecked={handleSortChecked}
+                    hasCheckedItems={restaurants.some((r) => r.checked)}
                 />
 
                 {isOwner ? (
