@@ -40,7 +40,7 @@ export default function RestaurantRow({
                     <p
                         className={`text-sm font-medium truncate ${
                             restaurant.checked
-                                ? "line-through text-text-light"
+                                ? " text-text-light"
                                 : "text-text-dark"
                         }`}
                     >
