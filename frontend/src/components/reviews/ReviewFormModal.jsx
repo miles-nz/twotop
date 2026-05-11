@@ -1,9 +1,16 @@
+import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import ReviewForm from "./ReviewForm";
 import { text } from "../../resources";
 
 export default function ReviewFormModal({ onClose, onReviewSubmitted }) {
+    useEffect(() => {
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, []);
     return (
         <AnimatePresence>
             <motion.div

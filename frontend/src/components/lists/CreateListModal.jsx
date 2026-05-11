@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Trash2 } from "lucide-react";
 import { text } from "../../resources";
@@ -104,6 +104,13 @@ export default function CreateListModal({ onClose, onCreated }) {
             setSaving(false);
         }
     };
+
+    useEffect(() => {
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, []);
 
     return (
         <AnimatePresence>
