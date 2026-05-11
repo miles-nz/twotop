@@ -48,7 +48,16 @@ export function ReviewCardHeader({ review, isDetailPage = false }) {
     return (
         <div className="flex flex-col gap-0.5 min-w-0">
             <h3 className="text-2xl font-bold text-text-dark wrap-break-word leading-tight">
-                {review.restaurant_name}
+                {isDetailPage ? (
+                    review.restaurant_name
+                ) : (
+                    <Link
+                        to={`/reviews/${review.id}`}
+                        className="hover:text-text-mid transition-colors"
+                    >
+                        {review.restaurant_name}
+                    </Link>
+                )}
             </h3>
             {review.restaurant_address ? (
                 <span className="text-xs text-text-light wrap-break-word">
@@ -113,20 +122,18 @@ export function ReviewCardHeader({ review, isDetailPage = false }) {
                         </>
                     ) : (
                         <>
-                            <Link
-                                to={`/reviews/${review.id}`}
+                            <span
                                 title={formatHoverDate(review.visit_date)}
-                                className="hidden sm:inline text-text-light hover:text-text-mid transition-colors"
+                                className="hidden sm:inline text-text-light"
                             >
                                 {formatVisitDate(review.visit_date)}
-                            </Link>
-                            <Link
-                                to={`/reviews/${review.id}`}
+                            </span>
+                            <span
                                 title={formatHoverDate(review.visit_date)}
-                                className="sm:hidden block text-text-light mt-0.5 hover:text-text-mid transition-colors"
+                                className="sm:hidden block text-text-light mt-0.5"
                             >
                                 {formatVisitDate(review.visit_date)}
-                            </Link>
+                            </span>
                         </>
                     )}
                 </span>
@@ -138,13 +145,12 @@ export function ReviewCardHeader({ review, isDetailPage = false }) {
                     {formatVisitDate(review.visit_date)}
                 </span>
             ) : (
-                <Link
-                    to={`/reviews/${review.id}`}
+                <span
                     title={formatHoverDate(review.visit_date)}
-                    className="text-xs text-text-light tracking-wide mt-0.5 hover:text-text-mid transition-colors"
+                    className="text-xs text-text-light tracking-wide mt-0.5"
                 >
                     {formatVisitDate(review.visit_date)}
-                </Link>
+                </span>
             )}
         </div>
     );
