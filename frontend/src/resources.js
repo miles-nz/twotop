@@ -117,6 +117,8 @@ export const text = {
     updatedYourList: " made changes to ",
     leftYourList: " left your list ",
     viewList: "View list",
+    addedYouAsContributor: " added you as a contributor to a review of ",
+    viewReview: "View review",
 
     // Review form
     writeReview: "Write a Review",

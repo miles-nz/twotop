@@ -177,6 +177,44 @@ export default function NotificationItem({
         );
     }
 
+    if (type === "review_contributor_added") {
+        return (
+            <NotificationWrapper read={read}>
+                <div className="flex items-center gap-3 mb-2">
+                    <Avatar
+                        name={data.adder_name}
+                        picture={data.adder_picture}
+                    />
+                    <p className="text-sm text-text-dark">
+                        <span className="font-medium">{data.adder_name}</span>
+                        {text.addedYouAsContributor}
+                        <span className="font-medium">
+                            {data.restaurant_name}
+                        </span>
+                    </p>
+                </div>
+                <NotificationFooter
+                    timestamp={notification.created_at}
+                    action={
+                        <button
+                            onClick={() => {
+                                onMarkAsRead?.(id);
+                                navigate(`/reviews/${data.review_id}`);
+                            }}
+                            className={
+                                read
+                                    ? "text-xs text-secondary-500 hover:underline transition-colors cursor-pointer"
+                                    : "text-xs bg-secondary-500 hover:bg-secondary-600 text-white px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                            }
+                        >
+                            {text.viewReview}
+                        </button>
+                    }
+                />
+            </NotificationWrapper>
+        );
+    }
+
     return null;
 }
 

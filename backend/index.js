@@ -513,6 +513,46 @@ app.post(
                 .select();
 
             if (error) return res.status(500).json({ error: error.message });
+
+            // Notify contributors if collaborative
+            const parsedContributors = allowed_contributors
+                ? JSON.parse(allowed_contributors)
+                : [];
+            if (
+                (is_collaborative === "true" || is_collaborative === true) &&
+                parsedContributors.length > 0
+            ) {
+                const token = await getMgmtToken();
+                const adderRes = await fetch(
+                    `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(user_id)}`,
+                    { headers: { Authorization: `Bearer ${token}` } },
+                );
+                const adderData = await adderRes.json();
+
+                await Promise.all(
+                    parsedContributors.map(async (c) => {
+                        const { error: notifError } = await supabase
+                            .from("notifications")
+                            .insert({
+                                user_id: c.user_id,
+                                type: "review_contributor_added",
+                                data: {
+                                    review_id: data[0].id,
+                                    restaurant_name: restaurant_name.trim(),
+                                    adder_id: user_id,
+                                    adder_name: adderData.name,
+                                    adder_picture: adderData.picture,
+                                },
+                            });
+                        if (notifError)
+                            console.error(
+                                "Notification insert error:",
+                                notifError,
+                            );
+                    }),
+                );
+            }
+
             res.status(201).json({ ...data[0], contributions: [] });
         } catch (err) {
             res.status(500).json({ error: err.message });
@@ -621,7 +661,6 @@ app.patch(
                 await deleteImages(removedUrls);
                 updates.image_urls = updatedUrls;
 
-                // Sync lqips to match remaining urls
                 const remainingIndices = (review.image_urls || [])
                     .map((url, i) => (updatedUrls.includes(url) ? i : -1))
                     .filter((i) => i !== -1);
@@ -658,6 +697,42 @@ app.patch(
                 .select();
 
             if (error) return res.status(500).json({ error: error.message });
+
+            // Notify newly added contributors
+            if (updates.allowed_contributors) {
+                const previousContributors = review.allowed_contributors || [];
+                const newContributors = updates.allowed_contributors.filter(
+                    (c) =>
+                        !previousContributors.some(
+                            (p) => p.user_id === c.user_id,
+                        ),
+                );
+
+                if (newContributors.length > 0) {
+                    const token = await getMgmtToken();
+                    const adderRes = await fetch(
+                        `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(user_id)}`,
+                        { headers: { Authorization: `Bearer ${token}` } },
+                    );
+                    const adderData = await adderRes.json();
+
+                    await Promise.all(
+                        newContributors.map((c) =>
+                            supabase.from("notifications").insert({
+                                user_id: c.user_id,
+                                type: "review_contributor_added",
+                                data: {
+                                    review_id: review.id,
+                                    restaurant_name: review.restaurant_name,
+                                    adder_id: user_id,
+                                    adder_name: adderData.name,
+                                    adder_picture: adderData.picture,
+                                },
+                            }),
+                        ),
+                    );
+                }
+            }
 
             const [reviewWithContributions] = await attachContributions(data);
             res.status(200).json(reviewWithContributions);
@@ -737,6 +812,13 @@ app.delete("/reviews/:id", checkJwt, async (req, res) => {
     try {
         await deleteImages(review.image_urls);
 
+        // Delete any contributor_added notifications for this review
+        await supabase
+            .from("notifications")
+            .delete()
+            .eq("type", "review_contributor_added")
+            .contains("data", { review_id: id });
+
         const { error: deleteError } = await supabase
             .from("reviews")
             .delete()
@@ -763,7 +845,6 @@ app.delete("/reviews/:id/contributions", checkJwt, async (req, res) => {
     if (fetchError || !review)
         return res.status(404).json({ error: ERRORS.reviewNotFound });
 
-    // Owner cannot leave their own review
     if (review.user_id === user_id)
         return res.status(403).json({ error: ERRORS.unauthorised });
 
@@ -773,7 +854,6 @@ app.delete("/reviews/:id/contributions", checkJwt, async (req, res) => {
     if (!isAllowed) return res.status(403).json({ error: ERRORS.unauthorised });
 
     try {
-        // Delete the contribution
         const { error: deleteError } = await supabase
             .from("review_contributions")
             .delete()
@@ -783,7 +863,6 @@ app.delete("/reviews/:id/contributions", checkJwt, async (req, res) => {
         if (deleteError)
             return res.status(500).json({ error: deleteError.message });
 
-        // Remove from allowed_contributors
         const updatedContributors = (review.allowed_contributors || []).filter(
             (c) => c.user_id !== user_id,
         );
@@ -794,6 +873,14 @@ app.delete("/reviews/:id/contributions", checkJwt, async (req, res) => {
 
         if (updateError)
             return res.status(500).json({ error: updateError.message });
+
+        // Delete any unread contributor_added notification for this user/review
+        await supabase
+            .from("notifications")
+            .delete()
+            .eq("type", "review_contributor_added")
+            .eq("user_id", user_id)
+            .contains("data", { review_id: id });
 
         res.status(200).json({ success: true });
     } catch (err) {

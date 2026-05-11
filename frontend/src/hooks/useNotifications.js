@@ -63,6 +63,7 @@ export default function useNotifications({
                 (n) =>
                     n.type !== "friend_request" &&
                     n.type !== "list_shared" &&
+                    n.type !== "review_contributor_added" &&
                     !n.read,
             );
             if (toMark.length === 0) return;

@@ -12,22 +12,17 @@ export default function ReviewsPage({
 }) {
     const { user } = useAuth0();
     const [formOpen, setFormOpen] = useState(false);
-    const [justSubmitted, setJustSubmitted] = useState(false);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [scrollToId, setScrollToId] = useState(null);
 
     const handleReviewSubmitted = (newId) => {
-        setJustSubmitted(true);
+        setFormOpen(false);
         setScrollToId(newId);
         setRefreshTrigger((prev) => prev + 1);
     };
 
     const handleReviewsLoaded = (count) => {
         if (count === 0) setFormOpen(true);
-        if (justSubmitted) {
-            setFormOpen(false);
-            setJustSubmitted(false);
-        }
     };
 
     return (
