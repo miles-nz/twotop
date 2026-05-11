@@ -49,7 +49,13 @@ export default function ListsPage({ refreshTrigger }) {
                 style={{ boxShadow: "0 4px 24px 0 rgba(0,0,0,0.10)" }}
                 aria-label={text.createList}
             >
-                +
+                <motion.span
+                    animate={{ rotate: createModalOpen ? 45 : 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="inline-block"
+                >
+                    +
+                </motion.span>
             </button>
 
             {/* Loading */}
@@ -100,12 +106,15 @@ export default function ListsPage({ refreshTrigger }) {
             )}
 
             {/* Create list modal */}
-            {createModalOpen && (
-                <CreateListModal
-                    onClose={() => setCreateModalOpen(false)}
-                    onCreated={handleCreated}
-                />
-            )}
+            <AnimatePresence>
+                {createModalOpen && (
+                    <CreateListModal
+                        key="create-list-modal"
+                        onClose={() => setCreateModalOpen(false)}
+                        onCreated={handleCreated}
+                    />
+                )}
+            </AnimatePresence>
         </div>
     );
 }

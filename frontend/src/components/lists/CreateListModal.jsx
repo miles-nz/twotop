@@ -122,7 +122,7 @@ export default function CreateListModal({ onClose, onCreated }) {
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: 8 }}
                     transition={{ duration: 0.2 }}
-                    className="bg-surface-50 rounded-2xl shadow-xl border border-surface-200 w-full max-w-sm overflow-hidden"
+                    className="bg-surface-50 rounded-2xl shadow-xl border border-surface-200 w-full max-w-xl overflow-hidden"
                 >
                     {/* Header */}
                     <div className="flex items-center justify-between px-5 py-4 border-b border-surface-200">
@@ -138,7 +138,7 @@ export default function CreateListModal({ onClose, onCreated }) {
                         </button>
                     </div>
 
-                    <div className="px-5 py-4 flex flex-col gap-4 max-h-[70vh] min-h-120 overflow-y-auto">
+                    <div className="px-5 py-4 flex flex-col gap-4 max-h-[70vh] min-h-130 overflow-y-auto">
                         {/* Name */}
                         <div className="flex flex-col gap-1.5">
                             <label className="text-xs font-medium text-text-light uppercase tracking-wide">

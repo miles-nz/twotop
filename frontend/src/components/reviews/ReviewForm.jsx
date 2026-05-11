@@ -1,6 +1,5 @@
 import { useState, useRef } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import { motion } from "framer-motion";
 import { ImagePlus, X } from "lucide-react";
 import ImageCropModal from "./ImageCropModal";
 import Button from "../ui/Button";
@@ -198,16 +197,7 @@ function ReviewForm({ onReviewSubmitted }) {
     };
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="bg-surface-50 rounded-2xl shadow-sm p-6 mb-6 border border-surface-200 text-text-dark"
-        >
-            <h2 className="text-xl font-bold text-text-dark mb-4">
-                {text.writeReview}
-            </h2>
-
+        <div className="text-text-dark">
             {draftRestored && (
                 <div className="flex items-center justify-between bg-surface-100 border border-surface-200 rounded-lg px-3 py-2 mb-4 text-sm text-text-mid">
                     <span>{text.draftRestored}</span>
@@ -499,7 +489,7 @@ function ReviewForm({ onReviewSubmitted }) {
                     onCancel={handleCropCancel}
                 />
             )}
-        </motion.div>
+        </div>
     );
 }
 
