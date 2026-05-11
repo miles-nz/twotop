@@ -5,6 +5,7 @@ import SlideWriteReview from "./SlideWriteReview";
 import SlideSharing from "./SlideSharing";
 import SlideCollaborative from "./SlideCollaborative";
 import SlideThemes from "./SlideThemes";
+import SlideLists from "./SlideLists";
 import ReplayButton from "./ReplayButton";
 import { text, tutorialExamples } from "../../resources";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -32,6 +33,12 @@ const SLIDES = [
         title: tutorialExamples.slideText.collaborative.title,
         sub: tutorialExamples.slideText.collaborative.sub,
         Component: SlideCollaborative,
+        hasReplay: true,
+    },
+    {
+        title: tutorialExamples.slideText.lists.title,
+        sub: tutorialExamples.slideText.lists.sub,
+        Component: SlideLists,
         hasReplay: true,
     },
     {
@@ -69,6 +76,12 @@ export default function WelcomeTutorial({ onDismiss }) {
             tutorialExamples.randomRestaurantName()
         );
     });
+    const [listSet, setListSet] = useState(() => {
+        return (
+            tutorialExamples.getListSetForEmail(email) ??
+            tutorialExamples.randomListSet()
+        );
+    });
 
     const goto = (n) => {
         setDirection(n > current ? 1 : -1);
@@ -89,9 +102,10 @@ export default function WelcomeTutorial({ onDismiss }) {
     const handleReplay = () => {
         setDone(false);
         setSlideKey((k) => k + 1);
-        if (current === 2) setUserSet(tutorialExamples.nextUserSet(userSet));
         if (current === 1)
             setRestaurantName(tutorialExamples.randomRestaurantName());
+        if (current === 2) setUserSet(tutorialExamples.nextUserSet(userSet));
+        if (current === 4) setListSet(tutorialExamples.randomListSet());
     };
 
     const { title, sub, Component, hasReplay } = SLIDES[current];
@@ -168,6 +182,7 @@ export default function WelcomeTutorial({ onDismiss }) {
                                 key={slideKey}
                                 userSet={userSet}
                                 restaurantName={restaurantName}
+                                listSet={listSet}
                                 onDone={
                                     hasReplay ? () => setDone(true) : undefined
                                 }
@@ -193,14 +208,14 @@ export default function WelcomeTutorial({ onDismiss }) {
                         {current > 0 && (
                             <button
                                 onClick={prev}
-                                className="px-4 py-1.5 rounded-lg text-sm outline outline-surface-200 text-text-mid hover:bg-surface-100 transition-colors"
+                                className="px-4 py-1.5 rounded-lg text-sm outline outline-surface-200 text-text-mid hover:bg-surface-100 transition-colors cursor-pointer"
                             >
                                 {text.back}
                             </button>
                         )}
                         <button
                             onClick={next}
-                            className="px-4 py-1.5 rounded-lg text-sm bg-primary-500 text-white hover:bg-primary-600 transition-colors"
+                            className="px-4 py-1.5 rounded-lg text-sm bg-primary-500 text-white hover:bg-primary-600 transition-colors cursor-pointer"
                         >
                             {current === SLIDES.length - 1
                                 ? text.gotIt

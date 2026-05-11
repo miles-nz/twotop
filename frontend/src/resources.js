@@ -147,6 +147,10 @@ export const text = {
     addYourReviewLabel: "You have been added as a collaborator on this review.",
     addYourReview: "Add your review",
     searchRestaurant: "Search restaurant...",
+    markAsPublicHelper:
+        "Make this review visible to everyone, not just your friends.",
+    collaborativeHelper:
+        "Invite others to add their own ratings and notes to this review.",
 
     // Photos
     photo: "Photo",
@@ -284,6 +288,10 @@ const slideText = {
     themes: {
         title: "Themes",
         sub: "Pick a theme. All your reviews will be styled to match, and you can change it whenever you like.",
+    },
+    lists: {
+        title: "Lists",
+        sub: "Create lists of your favourite restaurants, or ones you want to try. Enable checklist mode to tick them off as you go.",
     },
 };
 
@@ -498,6 +506,34 @@ const restaurantNameExamples = [
     "The Winchester",
 ];
 
+const listSets = [
+    {
+        listName: "Fine Dining",
+        restaurants: ["Chez Quis", "The Gilded Truffle", "Dorsia"],
+    },
+    {
+        listName: "Animated Atmosphere",
+        restaurants: ["Pizza Planet", "The Krusty Krab", "The Poison Apple"],
+    },
+    {
+        listName: "For the Family Man",
+        restaurants: ["Moe's Tavern", "The Drunken Clam", "Bob's Burgers"],
+    },
+
+    {
+        listName: "Fast Food Spots",
+        restaurants: [
+            "Big Kahuna Burger",
+            "Los Pollos Hermanos",
+            "Cluckin' Bell",
+        ],
+    },
+    {
+        listName: "Worth the Trip",
+        restaurants: ["Mos Eisley Cantina", "End Of Line Club", "Milliways"],
+    },
+];
+
 export const tutorialExamples = {
     slideText,
     randomUserSet: () => userSets[Math.floor(Math.random() * userSets.length)],
@@ -533,5 +569,14 @@ export const tutorialExamples = {
         );
         const nextIndex = (currentIndex + 1) % userSets.length;
         return userSets[nextIndex];
+    },
+    randomListSet: () => listSets[Math.floor(Math.random() * listSets.length)],
+    getListSetForEmail: (email) => {
+        const specialUser = specialUsers.find((u) => u.email === email);
+        if (!specialUser) return null;
+        return (
+            listSets.find((s) => s.listName === specialUser.defaultListName) ??
+            null
+        );
     },
 };

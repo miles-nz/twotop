@@ -20,7 +20,7 @@ import { getLocalDate } from "../../utils";
 const DRAFT_KEY = draftKeys.newReview;
 
 const inputClass =
-    "w-full border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400";
+    "w-full border border-surface-200 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-surface-300";
 
 function ReviewForm({ onReviewSubmitted }) {
     const { getAccessTokenSilently } = useAuth0();
@@ -202,18 +202,18 @@ function ReviewForm({ onReviewSubmitted }) {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="bg-surface-200 rounded-2xl shadow-md p-6 mb-6 border border-surface-200 text-text-dark"
+            className="bg-surface-50 rounded-2xl shadow-sm p-6 mb-6 border border-surface-200 text-text-dark"
         >
-            <h2 className="text-xl font-bold text-text-mid dark:text-text-dark mb-4">
+            <h2 className="text-xl font-bold text-text-dark mb-4">
                 {text.writeReview}
             </h2>
 
             {draftRestored && (
-                <div className="flex items-center justify-between bg-secondary-50 border border-secondary-200 rounded-lg px-3 py-2 mb-4 text-sm text-secondary-600">
+                <div className="flex items-center justify-between bg-surface-100 border border-surface-200 rounded-lg px-3 py-2 mb-4 text-sm text-text-mid">
                     <span>{text.draftRestored}</span>
                     <button
                         onClick={() => setDraftRestored(false)}
-                        className="text-secondary-400 hover:text-secondary-600"
+                        className="text-text-light hover:text-text-mid"
                     >
                         <X size={14} />
                     </button>
@@ -389,7 +389,7 @@ function ReviewForm({ onReviewSubmitted }) {
                                     e.preventDefault();
                                     fileInputRef.current.click();
                                 }}
-                                className="text-secondary-400 hover:text-secondary-600 cursor-pointer transition-colors"
+                                className="text-text-light hover:text-text-mid cursor-pointer transition-colors"
                             >
                                 <ImagePlus size={24} />
                             </button>
@@ -399,19 +399,24 @@ function ReviewForm({ onReviewSubmitted }) {
             </div>
 
             {/* Public + Collaborative checkboxes */}
-            <div className="mb-4 bg-surface-100 rounded-lg border border-surface-200 px-4 py-3 flex flex-col gap-2">
-                <label className="flex items-center gap-3 cursor-pointer">
+            <div className="mb-4 bg-surface-100 rounded-lg border border-surface-200 px-4 py-3 flex flex-col gap-3">
+                <label className="flex items-start gap-3 cursor-pointer">
                     <input
                         type="checkbox"
                         checked={isPublic}
                         onChange={(e) => setIsPublic(e.target.checked)}
-                        className="w-4 h-4 accent-secondary-500 cursor-pointer"
+                        className="w-4 h-4 accent-secondary-500 cursor-pointer mt-0.5"
                     />
-                    <span className="text-sm font-medium text-text-dark">
-                        {text.markAsPublic}
-                    </span>
+                    <div>
+                        <span className="text-sm font-medium text-text-dark">
+                            {text.markAsPublic}
+                        </span>
+                        <p className="text-xs text-text-light mt-0.5">
+                            {text.markAsPublicHelper}
+                        </p>
+                    </div>
                 </label>
-                <label className="flex items-center gap-3 cursor-pointer">
+                <label className="flex items-start gap-3 cursor-pointer">
                     <input
                         type="checkbox"
                         checked={isCollaborative}
@@ -419,11 +424,16 @@ function ReviewForm({ onReviewSubmitted }) {
                             setIsCollaborative(e.target.checked);
                             if (!e.target.checked) setSelectedContributors([]);
                         }}
-                        className="w-4 h-4 accent-secondary-500 cursor-pointer"
+                        className="w-4 h-4 accent-secondary-500 cursor-pointer mt-0.5"
                     />
-                    <span className="text-sm font-medium text-text-dark">
-                        {text.collaborative}
-                    </span>
+                    <div>
+                        <span className="text-sm font-medium text-text-dark">
+                            {text.collaborative}
+                        </span>
+                        <p className="text-xs text-text-light mt-0.5">
+                            {text.collaborativeHelper}
+                        </p>
+                    </div>
                 </label>
             </div>
 

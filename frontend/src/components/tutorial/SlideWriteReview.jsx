@@ -24,7 +24,7 @@ export default function SlideWriteReview({
                 setNameChars(ni++);
                 t(typeName, 60);
             } else {
-                fillStars(0, 0);
+                t(() => fillStars(0, 0), 300);
             }
         };
 
