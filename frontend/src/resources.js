@@ -163,7 +163,7 @@ export const text = {
     previousImage: "Previous image",
     goToImage: (index, length) => `Go to image ${index + 1} of ${length}`,
 
-    // Review card menu
+    // Review card
     reviewCardMenu: "Review card menu",
     makePublic: "Make Public",
     makePersonal: "Make Personal",
@@ -171,6 +171,10 @@ export const text = {
     leaveCollaboration: "Leave",
     confirmLeaveCollaboration:
         "Are you sure you want to leave this collaboration? Your review will be permanently deleted.",
+    shareReview: "Share review",
+    privateReview: "This review is private.",
+    privateReviewLoginMessage: "Log in to view your friends' reviews.",
+    forbiddenReviewMessage: "You don't have access to this review.",
 
     // Review list
     noReviews: "No reviews yet.",

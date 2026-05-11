@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { motion } from "framer-motion";
 import Navbar from "./components/layout/Navbar";
@@ -14,6 +14,7 @@ import { UserProvider, useUser } from "./contexts/UserContext";
 import usePullToRefresh from "./hooks/usePullToRefresh";
 import PullToRefreshIndicator from "./components/ui/PullToRefreshIndicator";
 import ListDetailPage from "./pages/ListDetailPage";
+import ReviewDetailPage from "./pages/ReviewDetailPage";
 
 function AppContent() {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
@@ -73,9 +74,17 @@ function AppContent() {
                     refreshing={refreshing}
                 />
                 <Navbar />
-                <div className="max-w-3xl mx-auto py-8 px-4">
-                    <ReviewList isPublic />
-                </div>
+                <Routes>
+                    <Route path="/reviews/:id" element={<ReviewDetailPage />} />
+                    <Route
+                        path="*"
+                        element={
+                            <div className="max-w-3xl mx-auto py-8 px-4">
+                                <ReviewList isPublic />
+                            </div>
+                        }
+                    />
+                </Routes>
             </motion.div>
         );
     }
@@ -125,11 +134,15 @@ function AppContent() {
                         />
                     }
                 />
+                <Route path="/reviews" element={<Navigate to="/" replace />} />
+                <Route path="/reviews/:id" element={<ReviewDetailPage />} />
                 <Route
                     path="/lists"
                     element={<ListsPage refreshTrigger={listRefreshTrigger} />}
                 />
                 <Route path="/lists/:id" element={<ListDetailPage />} />
+
+                <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
             <BottomNav />
         </motion.div>

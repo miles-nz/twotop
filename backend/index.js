@@ -389,6 +389,56 @@ app.get("/reviews/public", async (req, res) => {
     }
 });
 
+app.get("/reviews/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { data, error } = await supabase
+            .from("reviews")
+            .select("*")
+            .eq("id", id)
+            .single();
+
+        if (error || !data)
+            return res.status(404).json({ error: "Review not found" });
+
+        if (!data.is_public) {
+            try {
+                await new Promise((resolve, reject) => {
+                    checkJwt(req, res, (err) =>
+                        err ? reject(err) : resolve(),
+                    );
+                });
+                const userId = req.auth.payload.sub;
+
+                const isOwner = data.user_id === userId;
+                const isContributor = (data.allowed_contributors || []).some(
+                    (c) => c.user_id === userId,
+                );
+
+                if (!isOwner && !isContributor) {
+                    const { data: prefs } = await supabase
+                        .from("user_preferences")
+                        .select("shared_with")
+                        .eq("user_id", data.user_id)
+                        .single();
+
+                    const sharedWith = prefs?.shared_with || [];
+                    if (!sharedWith.some((u) => u.user_id === userId)) {
+                        return res.status(403).json({ private: true });
+                    }
+                }
+            } catch {
+                return res.status(403).json({ private: true });
+            }
+        }
+
+        const [review] = await attachContributions([data]);
+        res.status(200).json(review);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.post(
     "/reviews",
     checkJwt,

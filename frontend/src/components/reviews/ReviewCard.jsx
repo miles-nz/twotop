@@ -4,7 +4,12 @@ import { motion } from "framer-motion";
 import SingleReviewCard from "./SingleReviewCard";
 import CollaborativeReviewCard from "../reviews/CollaborativeReviewCard";
 
-function ReviewCard({ review, currentUserId, onReviewUpdated }) {
+function ReviewCard({
+    review,
+    currentUserId,
+    onReviewUpdated,
+    isDetailPage = false,
+}) {
     const { isDarkMode } = useTheme();
     const themeSet = isDarkMode ? themes.dark : themes.light;
     const theme = themeSet[review.theme_id] || themeSet["default-theme"];
@@ -24,12 +29,14 @@ function ReviewCard({ review, currentUserId, onReviewUpdated }) {
                     review={review}
                     currentUserId={currentUserId}
                     onReviewUpdated={onReviewUpdated}
+                    isDetailPage={isDetailPage}
                 />
             ) : (
                 <SingleReviewCard
                     review={review}
                     currentUserId={currentUserId}
                     onReviewUpdated={onReviewUpdated}
+                    isDetailPage={isDetailPage}
                 />
             )}
         </motion.div>

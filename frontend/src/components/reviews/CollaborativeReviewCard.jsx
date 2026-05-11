@@ -10,11 +10,12 @@ import ReviewCardMenu from "./ReviewCardMenu";
 import ReviewCardRatings from "./ReviewCardRatings";
 import ReviewCardCarousel from "./ReviewCardCarousel";
 import ConfirmModal from "../ui/ConfirmModal";
-import { MoreHorizontal, Pencil, LogOut } from "lucide-react";
+import { MoreHorizontal, Pencil, LogOut, Share, Share2 } from "lucide-react";
 import { text } from "../../resources";
 import { ReviewCardHeader, ReviewText } from "./reviewCardUtils";
 import { createPortal } from "react-dom";
 import { useReviewList } from "../../contexts/ReviewListContext";
+import { getOS } from "../../utils";
 
 function ContributorMenu({ review, onEdit, onReviewUpdated }) {
     const { getAccessTokenSilently } = useAuth0();
@@ -74,6 +75,23 @@ function ContributorMenu({ review, onEdit, onReviewUpdated }) {
         }
     };
 
+    const handleShare = async () => {
+        handleMenuClose();
+        const url = `${window.location.origin}/reviews/${review.id}`;
+        if (navigator.share) {
+            try {
+                await navigator.share({ url });
+            } catch {
+                // user cancelled
+            }
+        } else {
+            await navigator.clipboard.writeText(url);
+        }
+    };
+
+    const isIos = ["ios", "macos"].includes(getOS());
+    const ShareIcon = isIos ? Share : Share2;
+
     return (
         <div className="relative">
             <button
@@ -102,6 +120,13 @@ function ContributorMenu({ review, onEdit, onReviewUpdated }) {
                         >
                             <Pencil size={14} />
                             {text.edit}
+                        </button>
+                        <button
+                            onClick={handleShare}
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-text-dark hover:bg-surface-100 cursor-pointer"
+                        >
+                            <ShareIcon size={14} />
+                            {text.shareReview}
                         </button>
                         <button
                             onClick={() => {
@@ -227,7 +252,12 @@ function ContributionSection({
     );
 }
 
-function CollaborativeReviewCard({ review, currentUserId, onReviewUpdated }) {
+function CollaborativeReviewCard({
+    review,
+    currentUserId,
+    onReviewUpdated,
+    isDetailPage = false,
+}) {
     const [editing, setEditing] = useState(false);
     const [addingContribution, setAddingContribution] = useState(false);
     const editingState = useReviewCardEditing(review, onReviewUpdated, editing);
@@ -267,7 +297,10 @@ function CollaborativeReviewCard({ review, currentUserId, onReviewUpdated }) {
         <div className="py-6">
             <div className="px-6 pb-3">
                 <div className="flex items-start justify-between">
-                    <ReviewCardHeader review={review} />
+                    <ReviewCardHeader
+                        review={review}
+                        isDetailPage={isDetailPage}
+                    />
                     <div className="flex items-center gap-2 ml-3 mt-1 shrink-0">
                         {visibleContributions.length > 0 ? (
                             <CollaboratorAvatars
@@ -334,7 +367,7 @@ function CollaborativeReviewCard({ review, currentUserId, onReviewUpdated }) {
             {isContributor &&
                 !hasContributed &&
                 (addingContribution ? (
-                    <div className="border-t border-surface-200mx-6 mt-2 pt-4">
+                    <div className="border-t border-surface-200 mx-6 mt-2 pt-4">
                         <ContributorForm
                             review={review}
                             onSaved={() => {

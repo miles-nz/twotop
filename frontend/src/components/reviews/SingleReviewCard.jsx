@@ -6,13 +6,14 @@ import LoadingOverlay from "../ui/LoadingOverlay";
 import ReviewCardMenu from "./ReviewCardMenu";
 import ReviewCardRatings from "./ReviewCardRatings";
 import ReviewCardCarousel from "./ReviewCardCarousel";
-import {
-    markdownComponents,
-    ReviewCardHeader,
-    ReviewText,
-} from "./reviewCardUtils";
+import { ReviewCardHeader, ReviewText } from "./reviewCardUtils";
 
-function SingleReviewCard({ review, currentUserId, onReviewUpdated }) {
+function SingleReviewCard({
+    review,
+    currentUserId,
+    onReviewUpdated,
+    isDetailPage = false,
+}) {
     const [editing, setEditing] = useState(false);
     const editingState = useReviewCardEditing(review, onReviewUpdated, editing);
     const isOwner = review.user_id === currentUserId;
@@ -32,7 +33,10 @@ function SingleReviewCard({ review, currentUserId, onReviewUpdated }) {
             {/* Header */}
             <div className="px-6 pb-3">
                 <div className="flex items-start justify-between">
-                    <ReviewCardHeader review={review} />
+                    <ReviewCardHeader
+                        review={review}
+                        isDetailPage={isDetailPage}
+                    />
                     <div className="flex items-center gap-2 ml-3 mt-1 shrink-0">
                         {review.reviewer_name && (
                             <span className="text-xs text-text-mid">

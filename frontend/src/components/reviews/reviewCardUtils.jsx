@@ -1,10 +1,12 @@
-import { Quote, MapPin } from "lucide-react";
+import { Quote, MapPin, Share, Share2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { Link } from "react-router-dom";
 import rehypeRaw from "rehype-raw";
 import {
     formatVisitDate,
     formatHoverDate,
     formatShortAddress,
+    getOS,
 } from "../../utils";
 import { text } from "../../resources";
 
@@ -42,7 +44,7 @@ export const markdownComponents = {
 /**
  * Shared restaurant name, address, and date header used by all review card variants.
  */
-export function ReviewCardHeader({ review }) {
+export function ReviewCardHeader({ review, isDetailPage = false }) {
     return (
         <div className="flex flex-col gap-0.5 min-w-0">
             <h3 className="text-2xl font-bold text-text-dark wrap-break-word leading-tight">
@@ -94,26 +96,55 @@ export function ReviewCardHeader({ review }) {
                     <span className="hidden sm:inline mx-1 text-text-light/35">
                         |
                     </span>
-                    <span
-                        title={formatHoverDate(review.visit_date)}
-                        className="hidden sm:inline text-text-light"
-                    >
-                        {formatVisitDate(review.visit_date)}
-                    </span>
-                    <span
-                        title={formatHoverDate(review.visit_date)}
-                        className="sm:hidden block text-text-light mt-0.5"
-                    >
-                        {formatVisitDate(review.visit_date)}
-                    </span>
+                    {isDetailPage ? (
+                        <>
+                            <span
+                                title={formatHoverDate(review.visit_date)}
+                                className="hidden sm:inline text-text-light"
+                            >
+                                {formatVisitDate(review.visit_date)}
+                            </span>
+                            <span
+                                title={formatHoverDate(review.visit_date)}
+                                className="sm:hidden block text-text-light mt-0.5"
+                            >
+                                {formatVisitDate(review.visit_date)}
+                            </span>
+                        </>
+                    ) : (
+                        <>
+                            <Link
+                                to={`/reviews/${review.id}`}
+                                title={formatHoverDate(review.visit_date)}
+                                className="hidden sm:inline text-text-light hover:text-text-mid transition-colors"
+                            >
+                                {formatVisitDate(review.visit_date)}
+                            </Link>
+                            <Link
+                                to={`/reviews/${review.id}`}
+                                title={formatHoverDate(review.visit_date)}
+                                className="sm:hidden block text-text-light mt-0.5 hover:text-text-mid transition-colors"
+                            >
+                                {formatVisitDate(review.visit_date)}
+                            </Link>
+                        </>
+                    )}
                 </span>
-            ) : (
+            ) : isDetailPage ? (
                 <span
                     title={formatHoverDate(review.visit_date)}
                     className="text-xs text-text-light tracking-wide mt-0.5"
                 >
                     {formatVisitDate(review.visit_date)}
                 </span>
+            ) : (
+                <Link
+                    to={`/reviews/${review.id}`}
+                    title={formatHoverDate(review.visit_date)}
+                    className="text-xs text-text-light tracking-wide mt-0.5 hover:text-text-mid transition-colors"
+                >
+                    {formatVisitDate(review.visit_date)}
+                </Link>
             )}
         </div>
     );
@@ -136,5 +167,32 @@ export function ReviewText({ children, className = "px-4 pt-3 pb-0" }) {
                 </ReactMarkdown>
             </div>
         </div>
+    );
+}
+
+export function ShareReviewButton({ reviewId }) {
+    const url = `${window.location.origin}/reviews/${reviewId}`;
+    const isIos = ["ios", "macos"].includes(getOS());
+
+    const handleShare = async () => {
+        if (navigator.share) {
+            try {
+                await navigator.share({ url });
+            } catch {
+                // user cancelled, do nothing
+            }
+        } else {
+            await navigator.clipboard.writeText(url);
+        }
+    };
+
+    return (
+        <button
+            onClick={handleShare}
+            className="text-text-light hover:text-text-mid transition-colors cursor-pointer"
+            aria-label="Share review"
+        >
+            {isIos ? <Share size={16} /> : <Share2 size={16} />}
+        </button>
     );
 }

@@ -5,7 +5,8 @@ import {
     Eye,
     EyeOff,
     Pencil,
-    LogOut,
+    Share,
+    Share2,
 } from "lucide-react";
 import { useReviewList } from "../../contexts/ReviewListContext";
 import { text } from "../../resources";
@@ -14,23 +15,34 @@ import { useRef, useState, useEffect } from "react";
 import { useDeleteReview } from "../../hooks/useDeleteReview";
 import ConfirmModal from "../ui/ConfirmModal";
 import LoadingOverlay from "../ui/LoadingOverlay";
+import { getOS } from "../../utils";
 
-function ReviewCardMenu({
-    review,
-    onEditReview,
-    onReviewUpdated,
-    isContributor = false,
-}) {
+function ReviewCardMenu({ review, onEditReview, onReviewUpdated }) {
     const { getAccessTokenSilently } = useAuth0();
     const { openMenuId, handleMenuOpen, handleMenuClose } = useReviewList();
     const menuOpen = openMenuId === review.id;
     const buttonRef = useRef(null);
     const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
-    const [leaveConfirmOpen, setLeaveConfirmOpen] = useState(false);
-    const [leaving, setLeaving] = useState(false);
 
     const { deleting, handleDelete, confirmOpen, setConfirmOpen } =
         useDeleteReview(review.id, onReviewUpdated);
+
+    const handleShare = async () => {
+        handleMenuClose();
+        const url = `${window.location.origin}/reviews/${review.id}`;
+        if (navigator.share) {
+            try {
+                await navigator.share({ url });
+            } catch {
+                // user cancelled
+            }
+        } else {
+            await navigator.clipboard.writeText(url);
+        }
+    };
+
+    const isIos = ["ios", "macos"].includes(getOS());
+    const ShareIcon = isIos ? Share : Share2;
 
     const handleOpenMenu = (e) => {
         e.stopPropagation();
@@ -86,27 +98,6 @@ function ReviewCardMenu({
         }
     };
 
-    const handleLeaveCollaboration = async () => {
-        setLeaving(true);
-        try {
-            const token = await getAccessTokenSilently();
-            const response = await fetch(
-                `${import.meta.env.VITE_API_URL}/reviews/${review.id}/contributions`,
-                {
-                    method: "DELETE",
-                    headers: { Authorization: `Bearer ${token}` },
-                },
-            );
-            if (!response.ok) throw new Error("Failed to leave collaboration");
-            onReviewUpdated(review.id);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLeaving(false);
-            setLeaveConfirmOpen(false);
-        }
-    };
-
     return (
         <div className="relative">
             <button
@@ -126,57 +117,49 @@ function ReviewCardMenu({
                             left: menuPosition.left,
                         }}
                     >
-                        {isContributor ? (
-                            <button
-                                onClick={() => {
-                                    handleMenuClose();
-                                    setLeaveConfirmOpen(true);
-                                }}
-                                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-error-600 hover:bg-surface-100 rounded-lg cursor-pointer"
-                            >
-                                <LogOut size={14} />
-                                {text.leaveCollaboration}
-                            </button>
-                        ) : (
-                            <>
-                                <button
-                                    onClick={() => {
-                                        handleMenuClose();
-                                        onEditReview();
-                                    }}
-                                    className="flex items-center gap-2 w-full px-4 py-2 text-sm text-text-dark hover:bg-surface-100 rounded-t-lg cursor-pointer"
-                                >
-                                    <Pencil size={14} />
-                                    {text.edit}
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        handleMenuClose();
-                                        handleTogglePublic();
-                                    }}
-                                    className="flex items-center gap-2 w-full px-4 py-2 text-sm text-text-dark hover:bg-surface-100 cursor-pointer"
-                                >
-                                    {review.is_public ? (
-                                        <EyeOff size={14} />
-                                    ) : (
-                                        <Eye size={14} />
-                                    )}
-                                    {review.is_public
-                                        ? text.makePersonal
-                                        : text.makePublic}
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        handleMenuClose();
-                                        setConfirmOpen(true);
-                                    }}
-                                    className="flex items-center gap-2 w-full px-4 py-2 text-sm text-error-600 hover:bg-surface-100 rounded-b-lg cursor-pointer"
-                                >
-                                    <Trash2 size={14} />
-                                    {text.delete}
-                                </button>
-                            </>
-                        )}
+                        <button
+                            onClick={() => {
+                                handleMenuClose();
+                                onEditReview();
+                            }}
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-text-dark hover:bg-surface-100 rounded-t-lg cursor-pointer"
+                        >
+                            <Pencil size={14} />
+                            {text.edit}
+                        </button>
+                        <button
+                            onClick={() => {
+                                handleMenuClose();
+                                handleTogglePublic();
+                            }}
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-text-dark hover:bg-surface-100 cursor-pointer"
+                        >
+                            {review.is_public ? (
+                                <EyeOff size={14} />
+                            ) : (
+                                <Eye size={14} />
+                            )}
+                            {review.is_public
+                                ? text.makePersonal
+                                : text.makePublic}
+                        </button>
+                        <button
+                            onClick={handleShare}
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-text-dark hover:bg-surface-100 cursor-pointer"
+                        >
+                            <ShareIcon size={14} />
+                            {text.shareReview}
+                        </button>
+                        <button
+                            onClick={() => {
+                                handleMenuClose();
+                                setConfirmOpen(true);
+                            }}
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-error-600 hover:bg-surface-100 rounded-b-lg cursor-pointer"
+                        >
+                            <Trash2 size={14} />
+                            {text.delete}
+                        </button>
                     </div>,
                     document.body,
                 )}
@@ -187,14 +170,7 @@ function ReviewCardMenu({
                 message={text.confirmDeleteReview}
                 deleting={deleting}
             />
-            <ConfirmModal
-                isOpen={leaveConfirmOpen}
-                onConfirm={handleLeaveCollaboration}
-                onCancel={() => setLeaveConfirmOpen(false)}
-                message={text.confirmLeaveCollaboration}
-                deleting={leaving}
-            />
-            <LoadingOverlay isVisible={deleting || leaving} />
+            <LoadingOverlay isVisible={deleting} />
         </div>
     );
 }

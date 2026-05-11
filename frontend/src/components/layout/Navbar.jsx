@@ -10,6 +10,7 @@ import { text } from "../../resources";
 import Logo from "../ui/Logo";
 import useNotifications from "../../hooks/useNotifications";
 import { useUser } from "../../contexts/UserContext";
+import LoginButton from "../ui/LoginButton";
 
 function BellButton({
     user,
@@ -80,7 +81,7 @@ function Navbar({
     onShowTutorial,
     onListShareAccepted,
 }) {
-    const { user, logout, isAuthenticated, loginWithRedirect } = useAuth0();
+    const { user, logout, isAuthenticated } = useAuth0();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [notifOpen, setNotifOpen] = useState(false);
     const { fetchPreferences } = useUser();
@@ -186,12 +187,7 @@ function Navbar({
                         {user ? (
                             <AvatarDropdown {...avatarDropdownProps} />
                         ) : (
-                            <Button
-                                variant="surface"
-                                onClick={() => loginWithRedirect()}
-                            >
-                                {text.logIn}
-                            </Button>
+                            <LoginButton />
                         )}
                     </div>
                 </div>
@@ -235,12 +231,7 @@ function Navbar({
                                 mobile={true}
                             />
                         ) : (
-                            <Button
-                                variant="surface"
-                                onClick={loginWithRedirect}
-                            >
-                                {text.logIn}
-                            </Button>
+                            <LoginButton />
                         )}
                     </div>
                 </div>
@@ -278,15 +269,7 @@ function Navbar({
                                         <div className="pt-2 border-t border-surface-200 space-y-4">
                                             {!isAuthenticated && (
                                                 <div className="py-2">
-                                                    <Button
-                                                        variant="surface"
-                                                        onClick={
-                                                            loginWithRedirect
-                                                        }
-                                                        className="w-full"
-                                                    >
-                                                        {text.logIn}
-                                                    </Button>
+                                                    <LoginButton className="w-full" />
                                                 </div>
                                             )}
                                         </div>
