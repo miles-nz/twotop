@@ -208,14 +208,14 @@ export default function WelcomeTutorial({ onDismiss }) {
                         {current > 0 && (
                             <button
                                 onClick={prev}
-                                className="px-4 py-1.5 rounded-lg text-sm outline outline-surface-200 text-text-mid hover:bg-surface-100 transition-colors cursor-pointer"
+                                className="px-4 py-1.5 rounded-lg text-sm outline outline-surface-200 text-text-mid hover:bg-surface-100 transition-colors"
                             >
                                 {text.back}
                             </button>
                         )}
                         <button
                             onClick={next}
-                            className="px-4 py-1.5 rounded-lg text-sm bg-primary-500 text-white hover:bg-primary-600 transition-colors cursor-pointer"
+                            className="px-4 py-1.5 rounded-lg text-sm bg-primary-500 text-white hover:bg-primary-600 transition-colors"
                         >
                             {current === SLIDES.length - 1
                                 ? text.gotIt

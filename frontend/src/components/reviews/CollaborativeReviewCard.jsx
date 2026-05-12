@@ -97,7 +97,7 @@ function ContributorMenu({ review, onEdit, onReviewUpdated }) {
             <button
                 ref={buttonRef}
                 onClick={handleOpenMenu}
-                className="flex items-center text-text-light hover:text-text-mid cursor-pointer transition-colors"
+                className="flex items-center text-text-light hover:text-text-mid transition-colors"
                 aria-label={text.reviewCardMenu}
             >
                 <MoreHorizontal size={18} />
@@ -116,14 +116,14 @@ function ContributorMenu({ review, onEdit, onReviewUpdated }) {
                                 handleMenuClose();
                                 onEdit();
                             }}
-                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-text-dark hover:bg-surface-100 rounded-t-lg cursor-pointer"
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-text-dark hover:bg-surface-100 rounded-t-lg"
                         >
                             <Pencil size={14} />
                             {text.edit}
                         </button>
                         <button
                             onClick={handleShare}
-                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-text-dark hover:bg-surface-100 cursor-pointer"
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-text-dark hover:bg-surface-100"
                         >
                             <ShareIcon size={14} />
                             {text.shareReview}
@@ -133,7 +133,7 @@ function ContributorMenu({ review, onEdit, onReviewUpdated }) {
                                 handleMenuClose();
                                 setLeaveConfirmOpen(true);
                             }}
-                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-error-600 hover:bg-surface-100 rounded-b-lg cursor-pointer"
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-error-600 hover:bg-surface-100 rounded-b-lg"
                         >
                             <LogOut size={14} />
                             {text.leaveCollaboration}
@@ -385,7 +385,7 @@ function CollaborativeReviewCard({
                             </span>
                             <button
                                 onClick={() => setAddingContribution(true)}
-                                className="text-sm bg-secondary-500 hover:bg-secondary-600 text-white px-4 py-1.5 rounded-lg transition-colors cursor-pointer"
+                                className="text-sm bg-secondary-500 hover:bg-secondary-600 text-white px-4 py-1.5 rounded-lg transition-colors"
                             >
                                 {text.addYourReview}
                             </button>

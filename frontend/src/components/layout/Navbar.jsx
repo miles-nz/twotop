@@ -32,7 +32,7 @@ function BellButton({
                     e.stopPropagation();
                     onBellClick();
                 }}
-                className="p-1.5 text-text-light hover:text-text-dark transition-colors cursor-pointer"
+                className="p-1.5 text-text-light hover:text-text-dark transition-colors"
                 aria-label={text.notifications}
             >
                 <Bell size={20} />

@@ -6,6 +6,7 @@ import Button from "../ui/Button";
 import LoadingOverlay from "../ui/LoadingOverlay";
 import MarkdownToolbar from "./MarkdownToolbar";
 import PlacesSearch from "../ui/PlacesSearch";
+import Checkbox from "../ui/Checkbox";
 import { FormError, RatingsFields, ContributorPicker } from "./FormComponents";
 import { useAutoResize } from "../../hooks/useAutoResize";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
@@ -296,7 +297,7 @@ function ReviewForm({ onReviewSubmitted }) {
                     value={visitDate}
                     onChange={(e) => setVisitDate(e.target.value)}
                     max={getLocalDate()}
-                    className={inputClass}
+                    className={`${inputClass} cursor-pointer`}
                     style={{
                         color: visitDate
                             ? "var(--color-text-dark)"
@@ -365,7 +366,7 @@ function ReviewForm({ onReviewSubmitted }) {
                                     <button
                                         type="button"
                                         onClick={() => handleImageRemove(index)}
-                                        className="absolute -top-1 -right-1 bg-surface-300 rounded-full w-3 h-3 flex items-center justify-center cursor-pointer"
+                                        className="absolute -top-1 -right-1 bg-surface-300 rounded-full w-3 h-3 flex items-center justify-center"
                                     >
                                         <X size={8} />
                                     </button>
@@ -379,7 +380,7 @@ function ReviewForm({ onReviewSubmitted }) {
                                     e.preventDefault();
                                     fileInputRef.current.click();
                                 }}
-                                className="text-text-light hover:text-text-mid cursor-pointer transition-colors"
+                                className="text-text-light hover:text-text-mid transition-colors"
                             >
                                 <ImagePlus size={24} />
                             </button>
@@ -390,41 +391,29 @@ function ReviewForm({ onReviewSubmitted }) {
 
             {/* Public + Collaborative checkboxes */}
             <div className="mb-4 bg-surface-100 rounded-lg border border-surface-200 px-4 py-3 flex flex-col gap-3">
-                <label className="flex items-start gap-3 cursor-pointer">
-                    <input
-                        type="checkbox"
+                <div className="flex flex-col gap-1">
+                    <Checkbox
                         checked={isPublic}
-                        onChange={(e) => setIsPublic(e.target.checked)}
-                        className="w-4 h-4 accent-secondary-500 cursor-pointer mt-0.5"
+                        onChange={setIsPublic}
+                        label={text.markAsPublic}
                     />
-                    <div>
-                        <span className="text-sm font-medium text-text-dark">
-                            {text.markAsPublic}
-                        </span>
-                        <p className="text-xs text-text-light mt-0.5">
-                            {text.markAsPublicHelper}
-                        </p>
-                    </div>
-                </label>
-                <label className="flex items-start gap-3 cursor-pointer">
-                    <input
-                        type="checkbox"
+                    <p className="text-xs text-text-light ml-6">
+                        {text.markAsPublicHelper}
+                    </p>
+                </div>
+                <div className="flex flex-col gap-1">
+                    <Checkbox
                         checked={isCollaborative}
-                        onChange={(e) => {
-                            setIsCollaborative(e.target.checked);
-                            if (!e.target.checked) setSelectedContributors([]);
+                        onChange={(checked) => {
+                            setIsCollaborative(checked);
+                            if (!checked) setSelectedContributors([]);
                         }}
-                        className="w-4 h-4 accent-secondary-500 cursor-pointer mt-0.5"
+                        label={text.collaborative}
                     />
-                    <div>
-                        <span className="text-sm font-medium text-text-dark">
-                            {text.collaborative}
-                        </span>
-                        <p className="text-xs text-text-light mt-0.5">
-                            {text.collaborativeHelper}
-                        </p>
-                    </div>
-                </label>
+                    <p className="text-xs text-text-light ml-6">
+                        {text.collaborativeHelper}
+                    </p>
+                </div>
             </div>
 
             {isCollaborative && (

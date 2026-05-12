@@ -12,7 +12,7 @@ import { useTheme } from "../../contexts/ThemeContext";
 import { useUser } from "../../contexts/UserContext";
 
 const menuItemClasses =
-    "w-full px-4 py-2 text-sm hover:bg-surface-200 transition-colors text-left cursor-pointer";
+    "w-full px-4 py-2 text-sm hover:bg-surface-200 transition-colors text-left";
 
 export default function AvatarDropdown({
     user,
@@ -150,7 +150,7 @@ export default function AvatarDropdown({
         <div className={`relative ${mobile ? "p-1.5" : ""}`} ref={dropdownRef}>
             <button
                 onClick={() => setOpen((v) => !v)}
-                className={`flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity ${buttonClassName}`}
+                className={`flex items-center gap-2 hover:opacity-80 transition-opacity ${buttonClassName}`}
             >
                 {!mobile && showName && (
                     <span className="text-sm text-text-dark">
@@ -180,7 +180,7 @@ export default function AvatarDropdown({
                                         setThemeModalOpen(true);
                                         setOpen(false);
                                     }}
-                                    className="text-secondary-300 hover:text-text-dark transition-colors cursor-pointer"
+                                    className="text-secondary-300 hover:text-text-dark transition-colors"
                                     aria-label={text.theme}
                                     title={text.theme}
                                 >

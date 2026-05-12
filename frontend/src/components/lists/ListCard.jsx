@@ -14,7 +14,7 @@ export default function ListCard({ list }) {
             whileHover={{ scale: 1.015 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => navigate(`/lists/${list.id}`)}
-            className="relative w-full h-30 text-left bg-surface-50 border border-surface-200 rounded-2xl p-4 flex flex-col hover:border-surface-300 transition-colors shadow-sm cursor-pointer"
+            className="relative w-full h-30 text-left bg-surface-50 border border-surface-200 rounded-2xl p-4 flex flex-col hover:border-surface-300 transition-colors shadow-sm"
         >
             {/* Owner info for shared lists */}
             {list.permission !== "owner" && list.owner_name && (

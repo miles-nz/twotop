@@ -48,13 +48,13 @@ export default function DescriptionEdit({ value, onSave }) {
                 <div className="flex items-center gap-3">
                     <button
                         onClick={handleSave}
-                        className="text-xs text-secondary-500 hover:text-secondary-600 transition-colors cursor-pointer"
+                        className="text-xs text-secondary-500 hover:text-secondary-600 transition-colors"
                     >
                         {text.save}
                     </button>
                     <button
                         onClick={handleCancel}
-                        className="text-xs text-text-light hover:text-text-dark transition-colors cursor-pointer"
+                        className="text-xs text-text-light hover:text-text-dark transition-colors"
                     >
                         {text.cancel}
                     </button>
@@ -70,7 +70,7 @@ export default function DescriptionEdit({ value, onSave }) {
                     <p className="text-sm text-text-light">{value}</p>
                     <button
                         onClick={() => setEditing(true)}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity text-text-light hover:text-text-dark cursor-pointer"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity text-text-light hover:text-text-dark"
                         aria-label={text.editLabel(text.listDescriptionLabel)}
                     >
                         <Pencil size={12} />
@@ -79,7 +79,7 @@ export default function DescriptionEdit({ value, onSave }) {
             ) : (
                 <button
                     onClick={() => setEditing(true)}
-                    className="text-xs text-text-light hover:text-text-dark transition-colors cursor-pointer"
+                    className="text-xs text-text-light hover:text-text-dark transition-colors"
                 >
                     + {text.addDescription}
                 </button>

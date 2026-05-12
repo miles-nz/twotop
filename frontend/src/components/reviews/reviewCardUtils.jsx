@@ -195,7 +195,7 @@ export function ShareReviewButton({ reviewId }) {
     return (
         <button
             onClick={handleShare}
-            className="text-text-light hover:text-text-mid transition-colors cursor-pointer"
+            className="text-text-light hover:text-text-mid transition-colors"
             aria-label="Share review"
         >
             {isIos ? <Share size={16} /> : <Share2 size={16} />}

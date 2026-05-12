@@ -83,7 +83,7 @@ export function ContributorPicker({
                     <button
                         key={person.user_id}
                         onClick={() => onToggle(person)}
-                        className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors cursor-pointer text-left ${
+                        className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left ${
                             selected
                                 ? "bg-secondary-100 dark:bg-secondary-500 border border-secondary-300"
                                 : "bg-surface-50 border border-surface-200 hover:bg-surface-100"

@@ -37,7 +37,7 @@ export default function ListDetailHeader({
         <div className="flex items-center justify-between gap-3">
             <button
                 onClick={onBack}
-                className="p-1.5 text-text-light hover:text-text-dark transition-colors cursor-pointer"
+                className="p-1.5 text-text-light hover:text-text-dark transition-colors"
                 aria-label={text.back}
             >
                 <ArrowLeft size={20} />
@@ -47,7 +47,7 @@ export default function ListDetailHeader({
                 {canEdit && (
                     <button
                         onClick={onShare}
-                        className="p-1.5 text-text-light hover:text-text-dark transition-colors cursor-pointer"
+                        className="p-1.5 text-text-light hover:text-text-dark transition-colors"
                         aria-label={text.shareList}
                         title={text.shareList}
                     >
@@ -58,7 +58,7 @@ export default function ListDetailHeader({
                     <div className="relative">
                         <button
                             onClick={() => setMenuOpen((prev) => !prev)}
-                            className="p-1.5 text-text-light hover:text-text-dark transition-colors cursor-pointer"
+                            className="p-1.5 text-text-light hover:text-text-dark transition-colors"
                             aria-label="More options"
                         >
                             <MoreVertical size={20} />
@@ -88,7 +88,7 @@ export default function ListDetailHeader({
                                                 onSortChecked();
                                                 setMenuOpen(false);
                                             }}
-                                            className="w-full text-left px-4 py-3 text-sm text-text-dark hover:bg-surface-100 transition-colors cursor-pointer border-t border-surface-200"
+                                            className="w-full text-left px-4 py-3 text-sm text-text-dark hover:bg-surface-100 transition-colors border-t border-surface-200"
                                         >
                                             {text.moveCheckedToBottom}
                                         </button>
@@ -107,13 +107,13 @@ export default function ListDetailHeader({
                                 </span>
                                 <button
                                     onClick={onDelete}
-                                    className="text-xs text-error-500 hover:underline cursor-pointer"
+                                    className="text-xs text-error-500 hover:underline"
                                 >
                                     {text.yes}
                                 </button>
                                 <button
                                     onClick={onDeleteCancel}
-                                    className="text-xs text-text-light hover:underline cursor-pointer"
+                                    className="text-xs text-text-light hover:underline"
                                 >
                                     {text.cancel}
                                 </button>
@@ -121,7 +121,7 @@ export default function ListDetailHeader({
                         ) : (
                             <button
                                 onClick={onDeleteConfirm}
-                                className="p-1.5 text-text-light hover:text-error-500 transition-colors cursor-pointer"
+                                className="p-1.5 text-text-light hover:text-error-500 transition-colors"
                                 aria-label={text.deleteList}
                                 title={text.deleteList}
                             >
@@ -139,13 +139,13 @@ export default function ListDetailHeader({
                                 </span>
                                 <button
                                     onClick={onLeave}
-                                    className="text-xs text-error-500 hover:underline cursor-pointer"
+                                    className="text-xs text-error-500 hover:underline"
                                 >
                                     {text.yes}
                                 </button>
                                 <button
                                     onClick={onLeaveCancel}
-                                    className="text-xs text-text-light hover:underline cursor-pointer"
+                                    className="text-xs text-text-light hover:underline"
                                 >
                                     {text.cancel}
                                 </button>
@@ -153,7 +153,7 @@ export default function ListDetailHeader({
                         ) : (
                             <button
                                 onClick={onLeaveConfirm}
-                                className="p-1.5 text-text-light hover:text-error-500 transition-colors cursor-pointer"
+                                className="p-1.5 text-text-light hover:text-error-500 transition-colors"
                                 aria-label={text.leaveList}
                                 title={text.leaveList}
                             >

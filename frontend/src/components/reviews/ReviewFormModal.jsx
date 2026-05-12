@@ -37,7 +37,7 @@ export default function ReviewFormModal({ onClose, onReviewSubmitted }) {
                         </h2>
                         <button
                             onClick={onClose}
-                            className="text-text-light hover:text-text-dark transition-colors cursor-pointer"
+                            className="text-text-light hover:text-text-dark transition-colors"
                             aria-label={text.close}
                         >
                             <X size={18} />

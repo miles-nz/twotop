@@ -70,7 +70,7 @@ function MarkdownToolbar({ textareaRef, value, onChange }) {
     };
 
     const buttonClass =
-        "text-text-light hover:text-text-mid cursor-pointer transition-colors p-1 rounded";
+        "text-text-light hover:text-text-mid transition-colors p-1 rounded";
 
     return (
         <div className="flex gap-1 mb-1">

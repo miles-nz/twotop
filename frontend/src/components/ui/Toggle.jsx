@@ -22,7 +22,7 @@ export default function Toggle({ value, onToggle, ariaLabel, children }) {
     return (
         <button
             onClick={() => onToggle(!value)}
-            className={`relative w-11 h-6 rounded-full transition-colors duration-200 cursor-pointer focus:outline-none ${
+            className={`relative w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none ${
                 value ? "bg-secondary-500" : "bg-surface-300"
             }`}
             aria-pressed={value}

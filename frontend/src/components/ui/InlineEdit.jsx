@@ -68,7 +68,7 @@ function InlineEdit({
     ) : (
         <button
             onClick={() => setEditing(true)}
-            className={`text-left cursor-pointer group ${hoverEffects ? "transition-colors" : ""} ${className}`}
+            className={`text-left group ${hoverEffects ? "transition-colors" : ""} ${className}`}
         >
             {/* Value followed by pencil icon */}
             {displayMode === enums.inlineEditDisplayMode.valueWithPencil && (

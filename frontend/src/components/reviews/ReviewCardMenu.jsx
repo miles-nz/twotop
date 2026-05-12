@@ -104,7 +104,7 @@ function ReviewCardMenu({ review, onEditReview, onReviewUpdated }) {
                 ref={buttonRef}
                 onClick={handleOpenMenu}
                 aria-label={text.reviewCardMenu}
-                className="flex items-center text-text-light hover:text-text-mid cursor-pointer transition-colors"
+                className="flex items-center text-text-light hover:text-text-mid transition-colors"
             >
                 <MoreHorizontal size={22} />
             </button>
@@ -122,7 +122,7 @@ function ReviewCardMenu({ review, onEditReview, onReviewUpdated }) {
                                 handleMenuClose();
                                 onEditReview();
                             }}
-                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-text-dark hover:bg-surface-100 rounded-t-lg cursor-pointer"
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-text-dark hover:bg-surface-100 rounded-t-lg"
                         >
                             <Pencil size={14} />
                             {text.edit}
@@ -132,7 +132,7 @@ function ReviewCardMenu({ review, onEditReview, onReviewUpdated }) {
                                 handleMenuClose();
                                 handleTogglePublic();
                             }}
-                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-text-dark hover:bg-surface-100 cursor-pointer"
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-text-dark hover:bg-surface-100"
                         >
                             {review.is_public ? (
                                 <EyeOff size={14} />
@@ -145,7 +145,7 @@ function ReviewCardMenu({ review, onEditReview, onReviewUpdated }) {
                         </button>
                         <button
                             onClick={handleShare}
-                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-text-dark hover:bg-surface-100 cursor-pointer"
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-text-dark hover:bg-surface-100"
                         >
                             <ShareIcon size={14} />
                             {text.shareReview}
@@ -155,7 +155,7 @@ function ReviewCardMenu({ review, onEditReview, onReviewUpdated }) {
                                 handleMenuClose();
                                 setConfirmOpen(true);
                             }}
-                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-error-600 hover:bg-surface-100 rounded-b-lg cursor-pointer"
+                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-error-600 hover:bg-surface-100 rounded-b-lg"
                         >
                             <Trash2 size={14} />
                             {text.delete}

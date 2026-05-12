@@ -12,7 +12,7 @@ function Button({ onClick, children, variant = "primary", disabled = false }) {
         <button
             onClick={onClick}
             disabled={disabled}
-            className={`${styles[variant]} rounded-lg transition-colors cursor-pointer font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center`}
+            className={`${styles[variant]} rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center`}
         >
             {children}
         </button>

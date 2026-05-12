@@ -135,7 +135,7 @@ export default function ShareListModal({
                         </div>
                         <button
                             onClick={onClose}
-                            className="text-text-light hover:text-text-dark transition-colors cursor-pointer"
+                            className="text-text-light hover:text-text-dark transition-colors"
                             aria-label={text.close}
                         >
                             <X size={18} />
@@ -164,7 +164,7 @@ export default function ShareListModal({
                                                         : friend.user_id,
                                                 )
                                             }
-                                            className={`flex items-center gap-3 px-3 py-2 rounded-lg border transition-colors text-left cursor-pointer ${
+                                            className={`flex items-center gap-3 px-3 py-2 rounded-lg border transition-colors text-left ${
                                                 selectedUserId ===
                                                 friend.user_id
                                                     ? "border-secondary-400 bg-secondary-50"
@@ -194,7 +194,7 @@ export default function ShareListModal({
                                                     onClick={() =>
                                                         setSelectedPermission(p)
                                                     }
-                                                    className={`text-xs px-3 py-1.5 rounded-lg border transition-colors cursor-pointer ${
+                                                    className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${
                                                         selectedPermission === p
                                                             ? "border-secondary-400 bg-secondary-50 text-secondary-600"
                                                             : "border-surface-200 text-text-light hover:bg-surface-100"
@@ -213,7 +213,7 @@ export default function ShareListModal({
                                     <button
                                         onClick={handleShare}
                                         disabled={loading}
-                                        className="text-sm bg-secondary-500 hover:bg-secondary-600 disabled:opacity-40 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-colors self-end cursor-pointer"
+                                        className="text-sm bg-secondary-500 hover:bg-secondary-600 disabled:opacity-40 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-colors self-end"
                                     >
                                         {loading ? text.sending : text.send}
                                     </button>
@@ -281,7 +281,7 @@ export default function ShareListModal({
                                                     </span>
                                                     <button
                                                         onClick={handleRemove}
-                                                        className="text-xs text-error-500 hover:underline cursor-pointer"
+                                                        className="text-xs text-error-500 hover:underline"
                                                     >
                                                         {text.yes}
                                                     </button>
@@ -291,7 +291,7 @@ export default function ShareListModal({
                                                                 null,
                                                             )
                                                         }
-                                                        className="text-xs text-text-light hover:underline cursor-pointer"
+                                                        className="text-xs text-text-light hover:underline"
                                                     >
                                                         {text.cancel}
                                                     </button>
@@ -303,7 +303,7 @@ export default function ShareListModal({
                                                             share.user_id,
                                                         )
                                                     }
-                                                    className="p-1.5 rounded-full text-text-light hover:text-error-500 hover:bg-error-100 transition-colors cursor-pointer"
+                                                    className="p-1.5 rounded-full text-text-light hover:text-error-500 hover:bg-error-100 transition-colors"
                                                     aria-label={text.removeLabel(
                                                         share.name,
                                                     )}
@@ -330,7 +330,7 @@ export default function ShareListModal({
                     <div className="px-5 py-4 border-t border-surface-200 flex justify-end">
                         <button
                             onClick={onClose}
-                            className="text-sm text-text-mid hover:text-text-dark transition-colors cursor-pointer"
+                            className="text-sm text-text-mid hover:text-text-dark transition-colors"
                         >
                             {text.done}
                         </button>

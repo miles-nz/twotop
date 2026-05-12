@@ -8,6 +8,7 @@ import { getLocalDate } from "../../utils";
 import { useImageUpload } from "../../hooks/useImageUpload";
 import { useAutoResize } from "../../hooks/useAutoResize";
 import { useUser } from "../../contexts/UserContext";
+import Checkbox from "../ui/Checkbox";
 import { text } from "../../resources";
 
 function EditReviewUI({ editingState, handleSave, onClose, review }) {
@@ -132,7 +133,7 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
                     value={editedVisitDate}
                     onChange={(e) => setEditedVisitDate(e.target.value)}
                     max={getLocalDate()}
-                    className="w-full border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-dark"
+                    className="w-full border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-dark cursor-pointer"
                 />
             </div>
 
@@ -166,7 +167,7 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
                                         onClick={() =>
                                             handleRemoveExistingPhoto(url)
                                         }
-                                        className="absolute -top-1 -right-1 bg-surface-300 rounded-full w-4 h-4 flex items-center justify-center cursor-pointer"
+                                        className="absolute -top-1 -right-1 bg-surface-300 rounded-full w-4 h-4 flex items-center justify-center"
                                     >
                                         <X size={10} />
                                     </button>
@@ -186,7 +187,7 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
                                         prev.filter((_, i) => i !== index),
                                     )
                                 }
-                                className="absolute -top-1 -right-1 bg-surface-300 rounded-full w-4 h-4 flex items-center justify-center cursor-pointer"
+                                className="absolute -top-1 -right-1 bg-surface-300 rounded-full w-4 h-4 flex items-center justify-center"
                             >
                                 <X size={10} />
                             </button>
@@ -205,7 +206,7 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
                             <button
                                 type="button"
                                 onClick={() => fileInputRef.current.click()}
-                                className="w-16 h-16 flex items-center justify-center text-secondary-400 hover:text-secondary-600 cursor-pointer transition-colors"
+                                className="w-16 h-16 flex items-center justify-center text-secondary-400 hover:text-secondary-600 transition-colors"
                             >
                                 <ImagePlus size={24} />
                             </button>
@@ -244,30 +245,16 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
             )}
 
             <div className="mt-4 bg-surface-100 rounded-lg border border-surface-200 px-4 py-3 flex flex-col gap-2">
-                <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                        type="checkbox"
-                        checked={isPublic}
-                        onChange={(e) => setIsPublic(e.target.checked)}
-                        className="w-4 h-4 accent-secondary-500 cursor-pointer"
-                    />
-                    <span className="text-sm font-medium text-text-dark">
-                        {text.markAsPublic}
-                    </span>
-                </label>
-                <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                        type="checkbox"
-                        checked={editedIsCollaborative}
-                        onChange={(e) =>
-                            handleToggleCollaborative(e.target.checked)
-                        }
-                        className="w-4 h-4 accent-secondary-500 cursor-pointer"
-                    />
-                    <span className="text-sm font-medium text-text-dark">
-                        {text.collaborative}
-                    </span>
-                </label>
+                <Checkbox
+                    checked={isPublic}
+                    onChange={setIsPublic}
+                    label={text.markAsPublic}
+                />
+                <Checkbox
+                    checked={editedIsCollaborative}
+                    onChange={handleToggleCollaborative}
+                    label={text.collaborative}
+                />
             </div>
 
             {editedIsCollaborative && (
@@ -292,13 +279,13 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
             <div className="flex justify-end gap-2 mt-4">
                 <button
                     onClick={onClose}
-                    className="text-text-light hover:text-text-mid cursor-pointer transition-colors"
+                    className="text-text-light hover:text-text-mid transition-colors"
                 >
                     <X size={18} className="sm:w-4.5 sm:h-4.5 w-6 h-6" />
                 </button>
                 <button
                     onClick={handleSaveWithPublic}
-                    className="text-secondary-500 hover:text-secondary-600 cursor-pointer transition-colors"
+                    className="text-secondary-500 hover:text-secondary-600 transition-colors"
                 >
                     <Check size={18} className="sm:w-4.5 sm:h-4.5 w-6 h-6" />
                 </button>

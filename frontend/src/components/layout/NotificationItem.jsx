@@ -133,7 +133,7 @@ export default function NotificationItem({
                                 onMarkAsRead?.(id);
                                 navigate(`/lists/${data.list_id}`);
                             }}
-                            className="text-xs text-secondary-500 hover:underline transition-colors cursor-pointer"
+                            className="text-xs text-secondary-500 hover:underline transition-colors"
                         >
                             {text.viewList}
                         </button>
@@ -167,7 +167,7 @@ export default function NotificationItem({
                                 onMarkAsRead?.(id);
                                 navigate(`/lists/${data.list_id}`);
                             }}
-                            className="text-xs text-secondary-500 hover:underline transition-colors cursor-pointer"
+                            className="text-xs text-secondary-500 hover:underline transition-colors"
                         >
                             {text.viewList}
                         </button>
@@ -203,8 +203,8 @@ export default function NotificationItem({
                             }}
                             className={
                                 read
-                                    ? "text-xs text-secondary-500 hover:underline transition-colors cursor-pointer"
-                                    : "text-xs bg-secondary-500 hover:bg-secondary-600 text-white px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                                    ? "text-xs text-secondary-500 hover:underline transition-colors"
+                                    : "text-xs bg-secondary-500 hover:bg-secondary-600 text-white px-3 py-1.5 rounded-lg transition-colors"
                             }
                         >
                             {text.viewReview}
@@ -238,7 +238,7 @@ function NotificationActions({ onAccept, onDecline, resolved }) {
                     e.stopPropagation();
                     onAccept();
                 }}
-                className="text-xs bg-secondary-500 hover:bg-secondary-600 text-white px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                className="text-xs bg-secondary-500 hover:bg-secondary-600 text-white px-3 py-1.5 rounded-lg transition-colors"
             >
                 {text.accept}
             </button>
@@ -247,7 +247,7 @@ function NotificationActions({ onAccept, onDecline, resolved }) {
                     e.stopPropagation();
                     onDecline();
                 }}
-                className="text-xs border border-surface-300 hover:bg-surface-200 text-text-mid px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                className="text-xs border border-surface-300 hover:bg-surface-200 text-text-mid px-3 py-1.5 rounded-lg transition-colors"
             >
                 {text.decline}
             </button>

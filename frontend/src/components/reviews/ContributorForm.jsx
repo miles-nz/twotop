@@ -95,7 +95,7 @@ function ContributorForm({ review, existingContribution, onSaved, onCancel }) {
                 {onCancel && (
                     <button
                         onClick={onCancel}
-                        className="text-text-light hover:text-text-mid cursor-pointer transition-colors"
+                        className="text-text-light hover:text-text-mid transition-colors"
                     >
                         <X size={18} className="sm:w-4.5 sm:h-4.5 w-6 h-6" />
                     </button>
@@ -103,7 +103,7 @@ function ContributorForm({ review, existingContribution, onSaved, onCancel }) {
                 <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="text-secondary-500 hover:text-secondary-600 cursor-pointer transition-colors disabled:opacity-50"
+                    className="text-secondary-500 hover:text-secondary-600 transition-colors disabled:opacity-50"
                 >
                     <Check size={18} className="sm:w-4.5 sm:h-4.5 w-6 h-6" />
                 </button>

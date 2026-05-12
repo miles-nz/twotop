@@ -72,6 +72,10 @@ body {
     }
 }
 
+button {
+    cursor: pointer;
+}
+
 :root {
     --logo-ring-opacity: 0;
 }

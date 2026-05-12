@@ -18,7 +18,7 @@ export default function RestaurantRow({
                         onClick={() =>
                             onCheck(restaurant.id, !restaurant.checked)
                         }
-                        className={`shrink-0 w-4 h-4 rounded border transition-colors cursor-pointer ${
+                        className={`shrink-0 w-4 h-4 rounded border transition-colors ${
                             restaurant.checked
                                 ? "bg-secondary-500 border-secondary-500"
                                 : "border-surface-300 hover:border-secondary-400"
@@ -86,7 +86,7 @@ export default function RestaurantRow({
             {canEdit && (
                 <button
                     onClick={() => onRemove(restaurant.id)}
-                    className="p-1.5 rounded-full text-text-light hover:text-error-500 hover:bg-error-100 transition-colors shrink-0 cursor-pointer"
+                    className="p-1.5 rounded-full text-text-light hover:text-error-500 hover:bg-error-100 transition-colors shrink-0"
                     aria-label={text.removeLabel(restaurant.restaurant_name)}
                 >
                     <Trash2 size={14} />
