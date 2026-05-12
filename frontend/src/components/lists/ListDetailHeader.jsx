@@ -1,11 +1,12 @@
 import {
-    ArrowLeft,
+    ChevronLeft,
     Trash2,
     LogOut,
     Share,
     Share2,
     MoreVertical,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import { text } from "../../resources";
 import Toggle from "../ui/Toggle";
@@ -35,13 +36,13 @@ export default function ListDetailHeader({
 
     return (
         <div className="flex items-center justify-between gap-3">
-            <button
-                onClick={onBack}
-                className="p-1.5 text-text-light hover:text-text-dark transition-colors"
-                aria-label={text.back}
+            <Link
+                to="/lists"
+                className="inline-flex items-center gap-1 text-sm text-text-light hover:text-text-dark transition-colors"
             >
-                <ArrowLeft size={20} />
-            </button>
+                <ChevronLeft size={16} />
+                {text.lists}
+            </Link>
 
             <div className="flex items-center gap-2">
                 {canEdit && (

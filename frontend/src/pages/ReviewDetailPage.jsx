@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
+import { ChevronLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ReviewListProvider } from "../contexts/ReviewListContext";
 import ReviewCard from "../components/reviews/ReviewCard";
@@ -56,9 +57,17 @@ export default function ReviewDetailPage() {
         fetchReview();
     }, [id, isAuthenticated]);
 
-    if (loading) {
-        return (
-            <div className="max-w-3xl mx-auto pt-4 pb-16 px-4 sm:px-6 lg:px-0">
+    return (
+        <div className="max-w-3xl mx-auto pt-4 pb-16 px-4 sm:px-6 lg:px-0">
+            <Link
+                to="/"
+                className="inline-flex items-center gap-1 text-sm text-text-light hover:text-text-dark transition-colors mb-4"
+            >
+                <ChevronLeft size={16} />
+                {text.reviews}
+            </Link>
+
+            {loading && (
                 <AnimatePresence mode="wait">
                     <motion.div
                         key="loading"
@@ -73,23 +82,15 @@ export default function ReviewDetailPage() {
                         />
                     </motion.div>
                 </AnimatePresence>
-            </div>
-        );
-    }
+            )}
 
-    if (notFound) {
-        return (
-            <div className="max-w-3xl mx-auto pt-4 pb-16 px-4 sm:px-6 lg:px-0">
+            {notFound && (
                 <div className={statusCardClass}>
                     <p className="text-text-mid">Review not found.</p>
                 </div>
-            </div>
-        );
-    }
+            )}
 
-    if (isPrivate) {
-        return (
-            <div className="max-w-3xl mx-auto pt-4 pb-16 px-4 sm:px-6 lg:px-0">
+            {isPrivate && (
                 <div className={statusCardClass + " flex-col gap-3"}>
                     <p className="text-text-dark font-medium">
                         {text.privateReview}
@@ -98,13 +99,9 @@ export default function ReviewDetailPage() {
                         {text.privateReviewLoginMessage}
                     </p>
                 </div>
-            </div>
-        );
-    }
+            )}
 
-    if (isForbidden) {
-        return (
-            <div className="max-w-3xl mx-auto pt-4 pb-16 px-4 sm:px-6 lg:px-0">
+            {isForbidden && (
                 <div className={statusCardClass + " flex-col gap-3"}>
                     <p className="text-text-dark font-medium">
                         {text.privateReview}
@@ -113,30 +110,27 @@ export default function ReviewDetailPage() {
                         {text.forbiddenReviewMessage}
                     </p>
                 </div>
-            </div>
-        );
-    }
+            )}
 
-    return (
-        <div className="max-w-3xl mx-auto pt-4 pb-16 px-4 sm:px-6 lg:px-0">
-            <ReviewListProvider>
-                <ReviewCard
-                    review={review}
-                    currentUserId={user?.sub}
-                    onReviewUpdated={(updatedId) => {
-                        // refetch on update
-                        if (updatedId) {
-                            fetch(
-                                `${import.meta.env.VITE_API_URL}/reviews/${id}`,
-                            )
-                                .then((r) => r.json())
-                                .then(setReview)
-                                .catch(() => {});
-                        }
-                    }}
-                    isDetailPage
-                />
-            </ReviewListProvider>
+            {review && (
+                <ReviewListProvider>
+                    <ReviewCard
+                        review={review}
+                        currentUserId={user?.sub}
+                        onReviewUpdated={(updatedId) => {
+                            if (updatedId) {
+                                fetch(
+                                    `${import.meta.env.VITE_API_URL}/reviews/${id}`,
+                                )
+                                    .then((r) => r.json())
+                                    .then(setReview)
+                                    .catch(() => {});
+                            }
+                        }}
+                        isDetailPage
+                    />
+                </ReviewListProvider>
+            )}
         </div>
     );
 }

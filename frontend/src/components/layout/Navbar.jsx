@@ -6,7 +6,7 @@ import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import Button from "../ui/Button";
 import AvatarDropdown from "./AvatarDropdown";
 import NotificationDropdown from "./NotificationDropdown";
-import { text } from "../../resources";
+import { text, preferences } from "../../resources";
 import Logo from "../ui/Logo";
 import useNotifications from "../../hooks/useNotifications";
 import { useUser } from "../../contexts/UserContext";
@@ -67,7 +67,7 @@ function NavbarTitle() {
         >
             <Logo
                 size={50}
-                showIcon={false}
+                showIcon={true}
                 showText={true}
                 colonOverlap={true}
             />
@@ -196,24 +196,37 @@ function Navbar({
             {/* Mobile */}
             <div className="md:hidden sticky top-0 z-50">
                 <div className="px-4 py-3 flex items-center justify-between bg-surface-50 border-b border-surface-200">
-                    <div className="w-20 flex items-center">
-                        <button
-                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                            className="p-2 rounded-lg transition-colors"
-                        >
-                            {mobileMenuOpen ? (
-                                <X size={24} className="text-text-dark" />
-                            ) : (
-                                <Menu size={24} className="text-text-dark" />
-                            )}
-                        </button>
-                    </div>
-
-                    <div className="flex-1 flex justify-center">
+                    {preferences.showMobileMenu ? (
+                        <>
+                            <div className="w-10 flex items-center justify-start">
+                                <button
+                                    onClick={() =>
+                                        setMobileMenuOpen(!mobileMenuOpen)
+                                    }
+                                    className="p-2 rounded-lg transition-colors"
+                                >
+                                    {mobileMenuOpen ? (
+                                        <X
+                                            size={24}
+                                            className="text-text-dark"
+                                        />
+                                    ) : (
+                                        <Menu
+                                            size={24}
+                                            className="text-text-dark"
+                                        />
+                                    )}
+                                </button>
+                            </div>
+                            <div className="flex-1 flex justify-center">
+                                <NavbarTitle />
+                            </div>
+                        </>
+                    ) : (
                         <NavbarTitle />
-                    </div>
+                    )}
 
-                    <div className="w-24 flex items-center justify-end gap-2">
+                    <div className="flex items-center gap-2">
                         <BellButton
                             user={user}
                             unreadCount={unreadCount}
@@ -235,72 +248,74 @@ function Navbar({
                         )}
                     </div>
                 </div>
-
-                <AnimatePresence>
-                    {mobileMenuOpen && (
-                        <>
-                            <motion.div
-                                initial={{ opacity: 0, x: -250 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -250 }}
-                                transition={{ duration: 0.3 }}
-                                className="fixed left-0 top-0 bottom-0 w-64 bg-surface-50 border-r border-surface-200 shadow-lg overflow-y-auto z-30"
-                            >
-                                <div className="relative">
-                                    <div
-                                        className="flex items-center justify-center mx-5 pt-2"
-                                        style={{
-                                            height: "56px",
-                                            touchAction: "manipulation",
-                                            cursor: "pointer",
-                                        }}
-                                    >
-                                        <Logo
-                                            size={50}
-                                            showIcon={true}
-                                            showText={false}
-                                            colonOverlap={true}
-                                            disableAnimation={true}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="flex flex-col h-[calc(100vh-56px)]">
-                                    <div className="px-4 py-2 flex-1 overflow-y-auto">
-                                        <div className="pt-2 border-t border-surface-200 space-y-4">
-                                            {!isAuthenticated && (
-                                                <div className="py-2">
-                                                    <LoginButton className="w-full" />
-                                                </div>
-                                            )}
+                {preferences.showMobileMenu && (
+                    <AnimatePresence>
+                        {mobileMenuOpen && (
+                            <>
+                                <motion.div
+                                    initial={{ opacity: 0, x: -250 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -250 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="fixed left-0 top-0 bottom-0 w-64 bg-surface-50 border-r border-surface-200 shadow-lg overflow-y-auto z-30"
+                                >
+                                    <div className="relative">
+                                        <div
+                                            className="flex items-center justify-center mx-5 pt-2"
+                                            style={{
+                                                height: "56px",
+                                                touchAction: "manipulation",
+                                                cursor: "pointer",
+                                            }}
+                                        >
+                                            <Logo
+                                                size={50}
+                                                showIcon={true}
+                                                showText={false}
+                                                colonOverlap={true}
+                                                disableAnimation={true}
+                                            />
                                         </div>
                                     </div>
-                                </div>
-                            </motion.div>
-                            <motion.button
+                                    <div className="flex flex-col h-[calc(100vh-56px)]">
+                                        <div className="px-4 py-2 flex-1 overflow-y-auto">
+                                            <div className="pt-2 border-t border-surface-200 space-y-4">
+                                                {!isAuthenticated && (
+                                                    <div className="py-2">
+                                                        <LoginButton className="w-full" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                                <motion.button
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="fixed left-4 top-3 p-2 z-50 rounded-lg transition-colors"
+                                >
+                                    <X size={24} className="text-text-dark" />
+                                </motion.button>
+                            </>
+                        )}
+                    </AnimatePresence>
+                )}
+                {preferences.showMobileMenu && (
+                    <AnimatePresence>
+                        {mobileMenuOpen && (
+                            <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="fixed inset-0 bg-black/20 z-20 md:hidden"
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="fixed left-4 top-3 p-2 z-50 rounded-lg transition-colors"
-                            >
-                                <X size={24} className="text-text-dark" />
-                            </motion.button>
-                        </>
-                    )}
-                </AnimatePresence>
-
-                <AnimatePresence>
-                    {mobileMenuOpen && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.2 }}
-                            className="fixed inset-0 bg-black/20 z-20 md:hidden"
-                            onClick={() => setMobileMenuOpen(false)}
-                        />
-                    )}
-                </AnimatePresence>
+                            />
+                        )}
+                    </AnimatePresence>
+                )}
             </div>
         </nav>
     );

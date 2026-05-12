@@ -7,6 +7,7 @@ export const preferences = {
     maxImageSize: 20 * 1024 * 1024,
     minSearchCharacters: 3,
     pullRefreshThreshold: 100,
+    showMobileMenu: false,
 };
 
 export const STAR_PATH =
