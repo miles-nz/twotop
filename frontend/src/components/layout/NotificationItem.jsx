@@ -121,7 +121,7 @@ export default function NotificationItem({
                         <span className="font-medium">
                             {data.acceptor_name}
                         </span>
-                        {text.acceptedYourListShare}{" "}
+                        {text.acceptedYourListShare}
                         <span className="font-medium">{data.list_name}</span>
                     </p>
                 </div>
@@ -155,7 +155,7 @@ export default function NotificationItem({
                         <span className="font-medium">{data.editor_name}</span>
                         {data.is_leave
                             ? text.leftYourList
-                            : text.updatedYourList}{" "}
+                            : text.updatedYourList}
                         <span className="font-medium">{data.list_name}</span>
                     </p>
                 </div>
