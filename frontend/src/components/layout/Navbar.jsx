@@ -58,7 +58,7 @@ function BellButton({
     );
 }
 
-function NavbarTitle() {
+function NavbarTitle({ mobile = false }) {
     const navigate = useNavigate();
     return (
         <div
@@ -67,7 +67,7 @@ function NavbarTitle() {
         >
             <Logo
                 size={50}
-                showIcon={true}
+                showIcon={mobile}
                 showText={true}
                 colonOverlap={true}
             />
@@ -219,11 +219,11 @@ function Navbar({
                                 </button>
                             </div>
                             <div className="flex-1 flex justify-center">
-                                <NavbarTitle />
+                                <NavbarTitle mobile={true} />
                             </div>
                         </>
                     ) : (
-                        <NavbarTitle />
+                        <NavbarTitle mobile={true} />
                     )}
 
                     <div className="flex items-center gap-2">
