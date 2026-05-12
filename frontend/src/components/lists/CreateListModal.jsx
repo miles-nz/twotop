@@ -145,7 +145,10 @@ export default function CreateListModal({ onClose, onCreated }) {
                         </button>
                     </div>
 
-                    <div className="px-5 py-4 flex flex-col gap-4 max-h-[70vh] min-h-130 overflow-y-auto">
+                    <div
+                        className="px-5 py-4 flex flex-col gap-4 max-h-[70vh] min-h-130 overflow-y-scroll"
+                        onTouchMove={(e) => e.stopPropagation()}
+                    >
                         {/* Name */}
                         <div className="flex flex-col gap-1.5">
                             <label className="text-xs font-medium text-text-light uppercase tracking-wide">

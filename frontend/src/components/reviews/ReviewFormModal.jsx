@@ -45,7 +45,10 @@ export default function ReviewFormModal({ onClose, onReviewSubmitted }) {
                     </div>
 
                     {/* Scrollable content */}
-                    <div className="px-5 py-4 max-h-[85vh] overflow-y-auto">
+                    <div
+                        className="px-5 py-4 max-h-[85vh] overflow-y-scroll"
+                        onTouchMove={(e) => e.stopPropagation()}
+                    >
                         <ReviewForm onReviewSubmitted={onReviewSubmitted} />
                     </div>
                 </motion.div>
