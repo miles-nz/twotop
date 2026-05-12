@@ -51,10 +51,26 @@ function StarRating({ value, onChange, readOnly = false, size = "md" }) {
         const el = containerRef.current;
         if (!el) return;
 
+        let startX = null;
+        let startY = null;
+
+        const handleTouchStart = (e) => {
+            if (readOnly) return;
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+        };
+
         const handleTouchMove = (e) => {
             if (readOnly) return;
-            e.preventDefault();
             const touch = e.touches[0];
+
+            if (startX !== null && startY !== null) {
+                const dx = Math.abs(touch.clientX - startX);
+                const dy = Math.abs(touch.clientY - startY);
+                if (dy > dx) return;
+            }
+
+            e.preventDefault();
             const stars = el.querySelectorAll("[data-star]");
             for (const star of stars) {
                 const rect = star.getBoundingClientRect();
@@ -68,8 +84,12 @@ function StarRating({ value, onChange, readOnly = false, size = "md" }) {
             }
         };
 
+        el.addEventListener("touchstart", handleTouchStart, { passive: true });
         el.addEventListener("touchmove", handleTouchMove, { passive: false });
-        return () => el.removeEventListener("touchmove", handleTouchMove);
+        return () => {
+            el.removeEventListener("touchstart", handleTouchStart);
+            el.removeEventListener("touchmove", handleTouchMove);
+        };
     }, [readOnly]);
 
     const handleStarKeyDown = (e, starIndex) => {
