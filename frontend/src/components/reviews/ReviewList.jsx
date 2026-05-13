@@ -8,6 +8,7 @@ import ReviewSearch from "./ReviewSearch";
 import { useReviewFilter, defaultFilters } from "../../hooks/useReviewFilter";
 import { text } from "../../resources";
 import { useTheme } from "../../contexts/ThemeContext";
+import { useUser } from "../../contexts/UserContext";
 
 const statusCardClass =
     "bg-surface-50 rounded-2xl shadow-md p-6 text-center border border-surface-200";
@@ -38,9 +39,6 @@ function ReviewList({
     currentUserId,
     onReviewUpdated,
     onScrollComplete,
-    reviewerNameUpdate,
-    reviewerPictureUpdate,
-    reviewerThemeUpdate,
 }) {
     const { getAccessTokenSilently } = useAuth0();
     const { currentThemeId } = useTheme();
@@ -48,6 +46,9 @@ function ReviewList({
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [filters, setFilters] = useState(defaultFilters);
+
+    const { reviewerPictureUpdate, reviewerNameUpdate, reviewerThemeUpdate } =
+        useUser();
 
     useEffect(() => {
         const fetchReviews = async () => {

@@ -5,11 +5,7 @@ import ReviewFormModal from "../components/reviews/ReviewFormModal";
 import ReviewList from "../components/reviews/ReviewList";
 import { text } from "../resources";
 
-export default function ReviewsPage({
-    onReviewerPictureUpdate,
-    onReviewerNameUpdate,
-    onReviewerThemeUpdate,
-}) {
+export default function ReviewsPage() {
     const { user } = useAuth0();
     const [formOpen, setFormOpen] = useState(false);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -60,9 +56,6 @@ export default function ReviewsPage({
                     setRefreshTrigger((prev) => prev + 1);
                 }}
                 onScrollComplete={() => setScrollToId(null)}
-                reviewerPictureUpdate={onReviewerPictureUpdate}
-                reviewerNameUpdate={onReviewerNameUpdate}
-                reviewerThemeUpdate={onReviewerThemeUpdate}
             />
         </div>
     );

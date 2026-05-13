@@ -91,17 +91,21 @@ export const text = {
     logIn: "Log In",
     logOut: "Log Out",
 
-    // User preferences
+    // Profile / User preferences
     theme: "Theme",
     colorModeSystem: "System",
     colorModeLight: "Light",
     colorModeDark: "Dark",
     darkModeToggleLabel: "Dark mode toggle",
+    darkMode: "Dark mode",
     friendsLabel: "Friends",
     noSharedReviews: "You haven't added any friends yet.",
     addFriendInputPlaceholder: "Enter a user's email address",
     showTutorial: "View tutorial",
     profile: "Profile",
+    shareProfile: "Share profile",
+    appearance: "Appearance",
+    logOutConfirm: "Are you sure you want to log out?",
 
     // Notifications / Friend Requests
     notifications: "Notifications",

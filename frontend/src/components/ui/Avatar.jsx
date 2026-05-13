@@ -30,12 +30,12 @@ function Avatar({ name, picture, size = "md", title, loading = false }) {
         sm: "w-6 h-6 text-xs",
         md: "w-8 h-8 text-sm",
         lg: "w-10 h-10 text-base",
-        xl: "w-50 h-50 text-2xl",
+        xl: "w-50 h-50 text-6xl",
     };
 
     return (
         <div
-            className={`${sizes[size]} rounded-full bg-secondary-400 text-white flex items-center justify-center font-semibold text-xs overflow-hidden shrink-0`}
+            className={`${sizes[size]} rounded-full bg-secondary-400 text-white flex items-center justify-center font-semibold overflow-hidden shrink-0`}
             title={title || name}
         >
             <div className="relative w-full h-full flex items-center justify-center">

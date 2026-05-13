@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { NotebookText, List } from "lucide-react";
+import { NotebookText, List, User } from "lucide-react";
 import { text } from "../../resources";
 
 export default function BottomNav() {
@@ -28,6 +28,15 @@ export default function BottomNav() {
             >
                 <List size={22} />
                 <span className="text-xs font-medium">{text.lists}</span>
+            </NavLink>
+            <NavLink
+                to="/profile"
+                className={({ isActive }) =>
+                    `${baseClass} ${isActive ? activeClass : inactiveClass}`
+                }
+            >
+                <User size={22} />
+                <span className="text-xs font-medium">{text.profile}</span>
             </NavLink>
         </nav>
     );

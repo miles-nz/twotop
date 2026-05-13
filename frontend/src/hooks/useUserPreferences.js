@@ -8,6 +8,7 @@ export function useUserPreferences() {
     );
     const [sharedWith, setSharedWith] = useState([]);
     const [hasSeenTutorial, setHasSeenTutorial] = useState(true);
+    const [preferencesLoaded, setPreferencesLoaded] = useState(false);
 
     const fetchPreferences = async () => {
         try {
@@ -23,6 +24,7 @@ export function useUserPreferences() {
                 localStorage.setItem("twotop-theme-id", themeId);
                 setSharedWith(data.shared_with || []);
                 setHasSeenTutorial(data.has_seen_tutorial === true);
+                setPreferencesLoaded(true);
             }
         } catch (err) {
             setCurrentThemeId("default-theme");
@@ -102,5 +104,6 @@ export function useUserPreferences() {
         handleThemePreview,
         hasSeenTutorial,
         markTutorialSeen,
+        preferencesLoaded,
     };
 }

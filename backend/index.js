@@ -60,6 +60,7 @@ const ERRORS = {
         "You've already sent a request to this person (or they've sent one to you!)",
     friendRequestNotFound: "Friend request not found.",
     notificationNotFound: "Notification not found.",
+    invalidUserRequest: "A valid email or user ID is required",
 };
 
 // Multer setup
@@ -1227,6 +1228,35 @@ app.patch("/user/preferences", checkJwt, async (req, res) => {
     }
 });
 
+app.get("/user/:id", async (req, res) => {
+    const id = decodeURIComponent(req.params.id);
+
+    if (!id) {
+        return res.status(400).json({ error: "id is required" });
+    }
+
+    try {
+        const token = await getMgmtToken();
+        const response = await fetch(
+            `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(id)}`,
+            { headers: { Authorization: `Bearer ${token}` } },
+        );
+        const data = await response.json();
+
+        if (!data || data.error) {
+            return res.status(404).json({ error: ERRORS.userNotFound });
+        }
+
+        res.status(200).json({
+            user_id: data.user_id,
+            name: data.name,
+            picture: data.picture,
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.get("/places/search", checkJwt, placesRateLimit, async (req, res) => {
     const { q } = req.query;
     if (!q) return res.status(400).json({ error: "Query is required" });
@@ -1336,27 +1366,43 @@ app.post(
     friendRequestRateLimit,
     async (req, res) => {
         const sender_id = req.auth.payload.sub;
-        const { email } = req.body;
+        const { email, user_id: receiverUserId } = req.body;
 
-        if (!email || !EMAIL_REGEX.test(email)) {
-            return res.status(400).json({ error: ERRORS.invalidEmail });
+        if (!email && !receiverUserId) {
+            return res.status(400).json({ error: ERRORS.invalidUserRequest });
+        }
+
+        if (email && !EMAIL_REGEX.test(email)) {
+            return res.status(400).json({ error: ERRORS.invalidUserRequest });
         }
 
         try {
-            // Look up receiver by email
             const token = await getMgmtToken();
-            const response = await fetch(
-                `https://${process.env.AUTH0_DOMAIN}/api/v2/users-by-email?email=${encodeURIComponent(email)}`,
-                { headers: { Authorization: `Bearer ${token}` } },
-            );
-            const users = await response.json();
+            let receiver_id;
 
-            if (!users || users.length === 0) {
-                return res.status(404).json({ error: ERRORS.userNotFound });
+            if (receiverUserId) {
+                // Look up by user_id directly
+                const response = await fetch(
+                    `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(receiverUserId)}`,
+                    { headers: { Authorization: `Bearer ${token}` } },
+                );
+                const userData = await response.json();
+                if (!userData || userData.error) {
+                    return res.status(404).json({ error: ERRORS.userNotFound });
+                }
+                receiver_id = userData.user_id;
+            } else {
+                // Look up by email
+                const response = await fetch(
+                    `https://${process.env.AUTH0_DOMAIN}/api/v2/users-by-email?email=${encodeURIComponent(email)}`,
+                    { headers: { Authorization: `Bearer ${token}` } },
+                );
+                const users = await response.json();
+                if (!users || users.length === 0) {
+                    return res.status(404).json({ error: ERRORS.userNotFound });
+                }
+                receiver_id = users[0].user_id;
             }
-
-            const receiver = users[0];
-            const receiver_id = receiver.user_id;
 
             if (sender_id === receiver_id) {
                 return res

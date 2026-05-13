@@ -6,6 +6,7 @@ import Navbar from "./components/layout/Navbar";
 import BottomNav from "./components/layout/BottomNav";
 import ReviewsPage from "./pages/ReviewsPage";
 import ListsPage from "./pages/ListsPage";
+import ProfilePage from "./pages/ProfilePage";
 import WelcomeTutorial from "./components/tutorial/WelcomeTutorial";
 import ReviewList from "./components/reviews/ReviewList";
 import { applyThemeToCss } from "./utils";
@@ -24,12 +25,11 @@ function AppContent() {
         fetchPreferences,
         hasSeenTutorial,
         markTutorialSeen,
+        showTutorial,
+        setShowTutorial,
+        setReviewerThemeUpdate,
     } = useUser();
 
-    const [showTutorial, setShowTutorial] = useState(false);
-    const [reviewerPictureUpdate, setReviewerPictureUpdate] = useState(null);
-    const [reviewerNameUpdate, setReviewerNameUpdate] = useState(null);
-    const [reviewerThemeUpdate, setReviewerThemeUpdate] = useState(null);
     const [listRefreshTrigger, setListRefreshTrigger] = useState(0);
 
     const { pullDistance, refreshing } = usePullToRefresh();
@@ -76,6 +76,7 @@ function AppContent() {
                 <Navbar />
                 <Routes>
                     <Route path="/reviews/:id" element={<ReviewDetailPage />} />
+                    <Route path="/profile/:userId" element={<ProfilePage />} />
                     <Route
                         path="*"
                         element={
@@ -109,31 +110,12 @@ function AppContent() {
                 />
             )}
             <Navbar
-                onPictureUpdated={(newPicture) => {
-                    setReviewerPictureUpdate({
-                        picture: newPicture,
-                        userId: user.sub,
-                    });
-                }}
-                onNameUpdated={(newName) => {
-                    setReviewerNameUpdate({ name: newName, userId: user.sub });
-                }}
-                onShowTutorial={() => setShowTutorial(true)}
                 onListShareAccepted={() =>
                     setListRefreshTrigger((prev) => prev + 1)
                 }
             />
             <Routes>
-                <Route
-                    path="/"
-                    element={
-                        <ReviewsPage
-                            onReviewerPictureUpdate={reviewerPictureUpdate}
-                            onReviewerNameUpdate={reviewerNameUpdate}
-                            onReviewerThemeUpdate={reviewerThemeUpdate}
-                        />
-                    }
-                />
+                <Route path="/" element={<ReviewsPage />} />
                 <Route path="/reviews" element={<Navigate to="/" replace />} />
                 <Route path="/reviews/:id" element={<ReviewDetailPage />} />
                 <Route
@@ -141,7 +123,8 @@ function AppContent() {
                     element={<ListsPage refreshTrigger={listRefreshTrigger} />}
                 />
                 <Route path="/lists/:id" element={<ListDetailPage />} />
-
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/profile/:userId" element={<ProfilePage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
             <BottomNav />

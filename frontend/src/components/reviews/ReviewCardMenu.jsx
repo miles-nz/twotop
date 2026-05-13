@@ -168,7 +168,7 @@ function ReviewCardMenu({ review, onEditReview, onReviewUpdated }) {
                 onConfirm={handleDelete}
                 onCancel={() => setConfirmOpen(false)}
                 message={text.confirmDeleteReview}
-                deleting={deleting}
+                loading={deleting}
             />
             <LoadingOverlay isVisible={deleting} />
         </div>

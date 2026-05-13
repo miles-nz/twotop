@@ -146,7 +146,8 @@ function ContributorMenu({ review, onEdit, onReviewUpdated }) {
                 onConfirm={handleLeave}
                 onCancel={() => setLeaveConfirmOpen(false)}
                 message={text.confirmLeaveCollaboration}
-                deleting={leaving}
+                loading={leaving}
+                confirmLabel={text.leaveCollaboration}
             />
             <LoadingOverlay isVisible={leaving} />
         </div>

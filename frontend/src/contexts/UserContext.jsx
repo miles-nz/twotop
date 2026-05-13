@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { createContext, useContext } from "react";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { useUserPreferences } from "../hooks/useUserPreferences";
@@ -19,7 +20,13 @@ export function UserProvider({ children }) {
         handleSharedWithChange,
         hasSeenTutorial,
         markTutorialSeen,
+        preferencesLoaded,
     } = useUserPreferences();
+
+    const [reviewerPictureUpdate, setReviewerPictureUpdate] = useState(null);
+    const [reviewerNameUpdate, setReviewerNameUpdate] = useState(null);
+    const [reviewerThemeUpdate, setReviewerThemeUpdate] = useState(null);
+    const [showTutorial, setShowTutorial] = useState(false);
 
     return (
         <UserContext.Provider
@@ -34,6 +41,15 @@ export function UserProvider({ children }) {
                 fetchPreferences,
                 hasSeenTutorial,
                 markTutorialSeen,
+                reviewerPictureUpdate,
+                setReviewerPictureUpdate,
+                reviewerNameUpdate,
+                setReviewerNameUpdate,
+                reviewerThemeUpdate,
+                setReviewerThemeUpdate,
+                showTutorial,
+                setShowTutorial,
+                preferencesLoaded,
             }}
         >
             {children}

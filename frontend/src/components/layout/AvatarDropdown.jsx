@@ -20,10 +20,7 @@ export default function AvatarDropdown({
     showName = false,
     buttonClassName = "",
     dropdownClassName = "",
-    onPictureUpdated,
-    onNameUpdated,
     mobile = false,
-    onShowTutorial,
 }) {
     const { getAccessTokenSilently } = useAuth0();
     const {
@@ -40,6 +37,9 @@ export default function AvatarDropdown({
         setCurrentUserPicture,
         sharedWith,
         handleSharedWithChange,
+        setReviewerPictureUpdate,
+        setReviewerNameUpdate,
+        setShowTutorial,
     } = useUser();
 
     const [open, setOpen] = useState(false);
@@ -89,7 +89,10 @@ export default function AvatarDropdown({
             const data = await response.json();
             if (!response.ok) throw new Error(data.error);
             setCurrentUserPicture(data.picture);
-            onPictureUpdated?.(data.picture);
+            setReviewerPictureUpdate({
+                picture: data.picture,
+                userId: user.sub,
+            });
             await getAccessTokenSilently({ ignoreCache: true });
         } catch (err) {
             console.error("Failed to upload profile picture:", err);
@@ -111,7 +114,7 @@ export default function AvatarDropdown({
             );
             if (!response.ok) throw new Error("Failed to delete picture");
             setCurrentUserPicture(null);
-            onPictureUpdated?.(null);
+            setReviewerPictureUpdate({ picture: null, userId: user.sub });
             await getAccessTokenSilently({ ignoreCache: true });
         } catch (err) {
             console.error("Failed to delete profile picture:", err);
@@ -137,7 +140,7 @@ export default function AvatarDropdown({
             );
             if (!response.ok) throw new Error("Failed to update name");
             updateCurrentUserName(newName);
-            onNameUpdated?.(newName);
+            setReviewerNameUpdate({ name: newName, userId: user.sub });
             await getAccessTokenSilently({ ignoreCache: true });
         } catch (err) {
             console.error("Failed to update name:", err);
@@ -255,7 +258,7 @@ export default function AvatarDropdown({
                     uploading={uploading}
                     savingName={savingName}
                     onShowTutorial={() => {
-                        onShowTutorial?.();
+                        setShowTutorial(true);
                         setEditProfileModalOpen(false);
                     }}
                 />

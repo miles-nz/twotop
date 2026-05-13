@@ -28,7 +28,7 @@ export default function NotificationDropdown({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.15 }}
-            className="absolute -right-13 sm:right-0 mt-2 w-[calc(100vw-2rem)] sm:w-92 bg-surface-50 border border-surface-200 rounded-lg shadow-lg overflow-hidden z-50"
+            className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-92 bg-surface-50 border border-surface-200 rounded-lg shadow-lg overflow-hidden z-50"
         >
             <div className="flex items-center justify-between px-4 py-3 border-b border-surface-200">
                 <h3 className="text-sm font-medium text-text-dark">

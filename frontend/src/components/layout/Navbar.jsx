@@ -75,16 +75,11 @@ function NavbarTitle({ mobile = false }) {
     );
 }
 
-function Navbar({
-    onPictureUpdated,
-    onNameUpdated,
-    onShowTutorial,
-    onListShareAccepted,
-}) {
+function Navbar({ onListShareAccepted }) {
     const { user, logout, isAuthenticated } = useAuth0();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [notifOpen, setNotifOpen] = useState(false);
-    const { fetchPreferences } = useUser();
+    const { fetchPreferences, setShowTutorial } = useUser();
 
     const {
         notifications,
@@ -124,11 +119,8 @@ function Navbar({
             onLogout: () =>
                 logout({ logoutParams: { returnTo: window.location.origin } }),
             showName: true,
-            onPictureUpdated,
-            onNameUpdated,
-            onShowTutorial,
         }),
-        [user, logout, onPictureUpdated, onNameUpdated, onShowTutorial],
+        [user, logout],
     );
 
     return (
@@ -238,14 +230,7 @@ function Navbar({
                             onResolve={resolveRequest}
                             onClose={handleCloseNotif}
                         />
-                        {user ? (
-                            <AvatarDropdown
-                                {...avatarDropdownProps}
-                                mobile={true}
-                            />
-                        ) : (
-                            <LoginButton />
-                        )}
+                        {!user && <LoginButton />}
                     </div>
                 </div>
                 {preferences.showMobileMenu && (
