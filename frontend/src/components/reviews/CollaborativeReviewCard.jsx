@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
+import { createPortal } from "react-dom";
+import { Link } from "react-router-dom";
 import { useReviewCardEditing } from "../../hooks/useReviewCardEditing";
 import Avatar from "../ui/Avatar";
 import CollaboratorAvatars from "./CollaboratorAvatars";
@@ -13,9 +15,8 @@ import ConfirmModal from "../ui/ConfirmModal";
 import { MoreHorizontal, Pencil, LogOut, Share, Share2 } from "lucide-react";
 import { text } from "../../resources";
 import { ReviewCardHeader, ReviewText } from "./reviewCardUtils";
-import { createPortal } from "react-dom";
 import { useReviewList } from "../../contexts/ReviewListContext";
-import { getOS } from "../../utils";
+import { getOS, makeProfileUrl } from "../../utils";
 
 function ContributorMenu({ review, onEdit, onReviewUpdated }) {
     const { getAccessTokenSilently } = useAuth0();
@@ -160,14 +161,21 @@ function ReviewerSection({ review }) {
     return (
         <div className="mx-6 mt-2 pt-4">
             <div className="flex items-center gap-2 mb-2">
-                <Avatar
-                    name={review.reviewer_name}
-                    picture={review.reviewer_picture}
-                    size="sm"
-                />
-                <span className="text-xs text-text-mid">
-                    {review.reviewer_name}
-                </span>
+                <Link
+                    to={makeProfileUrl(review.user_id)}
+                    className="flex items-center gap-2 mb-2 group"
+                >
+                    <Avatar
+                        name={review.reviewer_name}
+                        picture={review.reviewer_picture}
+                        size="sm"
+                    />
+                    {review.reviewer_name && (
+                        <span className="text-xs text-text-mid group-hover:text-text-dark transition-opacity duration-100">
+                            {review.reviewer_name}
+                        </span>
+                    )}
+                </Link>
             </div>
             {hasRatings && (
                 <div className="flex justify-start lg:justify-center">
@@ -203,14 +211,19 @@ function ContributionSection({
         <div className="mx-6 mt-2 pt-4">
             <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                    <Avatar
-                        name={contribution.reviewer_name}
-                        picture={contribution.reviewer_picture}
-                        size="sm"
-                    />
-                    <span className="text-xs text-text-mid">
-                        {contribution.reviewer_name}
-                    </span>
+                    <Link
+                        to={makeProfileUrl(contribution.user_id)}
+                        className="flex items-center gap-2 group"
+                    >
+                        <Avatar
+                            name={contribution.reviewer_name}
+                            picture={contribution.reviewer_picture}
+                            size="sm"
+                        />
+                        <span className="text-xs text-text-mid group-hover:text-text-dark transition-opacity duration-100">
+                            {contribution.reviewer_name}
+                        </span>
+                    </Link>
                 </div>
                 {isOwn && (
                     <ContributorMenu
@@ -317,9 +330,12 @@ function CollaborativeReviewCard({
                                 }))}
                             />
                         ) : (
-                            <>
+                            <Link
+                                to={makeProfileUrl(review.user_id)}
+                                className="flex items-center gap-2 group"
+                            >
                                 {review.reviewer_name && (
-                                    <span className="text-xs text-text-mid">
+                                    <span className="text-xs text-text-mid group-hover:text-text-dark transition-opacity duration-100">
                                         {review.reviewer_name}
                                     </span>
                                 )}
@@ -328,7 +344,7 @@ function CollaborativeReviewCard({
                                     picture={review.reviewer_picture}
                                     size="sm"
                                 />
-                            </>
+                            </Link>
                         )}
                         {isOwner && (
                             <ReviewCardMenu

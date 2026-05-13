@@ -124,6 +124,7 @@ export const text = {
     viewList: "View list",
     addedYouAsContributor: " added you as a contributor to a review of ",
     viewReview: "View review",
+    addFriend: "Add Friend",
 
     // Review form
     writeReview: "Write a Review",

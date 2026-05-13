@@ -121,3 +121,7 @@ export function getOS() {
     if (/mac/i.test(ua)) return "macos";
     return "other";
 }
+
+export function makeProfileUrl(userId) {
+    return `/profile/${userId?.replace("auth0|", "")}`;
+}

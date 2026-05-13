@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import Avatar from "../ui/Avatar";
 import { text } from "../../resources";
 import { isDefaultAvatar } from "../../utils";
-import EditProfileModal from "../layout/EditProfileModal";
 import FriendsModal from "./FriendsModal";
 import ThemeModal from "../themes/ThemeModal";
 import DarkModeToggle from "./DarkModeToggle";
@@ -23,6 +23,8 @@ export default function AvatarDropdown({
     mobile = false,
 }) {
     const { getAccessTokenSilently } = useAuth0();
+    const navigate = useNavigate();
+
     const {
         currentThemeId,
         handleThemeChange,
@@ -47,7 +49,6 @@ export default function AvatarDropdown({
     const [savingName, setSavingName] = useState(false);
     const [themeModalOpen, setThemeModalOpen] = useState(false);
     const [friendsModalOpen, setFriendsModalOpen] = useState(false);
-    const [editProfileModalOpen, setEditProfileModalOpen] = useState(false);
     const dropdownRef = useRef(null);
 
     const picture = isDefaultAvatar(currentUserPicture)
@@ -217,7 +218,7 @@ export default function AvatarDropdown({
                         </div>
                         <button
                             onClick={() => {
-                                setEditProfileModalOpen(true);
+                                navigate("/profile");
                                 setOpen(false);
                             }}
                             className={`text-text-dark ${menuItemClasses}`}
@@ -245,24 +246,6 @@ export default function AvatarDropdown({
                     </motion.div>
                 )}
             </AnimatePresence>
-
-            {editProfileModalOpen && (
-                <EditProfileModal
-                    user={user}
-                    currentUserName={currentUserName}
-                    currentUserPicture={currentUserPicture}
-                    onSaveName={handleSaveName}
-                    onUploadPicture={handleUploadPicture}
-                    onDeletePicture={handleDeletePicture}
-                    onClose={() => setEditProfileModalOpen(false)}
-                    uploading={uploading}
-                    savingName={savingName}
-                    onShowTutorial={() => {
-                        setShowTutorial(true);
-                        setEditProfileModalOpen(false);
-                    }}
-                />
-            )}
 
             {friendsModalOpen && (
                 <FriendsModal
