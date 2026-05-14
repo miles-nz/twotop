@@ -410,6 +410,60 @@ app.get("/reviews/public", async (req, res) => {
     }
 });
 
+app.get("/reviews/user/:userId", async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const decodedUserId = decodeURIComponent(userId);
+
+        // Try to authenticate - optional
+        let viewerId = null;
+        try {
+            await new Promise((resolve, reject) => {
+                checkJwt(req, res, (err) => (err ? reject(err) : resolve()));
+            });
+            viewerId = req.auth.payload.sub;
+        } catch {
+            // unauthenticated - viewerId stays null
+        }
+
+        // Check if viewer is friends with the profile owner
+        let isFriend = false;
+        if (viewerId && viewerId !== decodedUserId) {
+            const { data: prefs } = await supabase
+                .from("user_preferences")
+                .select("shared_with")
+                .eq("user_id", decodedUserId)
+                .maybeSingle();
+
+            const sharedWith = prefs?.shared_with || [];
+            isFriend = sharedWith.some((u) => u.user_id === viewerId);
+        }
+
+        // Fetch reviews where user is owner OR contributor
+        const { data, error } = await supabase
+            .from("reviews")
+            .select("*")
+            .or(
+                `user_id.eq.${decodedUserId},allowed_contributors.cs.${JSON.stringify([{ user_id: decodedUserId }])}`,
+            )
+            .order("visit_date", { ascending: false });
+
+        if (error) return res.status(500).json({ error: error.message });
+
+        // Filter by visibility
+        const visibleReviews = data.filter((r) => {
+            if (r.is_public) return true;
+            if (isFriend) return true;
+            return false;
+        });
+
+        const reviews = await attachContributions(visibleReviews);
+        res.status(200).json(reviews);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.get("/reviews/:id", async (req, res) => {
     try {
         const { id } = req.params;
@@ -1257,20 +1311,36 @@ app.get("/user/:id", async (req, res) => {
 
     try {
         const token = await getMgmtToken();
-        const response = await fetch(
-            `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(id)}`,
-            { headers: { Authorization: `Bearer ${token}` } },
-        );
-        const data = await response.json();
+        const [userRes, countRes] = await Promise.all([
+            fetch(
+                `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(id)}`,
+                { headers: { Authorization: `Bearer ${token}` } },
+            ),
+            supabase
+                .from("reviews")
+                .select("is_public")
+                .or(
+                    `user_id.eq.${id},allowed_contributors.cs.${JSON.stringify([{ user_id: id }])}`,
+                ),
+        ]);
+
+        const data = await userRes.json();
 
         if (!data || data.error) {
             return res.status(404).json({ error: ERRORS.userNotFound });
         }
 
+        const allReviews = countRes.data ?? [];
+        const totalCount = allReviews.length;
+        const publicCount = allReviews.filter((r) => r.is_public).length;
+
         res.status(200).json({
             user_id: data.user_id,
             name: data.name,
             picture: data.picture,
+            created_at: data.created_at,
+            public_review_count: publicCount,
+            total_review_count: totalCount,
         });
     } catch (err) {
         res.status(500).json({ error: err.message });

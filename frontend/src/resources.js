@@ -106,6 +106,7 @@ export const text = {
     shareProfile: "Share profile",
     appearance: "Appearance",
     logOutConfirm: "Are you sure you want to log out?",
+    memberSince: "Member since",
 
     // Notifications / Friend Requests
     notifications: "Notifications",

@@ -3,10 +3,13 @@ import { useParams } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import {
     Camera,
+    ChevronDown,
+    ChevronUp,
     Share,
     Share2,
     LogOut,
     Moon,
+    NotebookText,
     Users,
     Palette,
     BookOpen,
@@ -27,6 +30,8 @@ import { getOS, isDefaultAvatar } from "../utils";
 import { useBreakpoint } from "../hooks/useBreakpoint";
 import { useOtherUserProfile } from "../hooks/useOtherUserProfile";
 import ConfirmModal from "../components/ui/ConfirmModal";
+import ReviewCard from "../components/reviews/ReviewCard";
+import { ReviewListProvider } from "../contexts/ReviewListContext";
 
 const ShareIcon = ["ios", "macos"].includes(getOS()) ? Share : Share2;
 
@@ -65,6 +70,11 @@ export default function ProfilePage() {
         friendStatus,
         sendingRequest,
         handleSendFriendRequest,
+        reviewsOpen,
+        userReviews,
+        reviewsLoading,
+        handleToggleReviews,
+        reviewCount,
     } = useOtherUserProfile(userId, isOwnProfile);
 
     const [friendsModalOpen, setFriendsModalOpen] = useState(false);
@@ -177,8 +187,8 @@ export default function ProfilePage() {
 
     if (!isOwnProfile) {
         return (
-            <div className="max-w-3xl mx-auto pt-8 pb-24 px-4 sm:px-6 lg:px-0">
-                <div className="bg-surface-50 rounded-2xl border border-surface-200 shadow-sm p-6 flex flex-col items-center gap-4">
+            <div className="max-w-3xl mx-auto pt-8 pb-24 px-4 sm:px-6 lg:px-0 flex flex-col gap-4">
+                <div className="bg-surface-50 rounded-2xl border border-surface-200 shadow-sm p-6 flex flex-col items-center gap-3">
                     <Avatar
                         name={otherUser?.name}
                         picture={otherUser?.picture}
@@ -187,6 +197,15 @@ export default function ProfilePage() {
                     <p className="text-lg font-semibold text-text-dark">
                         {otherUser?.name}
                     </p>
+                    {otherUser?.created_at && (
+                        <p className="text-xs text-text-light">
+                            {text.memberSince}{" "}
+                            {new Date(otherUser.created_at).toLocaleDateString(
+                                "en-NZ",
+                                { month: "long", year: "numeric" },
+                            )}
+                        </p>
+                    )}
                     {friendStatus === "friends" && (
                         <p className="text-sm text-text-light">
                             {text.friendsLabel}
@@ -206,7 +225,52 @@ export default function ProfilePage() {
                             {sendingRequest ? text.sending : text.addFriend}
                         </button>
                     )}
+
+                    {/* Reviews toggle */}
+                    {reviewCount > 0 && (
+                        <div className="w-full border-t border-surface-200 pt-4 flex justify-center">
+                            <button
+                                onClick={handleToggleReviews}
+                                className="flex items-center gap-1.5 text-sm text-text-light hover:text-text-dark transition-colors"
+                            >
+                                <NotebookText size={14} />
+                                {reviewCount} {text.reviews}
+                                {reviewsOpen ? (
+                                    <ChevronUp size={14} />
+                                ) : (
+                                    <ChevronDown size={14} />
+                                )}
+                            </button>
+                        </div>
+                    )}
                 </div>
+
+                {reviewsOpen && (
+                    <div className="flex flex-col gap-4">
+                        {reviewsLoading && (
+                            <div className="flex justify-center py-6">
+                                <LoadingDots />
+                            </div>
+                        )}
+                        {!reviewsLoading && userReviews?.length === 0 && (
+                            <p className="text-sm text-text-light text-center py-6">
+                                {text.noReviews}
+                            </p>
+                        )}
+                        {!reviewsLoading && userReviews?.length > 0 && (
+                            <ReviewListProvider>
+                                {userReviews.map((review) => (
+                                    <ReviewCard
+                                        key={review.id}
+                                        review={review}
+                                        currentUserId={user?.sub}
+                                        onReviewUpdated={() => {}}
+                                    />
+                                ))}
+                            </ReviewListProvider>
+                        )}
+                    </div>
+                )}
             </div>
         );
     }

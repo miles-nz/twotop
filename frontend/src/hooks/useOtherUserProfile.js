@@ -15,6 +15,9 @@ export function useOtherUserProfile(userId, isOwnProfile) {
         !isOwnProfile && !!userId,
     );
     const [sendingRequest, setSendingRequest] = useState(false);
+    const [reviewsOpen, setReviewsOpen] = useState(false);
+    const [userReviews, setUserReviews] = useState(null);
+    const [reviewsLoading, setReviewsLoading] = useState(false);
 
     useEffect(() => {
         if (isOwnProfile || !userId) return;
@@ -110,7 +113,38 @@ export function useOtherUserProfile(userId, isOwnProfile) {
         }
     };
 
+    const handleToggleReviews = async () => {
+        setReviewsOpen((prev) => !prev);
+        if (!reviewsOpen && userReviews === null) {
+            setReviewsLoading(true);
+            try {
+                const headers = {};
+                if (isAuthenticated) {
+                    const token = await getAccessTokenSilently();
+                    headers.Authorization = `Bearer ${token}`;
+                }
+                const fullUserId = `auth0|${userId}`;
+                const res = await fetch(
+                    `${import.meta.env.VITE_API_URL}/reviews/user/${encodeURIComponent(fullUserId)}`,
+                    { headers },
+                );
+                const data = await res.json();
+                if (res.ok) setUserReviews(data);
+                else setUserReviews([]);
+            } catch {
+                setUserReviews([]);
+            } finally {
+                setReviewsLoading(false);
+            }
+        }
+    };
+
     const isLoading = otherUserLoading || friendStatusLoading;
+
+    const reviewCount =
+        friendStatus === "friends"
+            ? otherUser?.total_review_count
+            : otherUser?.public_review_count;
 
     return {
         otherUser,
@@ -118,5 +152,10 @@ export function useOtherUserProfile(userId, isOwnProfile) {
         friendStatus,
         sendingRequest,
         handleSendFriendRequest,
+        reviewsOpen,
+        userReviews,
+        reviewsLoading,
+        handleToggleReviews,
+        reviewCount,
     };
 }
