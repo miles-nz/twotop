@@ -18,6 +18,9 @@ export function useOtherUserProfile(userId, isOwnProfile) {
     const [reviewsOpen, setReviewsOpen] = useState(false);
     const [userReviews, setUserReviews] = useState(null);
     const [reviewsLoading, setReviewsLoading] = useState(false);
+    const [listsOpen, setListsOpen] = useState(false);
+    const [userLists, setUserLists] = useState(null);
+    const [listsLoading, setListsLoading] = useState(false);
 
     useEffect(() => {
         if (isOwnProfile || !userId) return;
@@ -139,12 +142,34 @@ export function useOtherUserProfile(userId, isOwnProfile) {
         }
     };
 
+    const handleToggleLists = async () => {
+        setListsOpen((prev) => !prev);
+        if (!listsOpen && userLists === null) {
+            setListsLoading(true);
+            try {
+                const fullUserId = `auth0|${userId}`;
+                const res = await fetch(
+                    `${import.meta.env.VITE_API_URL}/lists/user/${encodeURIComponent(fullUserId)}`,
+                );
+                const data = await res.json();
+                if (res.ok) setUserLists(data);
+                else setUserLists([]);
+            } catch {
+                setUserLists([]);
+            } finally {
+                setListsLoading(false);
+            }
+        }
+    };
+
     const isLoading = otherUserLoading || friendStatusLoading;
 
     const reviewCount =
         friendStatus === "friends"
             ? otherUser?.total_review_count
             : otherUser?.public_review_count;
+
+    const listCount = otherUser?.featured_list_count ?? 0;
 
     return {
         otherUser,
@@ -153,9 +178,16 @@ export function useOtherUserProfile(userId, isOwnProfile) {
         sendingRequest,
         handleSendFriendRequest,
         reviewsOpen,
+        setReviewsOpen,
         userReviews,
         reviewsLoading,
         handleToggleReviews,
         reviewCount,
+        listsOpen,
+        setListsOpen,
+        userLists,
+        listsLoading,
+        handleToggleLists,
+        listCount,
     };
 }

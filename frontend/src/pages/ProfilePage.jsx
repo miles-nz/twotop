@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import {
     Camera,
@@ -13,6 +13,7 @@ import {
     Users,
     Palette,
     BookOpen,
+    LayoutList,
     X,
 } from "lucide-react";
 import Avatar from "../components/ui/Avatar";
@@ -26,7 +27,7 @@ import InlineEdit from "../components/ui/InlineEdit";
 import { useTheme } from "../contexts/ThemeContext";
 import { useUser } from "../contexts/UserContext";
 import { text, enums } from "../resources";
-import { getOS, isDefaultAvatar } from "../utils";
+import { getOS, isDefaultAvatar, makeProfileUrl } from "../utils";
 import { useBreakpoint } from "../hooks/useBreakpoint";
 import { useOtherUserProfile } from "../hooks/useOtherUserProfile";
 import ConfirmModal from "../components/ui/ConfirmModal";
@@ -71,10 +72,17 @@ export default function ProfilePage() {
         sendingRequest,
         handleSendFriendRequest,
         reviewsOpen,
+        setReviewsOpen,
         userReviews,
         reviewsLoading,
         handleToggleReviews,
         reviewCount,
+        listsOpen,
+        setListsOpen,
+        userLists,
+        listsLoading,
+        handleToggleLists,
+        listCount,
     } = useOtherUserProfile(userId, isOwnProfile);
 
     const [friendsModalOpen, setFriendsModalOpen] = useState(false);
@@ -226,21 +234,43 @@ export default function ProfilePage() {
                         </button>
                     )}
 
-                    {/* Reviews toggle */}
-                    {reviewCount > 0 && (
-                        <div className="w-full border-t border-surface-200 pt-4 flex justify-center">
-                            <button
-                                onClick={handleToggleReviews}
-                                className="flex items-center gap-1.5 text-sm text-text-light hover:text-text-dark transition-colors"
-                            >
-                                <NotebookText size={14} />
-                                {reviewCount} {text.reviews}
-                                {reviewsOpen ? (
-                                    <ChevronUp size={14} />
-                                ) : (
-                                    <ChevronDown size={14} />
-                                )}
-                            </button>
+                    {/* Reviews + Lists toggles */}
+                    {(reviewCount > 0 || listCount > 0) && (
+                        <div className="w-full border-t border-surface-200 pt-4 flex justify-center gap-6">
+                            {reviewCount > 0 && (
+                                <button
+                                    onClick={() => {
+                                        if (!reviewsOpen) setListsOpen(false);
+                                        handleToggleReviews();
+                                    }}
+                                    className="flex items-center gap-1.5 text-sm text-text-light hover:text-text-dark transition-colors"
+                                >
+                                    <NotebookText size={14} />
+                                    {text.reviewCountLabel(reviewCount)}
+                                    {reviewsOpen ? (
+                                        <ChevronUp size={14} />
+                                    ) : (
+                                        <ChevronDown size={14} />
+                                    )}
+                                </button>
+                            )}
+                            {listCount > 0 && (
+                                <button
+                                    onClick={() => {
+                                        if (!listsOpen) setReviewsOpen(false);
+                                        handleToggleLists();
+                                    }}
+                                    className="flex items-center gap-1.5 text-sm text-text-light hover:text-text-dark transition-colors"
+                                >
+                                    <LayoutList size={14} />
+                                    {text.listCountLabel(listCount)}
+                                    {listsOpen ? (
+                                        <ChevronUp size={14} />
+                                    ) : (
+                                        <ChevronDown size={14} />
+                                    )}
+                                </button>
+                            )}
                         </div>
                     )}
                 </div>
@@ -269,6 +299,54 @@ export default function ProfilePage() {
                                 ))}
                             </ReviewListProvider>
                         )}
+                    </div>
+                )}
+
+                {listsOpen && (
+                    <div className="flex flex-col gap-3">
+                        {listsLoading && (
+                            <div className="flex justify-center py-6">
+                                <LoadingDots />
+                            </div>
+                        )}
+                        {!listsLoading && userLists?.length === 0 && (
+                            <p className="text-sm text-text-light text-center py-6">
+                                {text.noLists}
+                            </p>
+                        )}
+                        {!listsLoading &&
+                            userLists?.length > 0 &&
+                            userLists.map((list) => (
+                                <a
+                                    key={list.id}
+                                    href={
+                                        list.share_token
+                                            ? `/lists/shared/${list.share_token}`
+                                            : null
+                                    }
+                                    onClick={
+                                        !list.share_token
+                                            ? (e) => e.preventDefault()
+                                            : undefined
+                                    }
+                                    className="block bg-surface-50 border border-surface-200 rounded-2xl px-5 py-4 hover:bg-surface-100 transition-colors"
+                                >
+                                    <p className="text-sm font-semibold text-text-dark">
+                                        {list.name}
+                                    </p>
+                                    {list.description && (
+                                        <p className="text-xs text-text-light mt-0.5">
+                                            {list.description}
+                                        </p>
+                                    )}
+                                    <p className="text-xs text-text-light mt-1">
+                                        {list.restaurants.length}{" "}
+                                        {list.restaurants.length === 1
+                                            ? text.restaurant
+                                            : text.restaurants}
+                                    </p>
+                                </a>
+                            ))}
                     </div>
                 )}
             </div>

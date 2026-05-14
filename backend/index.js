@@ -1311,7 +1311,7 @@ app.get("/user/:id", async (req, res) => {
 
     try {
         const token = await getMgmtToken();
-        const [userRes, countRes] = await Promise.all([
+        const [userRes, countRes, featuredRes] = await Promise.all([
             fetch(
                 `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(id)}`,
                 { headers: { Authorization: `Bearer ${token}` } },
@@ -1322,6 +1322,11 @@ app.get("/user/:id", async (req, res) => {
                 .or(
                     `user_id.eq.${id},allowed_contributors.cs.${JSON.stringify([{ user_id: id }])}`,
                 ),
+            supabase
+                .from("lists")
+                .select("id", { count: "exact" })
+                .eq("user_id", id)
+                .eq("is_featured", true),
         ]);
 
         const data = await userRes.json();
@@ -1341,6 +1346,7 @@ app.get("/user/:id", async (req, res) => {
             created_at: data.created_at,
             public_review_count: publicCount,
             total_review_count: totalCount,
+            featured_list_count: featuredRes.count ?? 0,
         });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -2053,6 +2059,38 @@ app.get("/lists", checkJwt, async (req, res) => {
     }
 });
 
+app.get("/lists/user/:userId", async (req, res) => {
+    const userId = decodeURIComponent(req.params.userId);
+
+    try {
+        const { data: lists, error } = await supabase
+            .from("lists")
+            .select("*, list_restaurants(*)")
+            .eq("user_id", userId)
+            .eq("is_featured", true)
+            .order("created_at", { ascending: false });
+
+        if (error) return res.status(500).json({ error: error.message });
+
+        const result = (lists || []).map((list) => ({
+            id: list.id,
+            name: list.name,
+            description: list.description,
+            is_checklist: list.is_checklist,
+            is_featured: list.is_featured,
+            share_token: list.share_token,
+            created_at: list.created_at,
+            restaurants: (list.list_restaurants || []).sort(
+                (a, b) => a.position - b.position,
+            ),
+        }));
+
+        res.status(200).json(result);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.get("/lists/shared/:token", async (req, res) => {
     try {
         const { token } = req.params;
@@ -2135,6 +2173,7 @@ app.patch("/lists/:id", checkJwt, async (req, res) => {
         name,
         description,
         is_checklist,
+        is_featured,
         generate_share_token,
         revoke_share_token,
     } = req.body;
@@ -2166,6 +2205,7 @@ app.patch("/lists/:id", checkJwt, async (req, res) => {
         updates.description = description?.trim() || null;
     if (is_checklist !== undefined)
         updates.is_checklist = is_checklist === true;
+    if (is_featured !== undefined) updates.is_featured = is_featured === true;
     if (generate_share_token && !list.share_token) {
         updates.share_token = crypto.randomUUID();
     }

@@ -265,6 +265,25 @@ export default function ListDetailPage() {
         }
     };
 
+    const handleToggleFeatured = async () => {
+        const newValue = !list.is_featured;
+        setList((prev) => ({ ...prev, is_featured: newValue }));
+        try {
+            const token = await getAccessTokenSilently();
+            await fetch(`${import.meta.env.VITE_API_URL}/lists/${id}`, {
+                method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ is_featured: newValue }),
+            });
+        } catch (err) {
+            console.error("Failed to toggle featured:", err);
+            setList((prev) => ({ ...prev, is_featured: !newValue }));
+        }
+    };
+
     const handleCheck = async (restaurantId, checked) => {
         setRestaurants((prev) =>
             prev.map((r) => (r.id === restaurantId ? { ...r, checked } : r)),
@@ -330,10 +349,12 @@ export default function ListDetailPage() {
                     isOwner={isOwner}
                     canEdit={canEdit}
                     isChecklist={list.is_checklist}
+                    isFeatured={list.is_featured}
                     confirmDelete={confirmDelete}
                     confirmLeave={confirmLeave}
                     onShare={() => setShareModalOpen(true)}
                     onToggleChecklist={handleToggleChecklist}
+                    onToggleFeatured={handleToggleFeatured}
                     onDeleteConfirm={() => setConfirmDelete(true)}
                     onDeleteCancel={() => setConfirmDelete(false)}
                     onDelete={handleDeleteList}

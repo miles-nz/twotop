@@ -19,10 +19,12 @@ export default function ListDetailHeader({
     isOwner,
     canEdit,
     isChecklist,
+    isFeatured,
     confirmDelete,
     confirmLeave,
     onShare,
     onToggleChecklist,
+    onToggleFeatured,
     onDeleteConfirm,
     onDeleteCancel,
     onDelete,
@@ -95,6 +97,20 @@ export default function ListDetailHeader({
                                             ariaLabel={text.checklistMode}
                                         />
                                     </div>
+                                    {isOwner && (
+                                        <div className="w-full px-4 py-3 flex items-center justify-between border-t border-surface-200">
+                                            <span className="text-sm text-text-dark">
+                                                {text.featureList}
+                                            </span>
+                                            <Toggle
+                                                value={isFeatured}
+                                                onToggle={(val) => {
+                                                    onToggleFeatured(val);
+                                                }}
+                                                ariaLabel={text.featureList}
+                                            />
+                                        </div>
+                                    )}
                                     {isChecklist && hasCheckedItems && (
                                         <button
                                             onClick={() => {
