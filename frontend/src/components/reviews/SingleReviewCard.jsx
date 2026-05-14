@@ -46,16 +46,18 @@ function SingleReviewCard({
                             className="flex items-center gap-2 group"
                         >
                             {review.reviewer_name && (
-                                <span className="text-xs text-text-mid group-hover:text-text-dark transition-opacity duration-100">
+                                <span className="text-xs text-text-mid group-hover:text-text-dark transition-colors duration-100">
                                     {review.reviewer_name}
                                 </span>
                             )}
-                            <Avatar
-                                name={review.reviewer_name}
-                                picture={review.reviewer_picture}
-                                size="sm"
-                                title={review.reviewer_name}
-                            />
+                            <div className="rounded-full ring-2 ring-surface-50 group-hover:ring-secondary-400 transition-all">
+                                <Avatar
+                                    name={review.reviewer_name}
+                                    picture={review.reviewer_picture}
+                                    size="sm"
+                                    title={review.reviewer_name}
+                                />
+                            </div>
                         </Link>
                         {isOwner && (
                             <ReviewCardMenu

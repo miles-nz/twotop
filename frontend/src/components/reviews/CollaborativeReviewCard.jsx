@@ -160,23 +160,23 @@ function ReviewerSection({ review }) {
         review.food_rating || review.drink_rating || review.ambience_rating;
     return (
         <div className="mx-6 mt-2 pt-4">
-            <div className="flex items-center gap-2 mb-2">
-                <Link
-                    to={makeProfileUrl(review.user_id)}
-                    className="flex items-center gap-2 mb-2 group"
-                >
+            <Link
+                to={makeProfileUrl(review.user_id)}
+                className="flex items-center gap-2 mb-2 group"
+            >
+                <div className="rounded-full ring-2 ring-surface-50 group-hover:ring-secondary-400 transition-all">
                     <Avatar
                         name={review.reviewer_name}
                         picture={review.reviewer_picture}
                         size="sm"
                     />
-                    {review.reviewer_name && (
-                        <span className="text-xs text-text-mid group-hover:text-text-dark transition-opacity duration-100">
-                            {review.reviewer_name}
-                        </span>
-                    )}
-                </Link>
-            </div>
+                </div>
+                {review.reviewer_name && (
+                    <span className="text-xs text-text-mid group-hover:text-text-dark transition-colors duration-100">
+                        {review.reviewer_name}
+                    </span>
+                )}
+            </Link>
             {hasRatings && (
                 <div className="flex justify-start lg:justify-center">
                     <ReviewCardRatings
@@ -215,12 +215,14 @@ function ContributionSection({
                         to={makeProfileUrl(contribution.user_id)}
                         className="flex items-center gap-2 group"
                     >
-                        <Avatar
-                            name={contribution.reviewer_name}
-                            picture={contribution.reviewer_picture}
-                            size="sm"
-                        />
-                        <span className="text-xs text-text-mid group-hover:text-text-dark transition-opacity duration-100">
+                        <div className="rounded-full ring-2 ring-surface-50 group-hover:ring-secondary-400 transition-all">
+                            <Avatar
+                                name={contribution.reviewer_name}
+                                picture={contribution.reviewer_picture}
+                                size="sm"
+                            />
+                        </div>
+                        <span className="text-xs text-text-mid group-hover:text-text-dark transition-colors duration-100">
                             {contribution.reviewer_name}
                         </span>
                     </Link>
@@ -335,15 +337,17 @@ function CollaborativeReviewCard({
                                 className="flex items-center gap-2 group"
                             >
                                 {review.reviewer_name && (
-                                    <span className="text-xs text-text-mid group-hover:text-text-dark transition-opacity duration-100">
+                                    <span className="text-xs text-text-mid group-hover:text-text-dark transition-colors duration-100">
                                         {review.reviewer_name}
                                     </span>
                                 )}
-                                <Avatar
-                                    name={review.reviewer_name}
-                                    picture={review.reviewer_picture}
-                                    size="sm"
-                                />
+                                <div className="rounded-full ring-2 ring-surface-50 group-hover:ring-secondary-400 transition-all">
+                                    <Avatar
+                                        name={review.reviewer_name}
+                                        picture={review.reviewer_picture}
+                                        size="sm"
+                                    />
+                                </div>
                             </Link>
                         )}
                         {isOwner && (

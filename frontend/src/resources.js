@@ -189,12 +189,6 @@ export const text = {
     noReviews: "No reviews yet.",
     makeGoogleMapsLink: (restaurant_name, place_id) =>
         `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant_name)}&query_place_id=${place_id}`,
-    makeContributorList: (ownerName, contributorNames) => {
-        if (contributorNames.length === 0) return ownerName;
-        if (contributorNames.length === 1)
-            return `${ownerName} & ${contributorNames[0]}`;
-        return `${ownerName} +${contributorNames.length}`;
-    },
 
     // Search / filters
     dateRangeLabel: "Date range",

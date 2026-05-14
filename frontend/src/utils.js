@@ -125,3 +125,10 @@ export function getOS() {
 export function makeProfileUrl(userId) {
     return `/profile/${userId?.replace("auth0|", "")}`;
 }
+
+export function makeContributorList(ownerName, contributorNames) {
+    if (contributorNames.length === 0) return ownerName;
+    if (contributorNames.length === 1)
+        return `${ownerName} & ${contributorNames[0]}`;
+    return `${ownerName} +${contributorNames.length}`;
+}
