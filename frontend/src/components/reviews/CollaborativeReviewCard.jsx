@@ -1,9 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { createPortal } from "react-dom";
-import { Link } from "react-router-dom";
 import { useReviewCardEditing } from "../../hooks/useReviewCardEditing";
-import Avatar from "../ui/Avatar";
 import CollaboratorAvatars from "./CollaboratorAvatars";
 import EditReviewUI from "./EditReviewUI";
 import ContributorForm from "./ContributorForm";
@@ -12,11 +10,12 @@ import ReviewCardMenu from "./ReviewCardMenu";
 import ReviewCardRatings from "./ReviewCardRatings";
 import ReviewCardCarousel from "./ReviewCardCarousel";
 import ConfirmModal from "../ui/ConfirmModal";
+import LinkedAvatar from "../ui/LinkedAvatar";
 import { MoreHorizontal, Pencil, LogOut, Share, Share2 } from "lucide-react";
 import { text } from "../../resources";
 import { ReviewCardHeader, ReviewText } from "./reviewCardUtils";
 import { useReviewList } from "../../contexts/ReviewListContext";
-import { getOS, makeProfileUrl } from "../../utils";
+import { getOS } from "../../utils";
 
 function ContributorMenu({ review, onEdit, onReviewUpdated }) {
     const { getAccessTokenSilently } = useAuth0();
@@ -160,23 +159,13 @@ function ReviewerSection({ review }) {
         review.food_rating || review.drink_rating || review.ambience_rating;
     return (
         <div className="mx-6 mt-2 pt-4">
-            <Link
-                to={makeProfileUrl(review.user_id)}
-                className="flex items-center gap-2 mb-2 group"
-            >
-                <div className="rounded-full ring-2 ring-surface-50 group-hover:ring-secondary-400 transition-all">
-                    <Avatar
-                        name={review.reviewer_name}
-                        picture={review.reviewer_picture}
-                        size="sm"
-                    />
-                </div>
-                {review.reviewer_name && (
-                    <span className="text-xs text-text-mid group-hover:text-text-dark transition-colors duration-100">
-                        {review.reviewer_name}
-                    </span>
-                )}
-            </Link>
+            <LinkedAvatar
+                name={review.reviewer_name}
+                picture={review.reviewer_picture}
+                size="sm"
+                userId={review.user_id}
+                className="mb-2"
+            />
             {hasRatings && (
                 <div className="flex justify-start lg:justify-center">
                     <ReviewCardRatings
@@ -210,23 +199,12 @@ function ContributionSection({
     return (
         <div className="mx-6 mt-2 pt-4">
             <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                    <Link
-                        to={makeProfileUrl(contribution.user_id)}
-                        className="flex items-center gap-2 group"
-                    >
-                        <div className="rounded-full ring-2 ring-surface-50 group-hover:ring-secondary-400 transition-all">
-                            <Avatar
-                                name={contribution.reviewer_name}
-                                picture={contribution.reviewer_picture}
-                                size="sm"
-                            />
-                        </div>
-                        <span className="text-xs text-text-mid group-hover:text-text-dark transition-colors duration-100">
-                            {contribution.reviewer_name}
-                        </span>
-                    </Link>
-                </div>
+                <LinkedAvatar
+                    name={contribution.reviewer_name}
+                    picture={contribution.reviewer_picture}
+                    size="sm"
+                    userId={contribution.user_id}
+                />
                 {isOwn && (
                     <ContributorMenu
                         review={review}
@@ -332,23 +310,13 @@ function CollaborativeReviewCard({
                                 }))}
                             />
                         ) : (
-                            <Link
-                                to={makeProfileUrl(review.user_id)}
-                                className="flex items-center gap-2 group"
-                            >
-                                {review.reviewer_name && (
-                                    <span className="text-xs text-text-mid group-hover:text-text-dark transition-colors duration-100">
-                                        {review.reviewer_name}
-                                    </span>
-                                )}
-                                <div className="rounded-full ring-2 ring-surface-50 group-hover:ring-secondary-400 transition-all">
-                                    <Avatar
-                                        name={review.reviewer_name}
-                                        picture={review.reviewer_picture}
-                                        size="sm"
-                                    />
-                                </div>
-                            </Link>
+                            <LinkedAvatar
+                                name={review.reviewer_name}
+                                picture={review.reviewer_picture}
+                                size="sm"
+                                userId={review.user_id}
+                                nameSide="left"
+                            />
                         )}
                         {isOwner && (
                             <ReviewCardMenu

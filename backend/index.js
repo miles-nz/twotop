@@ -1925,7 +1925,7 @@ app.get("/lists", checkJwt, async (req, res) => {
         // Fetch own lists
         const { data: ownLists, error: ownError } = await supabase
             .from("lists")
-            .select("*")
+            .select("*, share_token")
             .eq("user_id", user_id)
             .order("created_at", { ascending: false });
 
@@ -2053,6 +2053,44 @@ app.get("/lists", checkJwt, async (req, res) => {
     }
 });
 
+app.get("/lists/shared/:token", async (req, res) => {
+    try {
+        const { token } = req.params;
+        const { data: list, error } = await supabase
+            .from("lists")
+            .select("*, list_restaurants(*)")
+            .eq("share_token", token)
+            .maybeSingle();
+
+        if (error || !list)
+            return res.status(404).json({ error: "List not found." });
+
+        const restaurants = (list.list_restaurants || []).sort(
+            (a, b) => a.position - b.position,
+        );
+
+        const mgmtToken = await getMgmtToken();
+        const ownerRes = await fetch(
+            `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(list.user_id)}`,
+            { headers: { Authorization: `Bearer ${mgmtToken}` } },
+        );
+        const ownerData = await ownerRes.json();
+
+        res.status(200).json({
+            id: list.id,
+            name: list.name,
+            description: list.description,
+            is_checklist: list.is_checklist,
+            restaurants,
+            owner_name: ownerData.name,
+            owner_picture: ownerData.picture,
+            owner_user_id: list.user_id,
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.post("/lists", checkJwt, async (req, res) => {
     const user_id = req.auth.payload.sub;
     const { name, description, is_checklist } = req.body;
@@ -2093,7 +2131,13 @@ app.post("/lists", checkJwt, async (req, res) => {
 app.patch("/lists/:id", checkJwt, async (req, res) => {
     const user_id = req.auth.payload.sub;
     const { id } = req.params;
-    const { name, description, is_checklist } = req.body;
+    const {
+        name,
+        description,
+        is_checklist,
+        generate_share_token,
+        revoke_share_token,
+    } = req.body;
 
     const { data: list, error: fetchError } = await supabase
         .from("lists")
@@ -2122,6 +2166,12 @@ app.patch("/lists/:id", checkJwt, async (req, res) => {
         updates.description = description?.trim() || null;
     if (is_checklist !== undefined)
         updates.is_checklist = is_checklist === true;
+    if (generate_share_token && !list.share_token) {
+        updates.share_token = crypto.randomUUID();
+    }
+    if (revoke_share_token) {
+        updates.share_token = null;
+    }
 
     try {
         const { data, error } = await supabase

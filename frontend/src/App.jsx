@@ -16,6 +16,7 @@ import usePullToRefresh from "./hooks/usePullToRefresh";
 import PullToRefreshIndicator from "./components/ui/PullToRefreshIndicator";
 import ListDetailPage from "./pages/ListDetailPage";
 import ReviewDetailPage from "./pages/ReviewDetailPage";
+import SharedListPage from "./pages/SharedListPage";
 
 function AppContent() {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
@@ -85,6 +86,10 @@ function AppContent() {
                             </div>
                         }
                     />
+                    <Route
+                        path="/lists/shared/:token"
+                        element={<SharedListPage />}
+                    />
                 </Routes>
             </motion.div>
         );
@@ -123,6 +128,11 @@ function AppContent() {
                     element={<ListsPage refreshTrigger={listRefreshTrigger} />}
                 />
                 <Route path="/lists/:id" element={<ListDetailPage />} />
+                <Route
+                    path="/lists/shared/:token"
+                    element={<SharedListPage />}
+                />
+
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/profile/:userId" element={<ProfilePage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />

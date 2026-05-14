@@ -332,7 +332,6 @@ export default function ListDetailPage() {
                     isChecklist={list.is_checklist}
                     confirmDelete={confirmDelete}
                     confirmLeave={confirmLeave}
-                    onBack={() => navigate("/lists")}
                     onShare={() => setShareModalOpen(true)}
                     onToggleChecklist={handleToggleChecklist}
                     onDeleteConfirm={() => setConfirmDelete(true)}
@@ -343,6 +342,11 @@ export default function ListDetailPage() {
                     onLeave={handleLeaveList}
                     onSortChecked={handleSortChecked}
                     hasCheckedItems={restaurants.some((r) => r.checked)}
+                    ownerName={isOwner ? currentUserName : list.owner_name}
+                    ownerPicture={
+                        isOwner ? currentUserPicture : list.owner_picture
+                    }
+                    ownerId={list.user_id}
                 />
 
                 {isOwner ? (
@@ -440,6 +444,7 @@ export default function ListDetailPage() {
                     listId={id}
                     listName={list.name}
                     shares={list.shares}
+                    shareToken={list.share_token}
                     isOwner={isOwner}
                     ownerId={list.user_id}
                     ownerName={isOwner ? currentUserName : list.owner_name}

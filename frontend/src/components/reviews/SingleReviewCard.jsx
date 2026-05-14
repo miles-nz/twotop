@@ -1,7 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { useReviewCardEditing } from "../../hooks/useReviewCardEditing";
-import Avatar from "../ui/Avatar";
 import EditReviewUI from "./EditReviewUI";
 import LoadingOverlay from "../ui/LoadingOverlay";
 import ReviewCardMenu from "./ReviewCardMenu";
@@ -9,7 +7,7 @@ import ReviewCardRatings from "./ReviewCardRatings";
 import ReviewCardCarousel from "./ReviewCardCarousel";
 import { ReviewCardHeader, ReviewText } from "./reviewCardUtils";
 import { text } from "../../resources";
-import { makeProfileUrl } from "../../utils";
+import LinkedAvatar from "../ui/LinkedAvatar";
 
 function SingleReviewCard({
     review,
@@ -41,24 +39,13 @@ function SingleReviewCard({
                         isDetailPage={isDetailPage}
                     />
                     <div className="flex items-center gap-2 ml-3 mt-1 shrink-0">
-                        <Link
-                            to={makeProfileUrl(review.user_id)}
-                            className="flex items-center gap-2 group"
-                        >
-                            {review.reviewer_name && (
-                                <span className="text-xs text-text-mid group-hover:text-text-dark transition-colors duration-100">
-                                    {review.reviewer_name}
-                                </span>
-                            )}
-                            <div className="rounded-full ring-2 ring-surface-50 group-hover:ring-secondary-400 transition-all">
-                                <Avatar
-                                    name={review.reviewer_name}
-                                    picture={review.reviewer_picture}
-                                    size="sm"
-                                    title={review.reviewer_name}
-                                />
-                            </div>
-                        </Link>
+                        <LinkedAvatar
+                            name={review.reviewer_name}
+                            picture={review.reviewer_picture}
+                            size="sm"
+                            userId={review.user_id}
+                            nameSide="left"
+                        />
                         {isOwner && (
                             <ReviewCardMenu
                                 review={review}

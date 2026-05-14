@@ -76,6 +76,7 @@ export const text = {
     decline: "Decline",
     dismiss: "Dismiss",
     send: "Send",
+    share: "Share",
 
     // App
     appName1: "two",
@@ -245,6 +246,13 @@ export const text = {
     uncheck: "Mark as not visited",
     checklistProgress: (checked, total) => `${checked}/${total} visited`,
     moveCheckedToBottom: "Move checked to bottom",
+    shareViaLink: "Share via link",
+    generateLink: "Generate link",
+    generating: "Generating...",
+    revokeLink: "Revoke link",
+    confirmRevokeLink: "Anyone with the link will lose access. Are you sure?",
+    copy: "Copy",
+    listNotFound: "List not found.",
 
     // Errors
     errorFormatted: (error) => `Error: ${error}`,

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Trash2 } from "lucide-react";
 import { text } from "../../resources";
@@ -9,6 +9,7 @@ export default function ShareListModal({
     listId,
     listName,
     shares,
+    shareToken: initialShareToken,
     isOwner,
     ownerId,
     ownerName,
@@ -23,6 +24,9 @@ export default function ShareListModal({
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [confirmRemoveId, setConfirmRemoveId] = useState(null);
+    const [shareToken, setShareToken] = useState(initialShareToken ?? null);
+    const [generatingToken, setGeneratingToken] = useState(false);
+    const [confirmRevoke, setConfirmRevoke] = useState(false);
 
     const availableFriends = sharedWith.filter(
         (friend) =>
@@ -101,6 +105,64 @@ export default function ShareListModal({
             setError(text.errorGeneric);
         } finally {
             setConfirmRemoveId(null);
+        }
+    };
+
+    const handleGenerateLink = async () => {
+        setGeneratingToken(true);
+        try {
+            const token = await getAccessTokenSilently();
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/lists/${listId}`,
+                {
+                    method: "PATCH",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ generate_share_token: true }),
+                },
+            );
+            const data = await res.json();
+            if (res.ok) {
+                setShareToken(data.share_token);
+                await navigator.clipboard.writeText(
+                    `${window.location.origin}/lists/shared/${data.share_token}`,
+                );
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setGeneratingToken(false);
+        }
+    };
+
+    const handleCopyLink = async () => {
+        await navigator.clipboard.writeText(
+            `${window.location.origin}/lists/shared/${shareToken}`,
+        );
+    };
+
+    const handleRevokeLink = async () => {
+        try {
+            const token = await getAccessTokenSilently();
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/lists/${listId}`,
+                {
+                    method: "PATCH",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ revoke_share_token: true }),
+                },
+            );
+            if (res.ok) {
+                setShareToken(null);
+                setConfirmRevoke(false);
+            }
+        } catch (err) {
+            console.error(err);
         }
     };
 
@@ -325,6 +387,86 @@ export default function ShareListModal({
                             )}
                         </ul>
                     </div>
+
+                    {isOwner && (
+                        <div className="px-5 py-4 border-t border-surface-200 flex flex-col gap-3">
+                            <p className="text-xs font-medium text-text-light uppercase tracking-wide">
+                                {text.shareViaLink}
+                            </p>
+                            {shareToken ? (
+                                <div className="flex flex-col gap-2">
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            readOnly
+                                            value={`${window.location.origin}/lists/shared/${shareToken}`}
+                                            className="text-xs text-text-light bg-surface-100 border border-surface-200 rounded-lg px-3 py-2 flex-1 truncate"
+                                        />
+                                        <button
+                                            onClick={handleCopyLink}
+                                            className="text-xs bg-secondary-500 hover:bg-secondary-600 text-white px-3 py-2 rounded-lg transition-colors shrink-0"
+                                        >
+                                            {text.copy}
+                                        </button>
+                                        {navigator.share && (
+                                            <button
+                                                onClick={async () => {
+                                                    const url = `${window.location.origin}/lists/shared/${shareToken}`;
+                                                    try {
+                                                        await navigator.share({
+                                                            url,
+                                                        });
+                                                    } catch {}
+                                                }}
+                                                className="text-xs bg-secondary-500 hover:bg-secondary-600 text-white px-3 py-2 rounded-lg transition-colors shrink-0"
+                                            >
+                                                {text.share}
+                                            </button>
+                                        )}
+                                    </div>
+                                    {confirmRevoke ? (
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs text-text-light">
+                                                {text.confirmRevokeLink}
+                                            </span>
+                                            <button
+                                                onClick={handleRevokeLink}
+                                                className="text-xs text-error-500 hover:underline"
+                                            >
+                                                {text.yes}
+                                            </button>
+                                            <button
+                                                onClick={() =>
+                                                    setConfirmRevoke(false)
+                                                }
+                                                className="text-xs text-text-light hover:underline"
+                                            >
+                                                {text.cancel}
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={() =>
+                                                setConfirmRevoke(true)
+                                            }
+                                            className="text-xs text-error-500 hover:underline self-start transition-colors"
+                                        >
+                                            {text.revokeLink}
+                                        </button>
+                                    )}
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={handleGenerateLink}
+                                    disabled={generatingToken}
+                                    className="text-sm bg-secondary-500 hover:bg-secondary-600 disabled:opacity-40 text-white px-4 py-2 rounded-lg transition-colors self-start"
+                                >
+                                    {generatingToken
+                                        ? text.generating
+                                        : text.generateLink}
+                                </button>
+                            )}
+                        </div>
+                    )}
 
                     {/* Footer */}
                     <div className="px-5 py-4 border-t border-surface-200 flex justify-end">

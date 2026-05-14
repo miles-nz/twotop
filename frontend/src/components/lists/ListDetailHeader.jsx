@@ -6,10 +6,11 @@ import {
     Share2,
     MoreVertical,
 } from "lucide-react";
-import { Link } from "react-router-dom";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { text } from "../../resources";
 import Toggle from "../ui/Toggle";
+import LinkedAvatar from "../ui/LinkedAvatar";
 import { getOS } from "../../utils";
 
 const ShareIcon = ["ios", "macos"].includes(getOS()) ? Share : Share2;
@@ -20,7 +21,6 @@ export default function ListDetailHeader({
     isChecklist,
     confirmDelete,
     confirmLeave,
-    onBack,
     onShare,
     onToggleChecklist,
     onDeleteConfirm,
@@ -31,6 +31,9 @@ export default function ListDetailHeader({
     onLeave,
     onSortChecked,
     hasCheckedItems,
+    ownerName,
+    ownerPicture,
+    ownerId,
 }) {
     const [menuOpen, setMenuOpen] = useState(false);
 
@@ -44,7 +47,16 @@ export default function ListDetailHeader({
                 {text.lists}
             </Link>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+                {!isOwner && (
+                    <LinkedAvatar
+                        name={ownerName}
+                        picture={ownerPicture}
+                        size="sm"
+                        userId={ownerId}
+                    />
+                )}
+
                 {canEdit && (
                     <button
                         onClick={onShare}
