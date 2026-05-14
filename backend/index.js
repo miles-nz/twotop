@@ -186,7 +186,7 @@ const notifyListUpdated = async (listId, editorUserId, ownerUserId) => {
         const COOLDOWN_MINUTES = 10;
         const now = new Date();
 
-        // Check last notification time for this editor on this list
+        // Check cooldown
         const { data: existing } = await supabase
             .from("list_edit_notifications")
             .select("last_notified_at")
@@ -203,40 +203,60 @@ const notifyListUpdated = async (listId, editorUserId, ownerUserId) => {
 
         if (withinCooldown) return;
 
-        // Fetch editor name
+        // Fetch editor info and list name in parallel
         const token = await getMgmtToken();
-        const editorRes = await fetch(
-            `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(editorUserId)}`,
-            { headers: { Authorization: `Bearer ${token}` } },
-        );
+        const [editorRes, listResult, sharesResult] = await Promise.all([
+            fetch(
+                `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(editorUserId)}`,
+                { headers: { Authorization: `Bearer ${token}` } },
+            ),
+            supabase
+                .from("lists")
+                .select("name")
+                .eq("id", listId)
+                .maybeSingle(),
+            supabase
+                .from("list_shares")
+                .select("user_id")
+                .eq("list_id", listId),
+        ]);
+
         const editorData = await editorRes.json();
+        const list = listResult.data;
+        const sharedUsers = sharesResult.data || [];
 
-        // Fetch list name
-        const { data: list } = await supabase
-            .from("lists")
-            .select("name")
-            .eq("id", listId)
-            .maybeSingle();
+        // Build list of recipients: owner + all share users, excluding the editor
+        const recipientIds = [
+            ownerUserId,
+            ...sharedUsers.map((s) => s.user_id),
+        ].filter((id) => id !== editorUserId);
 
-        // Delete any existing unread list_updated notification for this editor/list combo
+        if (recipientIds.length === 0) return;
+
+        const notificationData = {
+            list_id: listId,
+            list_name: list?.name || "a list",
+            editor_id: editorUserId,
+            editor_name: editorData.name,
+            editor_picture: editorData.picture,
+        };
+
+        // Delete existing unread notifications for this editor/list combo for all recipients
         await supabase
             .from("notifications")
             .delete()
             .eq("type", "list_updated")
+            .in("user_id", recipientIds)
             .contains("data", { list_id: listId, editor_id: editorUserId });
 
-        // Insert fresh notification
-        await supabase.from("notifications").insert({
-            user_id: ownerUserId,
-            type: "list_updated",
-            data: {
-                list_id: listId,
-                list_name: list?.name || "a list",
-                editor_id: editorUserId,
-                editor_name: editorData.name,
-                editor_picture: editorData.picture,
-            },
-        });
+        // Insert notifications for all recipients
+        await supabase.from("notifications").insert(
+            recipientIds.map((userId) => ({
+                user_id: userId,
+                type: "list_updated",
+                data: notificationData,
+            })),
+        );
 
         // Upsert cooldown record
         await supabase.from("list_edit_notifications").upsert(
@@ -2139,11 +2159,7 @@ app.post("/lists/:id/restaurants", checkJwt, async (req, res) => {
 
         if (error) return res.status(500).json({ error: error.message });
 
-        // Notify owner if editor added a restaurant
-        if (!isOwner) {
-            await notifyListUpdated(id, user_id, list.user_id);
-        }
-
+        await notifyListUpdated(id, user_id, list.user_id);
         res.status(201).json(data);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -2243,10 +2259,7 @@ app.delete(
 
             if (error) return res.status(500).json({ error: error.message });
 
-            if (!isOwner) {
-                await notifyListUpdated(id, user_id, list.user_id);
-            }
-
+            await notifyListUpdated(id, user_id, list.user_id);
             res.status(200).json({ success: true });
         } catch (err) {
             res.status(500).json({ error: err.message });
@@ -2305,10 +2318,7 @@ app.patch("/lists/:id/restaurants/sort-checked", checkJwt, async (req, res) => {
             ),
         );
 
-        if (!isOwner) {
-            await notifyListUpdated(id, user_id, list.user_id);
-        }
-
+        await notifyListUpdated(id, user_id, list.user_id);
         res.status(200).json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -2360,10 +2370,7 @@ app.patch("/lists/:id/restaurants/reorder", checkJwt, async (req, res) => {
             ),
         );
 
-        if (!isOwner) {
-            await notifyListUpdated(id, user_id, list.user_id);
-        }
-
+        await notifyListUpdated(id, user_id, list.user_id);
         res.status(200).json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
