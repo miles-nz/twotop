@@ -2206,11 +2206,15 @@ app.patch("/lists/:id", checkJwt, async (req, res) => {
     if (is_checklist !== undefined)
         updates.is_checklist = is_checklist === true;
     if (is_featured !== undefined) updates.is_featured = is_featured === true;
+    if (is_featured === true && !list.share_token) {
+        updates.share_token = crypto.randomUUID();
+    }
     if (generate_share_token && !list.share_token) {
         updates.share_token = crypto.randomUUID();
     }
     if (revoke_share_token) {
         updates.share_token = null;
+        updates.is_featured = false;
     }
 
     try {

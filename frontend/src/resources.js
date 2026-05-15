@@ -110,12 +110,10 @@ export const text = {
     appearance: "Appearance",
     logOutConfirm: "Are you sure you want to log out?",
     memberSince: "Member since",
-    reviewCountLabel: (count) => {
-        return `${count} review${count === 1 ? "" : "s"}`;
-    },
-    listCountLabel: (count) => {
-        return `${count} list${count === 1 ? "" : "s"}`;
-    },
+    reviewCountLabel: (count) => `${count} review${count === 1 ? "" : "s"}`,
+    listCountLabel: (count) => `${count} list${count === 1 ? "" : "s"}`,
+    featuredLists: "Featured Lists",
+    settings: "Settings",
 
     // Notifications / Friend Requests
     notifications: "Notifications",
@@ -262,6 +260,8 @@ export const text = {
     copy: "Copy",
     listNotFound: "List not found.",
     featureList: "Feature on profile",
+    confirmRevokeFeatured:
+        "This will also remove this list from your profile. Are you sure?",
 
     // Errors
     errorFormatted: (error) => `Error: ${error}`,

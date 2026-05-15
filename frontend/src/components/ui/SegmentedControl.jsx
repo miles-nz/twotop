@@ -42,8 +42,15 @@ export default function SegmentedControl({
         return () => observer.disconnect();
     }, [options, showText, showIcon, fullWidth]);
 
+    const hasInitialized = useRef(false);
+
     useLayoutEffect(() => {
         if (segmentWidth === 0) return;
+        if (!hasInitialized.current) {
+            x.set(selectedIndex * segmentWidth);
+            hasInitialized.current = true;
+            return;
+        }
         animate(x, selectedIndex * segmentWidth, {
             type: "spring",
             stiffness: 400,

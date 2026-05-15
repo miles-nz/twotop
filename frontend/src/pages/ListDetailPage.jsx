@@ -467,6 +467,7 @@ export default function ListDetailPage() {
                     shares={list.shares}
                     shareToken={list.share_token}
                     isOwner={isOwner}
+                    isFeatured={list.is_featured}
                     ownerId={list.user_id}
                     ownerName={isOwner ? currentUserName : list.owner_name}
                     ownerPicture={

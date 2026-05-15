@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useState, useRef } from "react";
+import { useParams } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import {
     Camera,
@@ -10,10 +10,10 @@ import {
     LogOut,
     Moon,
     NotebookText,
+    List,
     Users,
     Palette,
     BookOpen,
-    LayoutList,
     X,
 } from "lucide-react";
 import Avatar from "../components/ui/Avatar";
@@ -27,7 +27,7 @@ import InlineEdit from "../components/ui/InlineEdit";
 import { useTheme } from "../contexts/ThemeContext";
 import { useUser } from "../contexts/UserContext";
 import { text, enums } from "../resources";
-import { getOS, isDefaultAvatar, makeProfileUrl } from "../utils";
+import { getOS, isDefaultAvatar } from "../utils";
 import { useBreakpoint } from "../hooks/useBreakpoint";
 import { useOtherUserProfile } from "../hooks/useOtherUserProfile";
 import ConfirmModal from "../components/ui/ConfirmModal";
@@ -95,6 +95,51 @@ export default function ProfilePage() {
         ? null
         : currentUserPicture;
     const displayName = currentUserName ?? user?.name;
+
+    // Own profile state
+    const [activeTab, setActiveTab] = useState("settings");
+    const [ownReviews, setOwnReviews] = useState(null);
+    const [ownReviewsLoading, setOwnReviewsLoading] = useState(false);
+    const [ownLists, setOwnLists] = useState(null);
+    const [ownListsLoading, setOwnListsLoading] = useState(false);
+
+    const handleSelectTab = async (tab) => {
+        setActiveTab(tab);
+        if (tab === "reviews" && ownReviews === null) {
+            setOwnReviewsLoading(true);
+            try {
+                const token = await getAccessTokenSilently();
+                const res = await fetch(
+                    `${import.meta.env.VITE_API_URL}/reviews/user/${encodeURIComponent(user.sub)}`,
+                    { headers: { Authorization: `Bearer ${token}` } },
+                );
+                const data = await res.json();
+                if (res.ok) setOwnReviews(data);
+                else setOwnReviews([]);
+            } catch {
+                setOwnReviews([]);
+            } finally {
+                setOwnReviewsLoading(false);
+            }
+        }
+        if (tab === "lists" && ownLists === null) {
+            setOwnListsLoading(true);
+            try {
+                const token = await getAccessTokenSilently();
+                const res = await fetch(
+                    `${import.meta.env.VITE_API_URL}/lists/user/${encodeURIComponent(user.sub)}`,
+                    { headers: { Authorization: `Bearer ${token}` } },
+                );
+                const data = await res.json();
+                if (res.ok) setOwnLists(data);
+                else setOwnLists([]);
+            } catch {
+                setOwnLists([]);
+            } finally {
+                setOwnListsLoading(false);
+            }
+        }
+    };
 
     const handleUploadPicture = async (file) => {
         setUploading(true);
@@ -195,7 +240,7 @@ export default function ProfilePage() {
 
     if (!isOwnProfile) {
         return (
-            <div className="max-w-3xl mx-auto pt-8 pb-24 px-4 sm:px-6 lg:px-0 flex flex-col gap-4">
+            <div className="max-w-3xl mx-auto pt-4 pb-24 px-4 sm:px-6 lg:px-0 flex flex-col gap-4">
                 <div className="bg-surface-50 rounded-2xl border border-surface-200 shadow-sm p-6 flex flex-col items-center gap-3">
                     <Avatar
                         name={otherUser?.name}
@@ -234,7 +279,6 @@ export default function ProfilePage() {
                         </button>
                     )}
 
-                    {/* Reviews + Lists toggles */}
                     {(reviewCount > 0 || listCount > 0) && (
                         <div className="w-full border-t border-surface-200 pt-4 flex justify-center gap-6">
                             {reviewCount > 0 && (
@@ -243,7 +287,7 @@ export default function ProfilePage() {
                                         if (!reviewsOpen) setListsOpen(false);
                                         handleToggleReviews();
                                     }}
-                                    className="flex items-center gap-1.5 text-sm text-text-light hover:text-text-dark transition-colors"
+                                    className={`flex items-center gap-1.5 text-sm hover:text-text-dark transition-colors ${reviewsOpen ? "text-text-dark" : "text-text-light"}`}
                                 >
                                     <NotebookText size={14} />
                                     {text.reviewCountLabel(reviewCount)}
@@ -260,9 +304,9 @@ export default function ProfilePage() {
                                         if (!listsOpen) setReviewsOpen(false);
                                         handleToggleLists();
                                     }}
-                                    className="flex items-center gap-1.5 text-sm text-text-light hover:text-text-dark transition-colors"
+                                    className={`flex items-center gap-1.5 text-sm hover:text-text-dark transition-colors ${listsOpen ? "text-text-dark" : "text-text-light"}`}
                                 >
-                                    <LayoutList size={14} />
+                                    <List size={14} />
                                     {text.listCountLabel(listCount)}
                                     {listsOpen ? (
                                         <ChevronUp size={14} />
@@ -319,17 +363,8 @@ export default function ProfilePage() {
                             userLists.map((list) => (
                                 <a
                                     key={list.id}
-                                    href={
-                                        list.share_token
-                                            ? `/lists/shared/${list.share_token}`
-                                            : null
-                                    }
-                                    onClick={
-                                        !list.share_token
-                                            ? (e) => e.preventDefault()
-                                            : undefined
-                                    }
-                                    className="block bg-surface-50 border border-surface-200 rounded-2xl px-5 py-4 hover:bg-surface-100 transition-colors"
+                                    href={`/lists/shared/${list.share_token}`}
+                                    className="block bg-surface-50 border border-surface-200 rounded-2xl px-5 py-4 hover:bg-surface-300 transition-colors"
                                 >
                                     <p className="text-sm font-semibold text-text-dark">
                                         {list.name}
@@ -353,8 +388,9 @@ export default function ProfilePage() {
         );
     }
 
+    // Own profile
     return (
-        <div className="max-w-3xl mx-auto pt-8 pb-24 px-4 sm:px-6 lg:px-0 flex flex-col gap-4">
+        <div className="max-w-3xl mx-auto pt-4 pb-24 px-4 sm:px-6 lg:px-0 flex flex-col gap-4">
             {/* Profile header */}
             <div className="bg-surface-50 rounded-2xl border border-surface-200 shadow-sm p-6 flex flex-col items-center gap-3">
                 <div className="relative">
@@ -423,66 +459,161 @@ export default function ProfilePage() {
                     <ShareIcon size={15} />
                     {text.shareProfile}
                 </button>
-            </div>
 
-            {/* 2-col grid: Friends + Theme */}
-            <div className="grid grid-cols-2 gap-3">
-                <button
-                    onClick={() => setFriendsModalOpen(true)}
-                    className="bg-surface-50 border border-surface-200 rounded-2xl p-4 flex flex-col items-start gap-2 text-left hover:bg-surface-200 transition-colors"
-                >
-                    <Users size={20} className="text-text-light" />
-                    <span className="text-sm font-medium text-text-dark">
-                        {text.friendsLabel}
-                    </span>
-                </button>
-                <button
-                    onClick={() => setThemeModalOpen(true)}
-                    className="bg-surface-50 border border-surface-200 rounded-2xl p-4 flex flex-col items-start gap-2 text-left hover:bg-surface-200 transition-colors"
-                >
-                    <Palette size={20} className="text-text-light" />
-                    <span className="text-sm font-medium text-text-dark">
-                        {text.theme}
-                    </span>
-                </button>
-            </div>
-
-            {/* Appearance row */}
-            <div className="bg-surface-50 border border-surface-200 rounded-2xl px-5 py-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <Moon size={18} className="text-text-light" />
-                    <span className="text-sm font-medium text-text-dark">
-                        {text.appearance}
-                    </span>
+                {/* Tab bar */}
+                <div className="w-full border-t border-surface-200 pt-4 flex justify-center gap-1">
+                    {[
+                        {
+                            key: "reviews",
+                            label: text.reviews,
+                        },
+                        {
+                            key: "lists",
+                            label: text.featuredLists,
+                        },
+                        { key: "settings", label: text.settings },
+                    ].map((tab) => (
+                        <button
+                            key={tab.key}
+                            onClick={() => handleSelectTab(tab.key)}
+                            className={`px-3.5 py-1.5 rounded-full text-sm transition-colors ${
+                                activeTab === tab.key
+                                    ? "bg-surface-200 text-text-dark font-medium"
+                                    : "text-text-light hover:text-text-dark"
+                            }`}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
                 </div>
-                <DarkModeToggle
-                    colorMode={colorMode}
-                    onColorModeChange={setColorMode}
-                    iconOnly={!isDesktop}
-                />
             </div>
 
-            {/* 2-col grid: Tutorial + Log out */}
-            <div className="grid grid-cols-2 gap-3">
-                <button
-                    onClick={() => setShowTutorial(true)}
-                    className="bg-surface-50 border border-surface-200 rounded-2xl p-4 flex flex-col items-start gap-2 text-left hover:bg-surface-200 transition-colors"
-                >
-                    <BookOpen size={20} className="text-text-light" />
-                    <span className="text-sm font-medium text-text-dark">
-                        {text.showTutorial}
-                    </span>
-                </button>
-                <button
-                    onClick={() => setLogoutModalOpen(true)}
-                    className="bg-surface-50 border border-surface-200 rounded-2xl p-4 flex flex-col items-start gap-2 text-left hover:bg-surface-200 transition-colors"
-                >
-                    <LogOut size={20} className="text-error-600" />
-                    <span className="text-sm font-medium text-error-600">
-                        {text.logOut}
-                    </span>
-                </button>
-            </div>
+            {/* Tab content */}
+            {activeTab === "reviews" && (
+                <div className="flex flex-col gap-4">
+                    {ownReviewsLoading && (
+                        <div className="flex justify-center py-6">
+                            <LoadingDots />
+                        </div>
+                    )}
+                    {!ownReviewsLoading && ownReviews?.length === 0 && (
+                        <p className="text-sm text-text-light text-center py-6">
+                            {text.noReviews}
+                        </p>
+                    )}
+                    {!ownReviewsLoading && ownReviews?.length > 0 && (
+                        <ReviewListProvider>
+                            {ownReviews.map((review) => (
+                                <ReviewCard
+                                    key={review.id}
+                                    review={review}
+                                    currentUserId={user?.sub}
+                                    onReviewUpdated={() => {}}
+                                />
+                            ))}
+                        </ReviewListProvider>
+                    )}
+                </div>
+            )}
+
+            {activeTab === "lists" && (
+                <div className="flex flex-col gap-3">
+                    {ownListsLoading && (
+                        <div className="flex justify-center py-6">
+                            <LoadingDots />
+                        </div>
+                    )}
+                    {!ownListsLoading && ownLists?.length === 0 && (
+                        <p className="text-sm text-text-light text-center py-6">
+                            {text.noLists}
+                        </p>
+                    )}
+                    {!ownListsLoading &&
+                        ownLists?.length > 0 &&
+                        ownLists.map((list) => (
+                            <a
+                                key={list.id}
+                                href={`/lists/shared/${list.share_token}`}
+                                className="block bg-surface-50 border border-surface-200 rounded-2xl px-5 py-4 hover:bg-surface-300 transition-colors"
+                            >
+                                <p className="text-sm font-semibold text-text-dark">
+                                    {list.name}
+                                </p>
+                                {list.description && (
+                                    <p className="text-xs text-text-light mt-0.5">
+                                        {list.description}
+                                    </p>
+                                )}
+                                <p className="text-xs text-text-light mt-1">
+                                    {list.restaurants.length}{" "}
+                                    {list.restaurants.length === 1
+                                        ? text.restaurant
+                                        : text.restaurants}
+                                </p>
+                            </a>
+                        ))}
+                </div>
+            )}
+
+            {activeTab === "settings" && (
+                <>
+                    <div className="grid grid-cols-2 gap-3">
+                        <button
+                            onClick={() => setFriendsModalOpen(true)}
+                            className="bg-surface-50 border border-surface-200 rounded-2xl p-4 flex flex-col items-start gap-2 text-left hover:bg-surface-200 transition-colors"
+                        >
+                            <Users size={20} className="text-text-light" />
+                            <span className="text-sm font-medium text-text-dark">
+                                {text.friendsLabel}
+                            </span>
+                        </button>
+                        <button
+                            onClick={() => setThemeModalOpen(true)}
+                            className="bg-surface-50 border border-surface-200 rounded-2xl p-4 flex flex-col items-start gap-2 text-left hover:bg-surface-200 transition-colors"
+                        >
+                            <Palette size={20} className="text-text-light" />
+                            <span className="text-sm font-medium text-text-dark">
+                                {text.theme}
+                            </span>
+                        </button>
+                    </div>
+
+                    <div className="bg-surface-50 border border-surface-200 rounded-2xl px-5 py-4 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <Moon size={18} className="text-text-light" />
+                            <span className="text-sm font-medium text-text-dark">
+                                {text.appearance}
+                            </span>
+                        </div>
+                        <DarkModeToggle
+                            colorMode={colorMode}
+                            onColorModeChange={setColorMode}
+                            iconOnly={!isDesktop}
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                        <button
+                            onClick={() => setShowTutorial(true)}
+                            className="bg-surface-50 border border-surface-200 rounded-2xl p-4 flex flex-col items-start gap-2 text-left hover:bg-surface-200 transition-colors"
+                        >
+                            <BookOpen size={20} className="text-text-light" />
+                            <span className="text-sm font-medium text-text-dark">
+                                {text.showTutorial}
+                            </span>
+                        </button>
+                        <button
+                            onClick={() => setLogoutModalOpen(true)}
+                            className="bg-surface-50 border border-surface-200 rounded-2xl p-4 flex flex-col items-start gap-2 text-left hover:bg-surface-200 transition-colors"
+                        >
+                            <LogOut size={20} className="text-error-600" />
+                            <span className="text-sm font-medium text-error-600">
+                                {text.logOut}
+                            </span>
+                        </button>
+                    </div>
+                </>
+            )}
 
             {friendsModalOpen && (
                 <FriendsModal

@@ -14,6 +14,7 @@ export default function ShareListModal({
     ownerId,
     ownerName,
     ownerPicture,
+    isFeatured,
     onClose,
     getAccessTokenSilently,
 }) {
@@ -424,24 +425,28 @@ export default function ShareListModal({
                                         )}
                                     </div>
                                     {confirmRevoke ? (
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-xs text-text-light">
-                                                {text.confirmRevokeLink}
-                                            </span>
-                                            <button
-                                                onClick={handleRevokeLink}
-                                                className="text-xs text-error-500 hover:underline"
-                                            >
-                                                {text.yes}
-                                            </button>
-                                            <button
-                                                onClick={() =>
-                                                    setConfirmRevoke(false)
-                                                }
-                                                className="text-xs text-text-light hover:underline"
-                                            >
-                                                {text.cancel}
-                                            </button>
+                                        <div className="flex flex-col gap-2">
+                                            <p className="text-xs text-text-light">
+                                                {isFeatured
+                                                    ? text.confirmRevokeFeatured
+                                                    : text.confirmRevokeLink}
+                                            </p>
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={handleRevokeLink}
+                                                    className="text-xs text-error-500 hover:underline"
+                                                >
+                                                    {text.yes}
+                                                </button>
+                                                <button
+                                                    onClick={() =>
+                                                        setConfirmRevoke(false)
+                                                    }
+                                                    className="text-xs text-text-light hover:underline"
+                                                >
+                                                    {text.cancel}
+                                                </button>
+                                            </div>
                                         </div>
                                     ) : (
                                         <button

@@ -24,6 +24,18 @@ export function useOtherUserProfile(userId, isOwnProfile) {
 
     useEffect(() => {
         if (isOwnProfile || !userId) return;
+        setOtherUser(null);
+        setOtherUserLoading(true);
+        setFriendStatus("loading");
+        setFriendStatusLoading(true);
+        setReviewsOpen(false);
+        setUserReviews(null);
+        setListsOpen(false);
+        setUserLists(null);
+    }, [userId]);
+
+    useEffect(() => {
+        if (isOwnProfile || !userId) return;
         const fetchOtherUser = async () => {
             try {
                 const headers = {};
@@ -117,58 +129,64 @@ export function useOtherUserProfile(userId, isOwnProfile) {
     };
 
     const handleToggleReviews = async () => {
-        setReviewsOpen((prev) => !prev);
-        if (!reviewsOpen && userReviews === null) {
-            setReviewsLoading(true);
-            try {
-                const headers = {};
-                if (isAuthenticated) {
-                    const token = await getAccessTokenSilently();
-                    headers.Authorization = `Bearer ${token}`;
+        const opening = !reviewsOpen;
+        setReviewsOpen(opening);
+        if (opening) {
+            setListsOpen(false);
+            if (userReviews === null) {
+                setReviewsLoading(true);
+                try {
+                    const headers = {};
+                    if (isAuthenticated) {
+                        const token = await getAccessTokenSilently();
+                        headers.Authorization = `Bearer ${token}`;
+                    }
+                    const fullUserId = `auth0|${userId}`;
+                    const res = await fetch(
+                        `${import.meta.env.VITE_API_URL}/reviews/user/${encodeURIComponent(fullUserId)}`,
+                        { headers },
+                    );
+                    const data = await res.json();
+                    if (res.ok) setUserReviews(data);
+                    else setUserReviews([]);
+                } catch {
+                    setUserReviews([]);
+                } finally {
+                    setReviewsLoading(false);
                 }
-                const fullUserId = `auth0|${userId}`;
-                const res = await fetch(
-                    `${import.meta.env.VITE_API_URL}/reviews/user/${encodeURIComponent(fullUserId)}`,
-                    { headers },
-                );
-                const data = await res.json();
-                if (res.ok) setUserReviews(data);
-                else setUserReviews([]);
-            } catch {
-                setUserReviews([]);
-            } finally {
-                setReviewsLoading(false);
             }
         }
     };
 
     const handleToggleLists = async () => {
-        setListsOpen((prev) => !prev);
-        if (!listsOpen && userLists === null) {
-            setListsLoading(true);
-            try {
-                const fullUserId = `auth0|${userId}`;
-                const res = await fetch(
-                    `${import.meta.env.VITE_API_URL}/lists/user/${encodeURIComponent(fullUserId)}`,
-                );
-                const data = await res.json();
-                if (res.ok) setUserLists(data);
-                else setUserLists([]);
-            } catch {
-                setUserLists([]);
-            } finally {
-                setListsLoading(false);
+        const opening = !listsOpen;
+        setListsOpen(opening);
+        if (opening) {
+            setReviewsOpen(false);
+            if (userLists === null) {
+                setListsLoading(true);
+                try {
+                    const fullUserId = `auth0|${userId}`;
+                    const res = await fetch(
+                        `${import.meta.env.VITE_API_URL}/lists/user/${encodeURIComponent(fullUserId)}`,
+                    );
+                    const data = await res.json();
+                    if (res.ok) setUserLists(data);
+                    else setUserLists([]);
+                } catch {
+                    setUserLists([]);
+                } finally {
+                    setListsLoading(false);
+                }
             }
         }
     };
 
     const isLoading = otherUserLoading || friendStatusLoading;
-
     const reviewCount =
         friendStatus === "friends"
             ? otherUser?.total_review_count
             : otherUser?.public_review_count;
-
     const listCount = otherUser?.featured_list_count ?? 0;
 
     return {
