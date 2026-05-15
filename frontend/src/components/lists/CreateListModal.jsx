@@ -208,6 +208,9 @@ export default function CreateListModal({ onClose, onCreated }) {
                             </label>
                             <PlacesSearch
                                 onPlaceSelected={handleAddRestaurant}
+                                onManualAdd={(name) =>
+                                    handleAddRestaurant({ name })
+                                }
                                 resetOnSelect={true}
                                 showTypingPlaceholder={false}
                                 className="w-full text-sm border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-dark placeholder-text-light"

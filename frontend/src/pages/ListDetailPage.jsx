@@ -208,6 +208,59 @@ export default function ListDetailPage() {
         }
     };
 
+    const handleManualAdd = async (name) => {
+        try {
+            const token = await getAccessTokenSilently();
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/lists/${id}/restaurants`,
+                {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ restaurant_name: name }),
+                },
+            );
+            const data = await res.json();
+            if (res.ok) setRestaurants((prev) => [data, ...prev]);
+        } catch (err) {
+            console.error("Failed to manually add restaurant:", err);
+        }
+    };
+
+    const handleUpdateRestaurantAddress = async (restaurantId, address) => {
+        try {
+            const token = await getAccessTokenSilently();
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/lists/${id}/restaurants/${restaurantId}`,
+                {
+                    method: "PATCH",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ restaurant_address: address }),
+                },
+            );
+            const data = await res.json();
+            if (res.ok) {
+                setRestaurants((prev) =>
+                    prev.map((r) =>
+                        r.id === restaurantId
+                            ? {
+                                  ...r,
+                                  restaurant_address: data.restaurant_address,
+                              }
+                            : r,
+                    ),
+                );
+            }
+        } catch (err) {
+            console.error("Failed to update address:", err);
+        }
+    };
+
     const handleDeleteList = async () => {
         setSaving(true);
         try {
@@ -270,14 +323,25 @@ export default function ListDetailPage() {
         setList((prev) => ({ ...prev, is_featured: newValue }));
         try {
             const token = await getAccessTokenSilently();
-            await fetch(`${import.meta.env.VITE_API_URL}/lists/${id}`, {
-                method: "PATCH",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/lists/${id}`,
+                {
+                    method: "PATCH",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ is_featured: newValue }),
                 },
-                body: JSON.stringify({ is_featured: newValue }),
-            });
+            );
+            const data = await res.json();
+            if (res.ok) {
+                setList((prev) => ({
+                    ...prev,
+                    is_featured: data.is_featured,
+                    share_token: data.share_token,
+                }));
+            }
         } catch (err) {
             console.error("Failed to toggle featured:", err);
             setList((prev) => ({ ...prev, is_featured: !newValue }));
@@ -407,6 +471,7 @@ export default function ListDetailPage() {
                 <div className="mb-6">
                     <PlacesSearch
                         onPlaceSelected={handleAddRestaurant}
+                        onManualAdd={handleManualAdd}
                         resetOnSelect={true}
                         showTypingPlaceholder={false}
                         className="w-full text-sm border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-dark"
@@ -439,6 +504,9 @@ export default function ListDetailPage() {
                                     onRemove={handleRemoveRestaurant}
                                     isChecklist={list.is_checklist}
                                     onCheck={handleCheck}
+                                    onAddressUpdate={
+                                        handleUpdateRestaurantAddress
+                                    }
                                 />
                             </SortableItem>
                         ) : (
@@ -449,10 +517,13 @@ export default function ListDetailPage() {
                                 <RestaurantRow
                                     restaurant={restaurant}
                                     index={index}
-                                    canEdit={false}
+                                    canEdit={canEdit}
                                     onRemove={handleRemoveRestaurant}
                                     isChecklist={list.is_checklist}
                                     onCheck={handleCheck}
+                                    onAddressUpdate={
+                                        handleUpdateRestaurantAddress
+                                    }
                                 />
                             </div>
                         ),

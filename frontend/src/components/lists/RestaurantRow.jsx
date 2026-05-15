@@ -1,4 +1,5 @@
-import { MapPin, Trash2, Check } from "lucide-react";
+import { useState } from "react";
+import { MapPin, MapPinPen, Trash2, Check } from "lucide-react";
 import { text } from "../../resources";
 import { formatShortAddress } from "../../utils";
 
@@ -9,7 +10,24 @@ export default function RestaurantRow({
     onRemove,
     isChecklist,
     onCheck,
+    onAddressUpdate,
 }) {
+    const [editingAddress, setEditingAddress] = useState(false);
+    const [addressInput, setAddressInput] = useState(
+        restaurant.restaurant_address || "",
+    );
+    const [saving, setSaving] = useState(false);
+
+    const handleSaveAddress = async () => {
+        setSaving(true);
+        await onAddressUpdate(restaurant.id, addressInput.trim());
+        setSaving(false);
+        setEditingAddress(false);
+    };
+
+    const hasAddress = !!restaurant.restaurant_address;
+    const hasPlaceId = !!restaurant.place_id;
+
     return (
         <div className="flex items-center justify-between gap-2 py-2 pr-3 min-w-0 flex-1">
             <div className="flex items-center gap-3 min-w-0">
@@ -40,14 +58,17 @@ export default function RestaurantRow({
                     <p
                         className={`text-sm font-medium truncate ${
                             isChecklist && restaurant.checked
-                                ? " text-text-light"
+                                ? "text-text-light"
                                 : "text-text-dark"
                         }`}
                     >
                         {restaurant.restaurant_name}
                     </p>
-                    {restaurant.restaurant_address &&
-                        (restaurant.place_id ? (
+
+                    {/* Address display */}
+                    {hasAddress &&
+                        !editingAddress &&
+                        (hasPlaceId ? (
                             <a
                                 href={text.makeGoogleMapsLink(
                                     restaurant.restaurant_name,
@@ -68,9 +89,29 @@ export default function RestaurantRow({
                                     )}
                                 </span>
                             </a>
+                        ) : canEdit ? (
+                            <button
+                                onClick={() => {
+                                    setAddressInput(
+                                        restaurant.restaurant_address,
+                                    );
+                                    setEditingAddress(true);
+                                }}
+                                className="flex items-center gap-1 text-xs text-text-light hover:text-secondary-500 transition-colors"
+                            >
+                                <MapPinPen size={10} className="shrink-0" />
+                                <span className="hidden sm:inline">
+                                    {restaurant.restaurant_address}
+                                </span>
+                                <span className="sm:hidden">
+                                    {formatShortAddress(
+                                        restaurant.restaurant_address,
+                                    )}
+                                </span>
+                            </button>
                         ) : (
                             <p className="flex items-center gap-1 text-xs text-text-light">
-                                <MapPin size={10} className="shrink-0" />
+                                <MapPinPen size={10} className="shrink-0" />
                                 <span className="hidden sm:inline">
                                     {restaurant.restaurant_address}
                                 </span>
@@ -81,6 +122,56 @@ export default function RestaurantRow({
                                 </span>
                             </p>
                         ))}
+
+                    {/* Add/Edit address affordance for manual entries */}
+                    {!hasAddress &&
+                        !editingAddress &&
+                        canEdit &&
+                        !hasPlaceId && (
+                            <button
+                                onClick={() => {
+                                    setAddressInput("");
+                                    setEditingAddress(true);
+                                }}
+                                className="text-xs text-text-light hover:text-secondary-500 transition-colors"
+                            >
+                                {text.addAddress}
+                            </button>
+                        )}
+
+                    {/* Inline address input */}
+                    {editingAddress && (
+                        <div className="flex items-center gap-1.5 mt-1">
+                            <input
+                                autoFocus
+                                type="text"
+                                value={addressInput}
+                                onChange={(e) =>
+                                    setAddressInput(e.target.value)
+                                }
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") handleSaveAddress();
+                                    if (e.key === "Escape")
+                                        setEditingAddress(false);
+                                }}
+                                placeholder={text.addressPlaceholder}
+                                className="text-xs border border-surface-300 rounded px-2 py-1 bg-surface-50 focus:outline-none focus:ring-1 focus:ring-secondary-400 text-text-dark w-40 sm:w-56"
+                            />
+                            <button
+                                onClick={handleSaveAddress}
+                                disabled={saving}
+                                className="text-xs text-secondary-500 hover:text-secondary-600 disabled:opacity-40 transition-colors"
+                            >
+                                {saving ? text.saving : text.save}
+                            </button>
+                            <button
+                                onClick={() => setEditingAddress(false)}
+                                className="text-xs text-text-light hover:text-text-dark transition-colors"
+                            >
+                                {text.cancel}
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
             {canEdit && (

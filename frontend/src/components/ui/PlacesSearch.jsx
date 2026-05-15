@@ -14,6 +14,7 @@ function PlacesSearch({
     resetOnSelect = false,
     showTypingPlaceholder = true,
     onPlaceSelected,
+    onManualAdd,
     className = "",
 }) {
     const { getAccessTokenSilently } = useAuth0();
@@ -74,7 +75,7 @@ function PlacesSearch({
                 const data = await response.json();
                 if (!response.ok) throw new Error();
                 setSuggestions(data);
-                setOpen(data.length > 0);
+                setOpen(true);
             } catch (err) {
                 setSearchError(true);
                 setOpen(true);
@@ -127,11 +128,22 @@ function PlacesSearch({
         }
     };
 
+    const handleManualAdd = () => {
+        const name = value.trim();
+        if (!name || !onManualAdd) return;
+        setOpen(false);
+        setSuggestions([]);
+        if (resetOnSelect) setInternalValue("");
+        onManualAdd(name);
+    };
+
     const handleClear = () => {
         onClearPlace?.();
         setSuggestions([]);
         setOpen(false);
     };
+
+    const showManualAdd = !!onManualAdd && value.trim().length > 0;
 
     return (
         <div className="relative" ref={containerRef}>
@@ -164,38 +176,62 @@ function PlacesSearch({
                     </button>
                 )}
             </div>
-            {open && (
+            {(open || showManualAdd) && (
                 <ul className="absolute z-50 w-full bg-surface-50 border border-surface-200 rounded-lg shadow-lg mt-1 max-h-60 overflow-y-auto">
-                    {searchError ? (
-                        <li className="px-4 py-2 text-sm text-text-light">
-                            {text.searchError}
+                    {open && (
+                        <>
+                            {searchError ? (
+                                <li className="px-4 py-2 text-sm text-text-light">
+                                    {text.searchError}
+                                </li>
+                            ) : loading ? (
+                                <li className="px-4 py-2 text-sm text-text-light">
+                                    {text.searchingPlaces}
+                                </li>
+                            ) : suggestions.length === 0 ? (
+                                <li className="px-4 py-2 text-sm text-text-light">
+                                    {text.noPlacesFound}
+                                </li>
+                            ) : (
+                                suggestions.map((s) => (
+                                    <li key={s.place_id}>
+                                        <button
+                                            type="button"
+                                            onMouseDown={(e) =>
+                                                e.preventDefault()
+                                            }
+                                            onClick={() => handleSelect(s)}
+                                            className="w-full text-left px-4 py-2 hover:bg-surface-100 transition-colors"
+                                        >
+                                            <span className="block text-sm text-text-dark">
+                                                {s.name}
+                                            </span>
+                                            <span className="block text-xs text-text-light">
+                                                {s.address}
+                                            </span>
+                                        </button>
+                                    </li>
+                                ))
+                            )}
+                        </>
+                    )}
+                    {showManualAdd && (
+                        <li
+                            className={
+                                open ? "border-t border-surface-200" : ""
+                            }
+                        >
+                            <button
+                                type="button"
+                                onMouseDown={(e) => e.preventDefault()}
+                                onClick={handleManualAdd}
+                                className="w-full text-left px-4 py-2 hover:bg-surface-100 transition-colors"
+                            >
+                                <span className="block text-sm text-secondary-500">
+                                    {text.addManualRestaurant(value.trim())}
+                                </span>
+                            </button>
                         </li>
-                    ) : loading ? (
-                        <li className="px-4 py-2 text-sm text-text-light">
-                            {text.searchingPlaces}
-                        </li>
-                    ) : suggestions.length === 0 ? (
-                        <li className="px-4 py-2 text-sm text-text-light">
-                            {text.noPlacesFound}
-                        </li>
-                    ) : (
-                        suggestions.map((s) => (
-                            <li key={s.place_id}>
-                                <button
-                                    type="button"
-                                    onMouseDown={(e) => e.preventDefault()}
-                                    onClick={() => handleSelect(s)}
-                                    className="w-full text-left px-4 py-2 hover:bg-surface-100 transition-colors"
-                                >
-                                    <span className="block text-sm text-text-dark">
-                                        {s.name}
-                                    </span>
-                                    <span className="block text-xs text-text-light">
-                                        {s.address}
-                                    </span>
-                                </button>
-                            </li>
-                        ))
                     )}
                 </ul>
             )}

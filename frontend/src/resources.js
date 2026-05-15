@@ -262,6 +262,10 @@ export const text = {
     featureList: "Feature on profile",
     confirmRevokeFeatured:
         "This will also remove this list from your profile. Are you sure?",
+    addManualRestaurant: (name) => `Add "${name}"`,
+    addAddress: "Add address",
+    addressPlaceholder: "Enter address",
+    saving: "Saving...",
 
     // Errors
     errorFormatted: (error) => `Error: ${error}`,

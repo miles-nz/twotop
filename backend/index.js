@@ -2331,6 +2331,65 @@ app.post("/lists/:id/restaurants", checkJwt, async (req, res) => {
 });
 
 app.patch(
+    "/lists/:id/restaurants/:restaurantId",
+    checkJwt,
+    async (req, res) => {
+        const user_id = req.auth.payload.sub;
+        const { id, restaurantId } = req.params;
+        const { restaurant_address } = req.body;
+
+        if (
+            restaurant_address !== undefined &&
+            typeof restaurant_address !== "string"
+        ) {
+            return res
+                .status(400)
+                .json({ error: "Invalid restaurant_address" });
+        }
+
+        const { data: list, error: fetchError } = await supabase
+            .from("lists")
+            .select("*")
+            .eq("id", id)
+            .maybeSingle();
+
+        if (fetchError || !list)
+            return res.status(404).json({ error: "List not found." });
+
+        const isOwner = list.user_id === user_id;
+        if (!isOwner) {
+            const { data: share } = await supabase
+                .from("list_shares")
+                .select("permission")
+                .eq("list_id", id)
+                .eq("user_id", user_id)
+                .maybeSingle();
+
+            if (!share || share.permission !== "edit") {
+                return res.status(403).json({ error: ERRORS.unauthorised });
+            }
+        }
+
+        try {
+            const { data, error } = await supabase
+                .from("list_restaurants")
+                .update({
+                    restaurant_address: restaurant_address?.trim() || null,
+                })
+                .eq("id", restaurantId)
+                .eq("list_id", id)
+                .select()
+                .single();
+
+            if (error) return res.status(500).json({ error: error.message });
+            res.status(200).json(data);
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    },
+);
+
+app.patch(
     "/lists/:id/restaurants/:restaurantId/check",
     checkJwt,
     async (req, res) => {
