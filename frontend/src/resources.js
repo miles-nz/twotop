@@ -83,10 +83,6 @@ export const text = {
     // App
     appName1: "two",
     appName2: "top",
-    appNameSeparator: ":",
-    get appName() {
-        return `${this.appName1}${this.appNameSeparator}${this.appName2}`;
-    },
     reviews: "Reviews",
     lists: "Lists",
 
@@ -265,7 +261,8 @@ export const text = {
     addManualRestaurant: (name) => `Add "${name}"`,
     addAddress: "Add address",
     addressPlaceholder: "Enter address",
-    saving: "Saving...",
+    noFeaturedLists:
+        "You haven't featured any lists yet. Feature a list to have it show up here.",
 
     // Errors
     errorFormatted: (error) => `Error: ${error}`,

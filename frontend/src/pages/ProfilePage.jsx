@@ -525,7 +525,7 @@ export default function ProfilePage() {
                     )}
                     {!ownListsLoading && ownLists?.length === 0 && (
                         <p className="text-sm text-text-light text-center py-6">
-                            {text.noLists}
+                            {text.noFeaturedLists}
                         </p>
                     )}
                     {!ownListsLoading &&
