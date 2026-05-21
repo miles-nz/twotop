@@ -73,13 +73,19 @@ function ReviewList({
                     setError(
                         `${text.errorFailedFetch} (${response.status}${data?.error ? `: ${data.error}` : ""})`,
                     );
+                    setLoading(false);
                     return;
                 }
                 setReviews(alternateReviewers(data));
                 onReviewsLoaded?.(data.length);
+                setLoading(false);
             } catch (err) {
+                if (
+                    err.message === "Load failed" ||
+                    err.message === "Failed to fetch"
+                )
+                    return;
                 setError(`${text.errorGeneric} (${err.message})`);
-            } finally {
                 setLoading(false);
             }
         };

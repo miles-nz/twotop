@@ -66,48 +66,51 @@ export default function RestaurantRow({
                         }`}
                     >
                         {restaurant.restaurant_name}
-                        {hasAddress &&
-                            !editingAddress &&
-                            (hasPlaceId ? (
-                                <a
-                                    href={text.makeGoogleMapsLink(
-                                        restaurant.restaurant_name,
-                                        restaurant.place_id,
-                                    )}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="sm:hidden font-normal text-text-light hover:text-secondary-500 transition-colors ml-1"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
+                        {hasAddress && !editingAddress && (
+                            <>
+                                <span className="sm:hidden font-normal text-text-light">
+                                    {" "}
                                     ·{" "}
-                                    {formatSuburb(
-                                        restaurant.restaurant_address,
-                                    )}
-                                </a>
-                            ) : canEdit ? (
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setAddressInput(
-                                            restaurant.restaurant_address,
-                                        );
-                                        setEditingAddress(true);
-                                    }}
-                                    className="sm:hidden font-normal text-text-light hover:text-secondary-500 transition-colors ml-1"
-                                >
-                                    ·{" "}
-                                    {formatSuburb(
-                                        restaurant.restaurant_address,
-                                    )}
-                                </button>
-                            ) : (
-                                <span className="sm:hidden font-normal text-text-light ml-1">
-                                    ·{" "}
-                                    {formatSuburb(
-                                        restaurant.restaurant_address,
-                                    )}
                                 </span>
-                            ))}
+                                {hasPlaceId ? (
+                                    <a
+                                        href={text.makeGoogleMapsLink(
+                                            restaurant.restaurant_name,
+                                            restaurant.place_id,
+                                        )}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="sm:hidden font-normal text-text-light hover:text-secondary-500 transition-colors"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        {formatSuburb(
+                                            restaurant.restaurant_address,
+                                        )}
+                                    </a>
+                                ) : canEdit ? (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setAddressInput(
+                                                restaurant.restaurant_address,
+                                            );
+                                            setEditingAddress(true);
+                                        }}
+                                        className="sm:hidden font-normal text-text-light hover:text-secondary-500 transition-colors"
+                                    >
+                                        {formatSuburb(
+                                            restaurant.restaurant_address,
+                                        )}
+                                    </button>
+                                ) : (
+                                    <span className="sm:hidden font-normal text-text-light ml-1">
+                                        {formatSuburb(
+                                            restaurant.restaurant_address,
+                                        )}
+                                    </span>
+                                )}
+                            </>
+                        )}
                     </div>
 
                     {/* Address display - desktop only */}

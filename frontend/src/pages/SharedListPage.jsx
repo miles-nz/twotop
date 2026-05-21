@@ -3,7 +3,8 @@ import { useParams } from "react-router-dom";
 import LoadingDots from "../components/ui/LoadingDots";
 import { useTheme } from "../contexts/ThemeContext";
 import { text } from "../resources";
-import { Check } from "lucide-react";
+import { Check, MapPin, MapPinPen } from "lucide-react";
+import { formatSuburb } from "../utils";
 import LinkedAvatar from "../components/ui/LinkedAvatar";
 import { RestaurantRatings } from "../components/ui/RatingPill";
 
@@ -100,12 +101,68 @@ export default function SharedListPage() {
                                 <div className="min-w-0 flex-1">
                                     <p className="text-sm text-text-dark truncate">
                                         {restaurant.restaurant_name}
+                                        {restaurant.restaurant_address && (
+                                            <>
+                                                <span className="sm:hidden font-normal text-text-light">
+                                                    {" "}
+                                                    ·{" "}
+                                                </span>
+                                                {restaurant.place_id ? (
+                                                    <a
+                                                        href={text.makeGoogleMapsLink(
+                                                            restaurant.restaurant_name,
+                                                            restaurant.place_id,
+                                                        )}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="sm:hidden font-normal text-text-light hover:text-secondary-500 transition-colors"
+                                                        onClick={(e) =>
+                                                            e.stopPropagation()
+                                                        }
+                                                    >
+                                                        {formatSuburb(
+                                                            restaurant.restaurant_address,
+                                                        )}
+                                                    </a>
+                                                ) : (
+                                                    <span className="sm:hidden font-normal text-text-light">
+                                                        {formatSuburb(
+                                                            restaurant.restaurant_address,
+                                                        )}
+                                                    </span>
+                                                )}
+                                            </>
+                                        )}
                                     </p>
-                                    {restaurant.restaurant_address && (
-                                        <p className="text-xs text-text-light">
-                                            {restaurant.restaurant_address}
-                                        </p>
-                                    )}
+                                    {restaurant.restaurant_address &&
+                                        (restaurant.place_id ? (
+                                            <a
+                                                href={text.makeGoogleMapsLink(
+                                                    restaurant.restaurant_name,
+                                                    restaurant.place_id,
+                                                )}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="hidden sm:flex items-center gap-1 text-xs text-text-light hover:text-secondary-500 transition-colors"
+                                                onClick={(e) =>
+                                                    e.stopPropagation()
+                                                }
+                                            >
+                                                <MapPin
+                                                    size={10}
+                                                    className="shrink-0"
+                                                />
+                                                {restaurant.restaurant_address}
+                                            </a>
+                                        ) : (
+                                            <p className="hidden sm:flex items-center gap-1 text-xs text-text-light">
+                                                <MapPinPen
+                                                    size={10}
+                                                    className="shrink-0"
+                                                />
+                                                {restaurant.restaurant_address}
+                                            </p>
+                                        ))}
                                     {list.show_ratings && ratings && (
                                         <div className="sm:hidden mt-0.5">
                                             <RestaurantRatings
