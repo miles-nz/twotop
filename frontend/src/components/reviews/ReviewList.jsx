@@ -51,6 +51,8 @@ function ReviewList({
         useUser();
 
     useEffect(() => {
+        const controller = new AbortController();
+
         const fetchReviews = async () => {
             setLoading(true);
             setError(null);
@@ -60,12 +62,16 @@ function ReviewList({
                 if (isPublic) {
                     response = await fetch(
                         `${import.meta.env.VITE_API_URL}/reviews/public`,
+                        { signal: controller.signal },
                     );
                 } else {
                     const token = await getAccessTokenSilently();
                     response = await fetch(
                         `${import.meta.env.VITE_API_URL}/reviews`,
-                        { headers: { Authorization: `Bearer ${token}` } },
+                        {
+                            headers: { Authorization: `Bearer ${token}` },
+                            signal: controller.signal,
+                        },
                     );
                 }
                 const data = await response.json();
@@ -81,6 +87,7 @@ function ReviewList({
                 setLoading(false);
             } catch (err) {
                 if (
+                    err.name === "AbortError" ||
                     err.message === "Load failed" ||
                     err.message === "Failed to fetch"
                 )
@@ -89,7 +96,9 @@ function ReviewList({
                 setLoading(false);
             }
         };
+
         fetchReviews();
+        return () => controller.abort();
     }, [refreshTrigger, isPublic, getAccessTokenSilently]);
 
     useEffect(() => {
