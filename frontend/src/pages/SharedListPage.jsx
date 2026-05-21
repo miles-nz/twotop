@@ -5,6 +5,7 @@ import { useTheme } from "../contexts/ThemeContext";
 import { text } from "../resources";
 import { Check } from "lucide-react";
 import LinkedAvatar from "../components/ui/LinkedAvatar";
+import { RestaurantRatings } from "../components/ui/RatingPill";
 
 export default function SharedListPage() {
     const { token } = useParams();
@@ -84,32 +85,49 @@ export default function SharedListPage() {
                 </p>
             ) : (
                 <div className="flex flex-col gap-2">
-                    {list.restaurants.map((restaurant, index) => (
-                        <div
-                            key={restaurant.id}
-                            className="flex items-center gap-3 rounded-lg bg-surface-50 border border-surface-200 px-4 py-3"
-                        >
-                            <span className="text-xs text-text-light shrink-0">
-                                {index + 1}
-                            </span>
-                            <div className="min-w-0 flex-1">
-                                <p className="text-sm text-text-dark truncate">
-                                    {restaurant.restaurant_name}
-                                </p>
-                                {restaurant.restaurant_address && (
-                                    <p className="text-xs text-text-light truncate">
-                                        {restaurant.restaurant_address}
+                    {list.restaurants.map((restaurant, index) => {
+                        const ratings = restaurant.place_id
+                            ? list.ratings?.[restaurant.place_id]
+                            : null;
+                        return (
+                            <div
+                                key={restaurant.id}
+                                className="flex items-center gap-3 rounded-lg bg-surface-50 border border-surface-200 px-4 py-3"
+                            >
+                                <span className="text-xs text-text-light shrink-0">
+                                    {index + 1}
+                                </span>
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-sm text-text-dark truncate">
+                                        {restaurant.restaurant_name}
                                     </p>
+                                    {restaurant.restaurant_address && (
+                                        <p className="text-xs text-text-light">
+                                            {restaurant.restaurant_address}
+                                        </p>
+                                    )}
+                                    {list.show_ratings && ratings && (
+                                        <div className="sm:hidden mt-0.5">
+                                            <RestaurantRatings
+                                                ratings={ratings}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                                {list.show_ratings && ratings && (
+                                    <div className="hidden sm:flex shrink-0">
+                                        <RestaurantRatings ratings={ratings} />
+                                    </div>
+                                )}
+                                {list.is_checklist && restaurant.checked && (
+                                    <Check
+                                        size={14}
+                                        className="text-secondary-500 shrink-0"
+                                    />
                                 )}
                             </div>
-                            {list.is_checklist && restaurant.checked && (
-                                <Check
-                                    size={14}
-                                    className="text-secondary-500 shrink-0"
-                                />
-                            )}
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
         </div>

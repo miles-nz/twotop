@@ -263,6 +263,7 @@ export const text = {
     addressPlaceholder: "Enter address",
     noFeaturedLists:
         "You haven't featured any lists yet. Feature a list to have it show up here.",
+    showRatings: "Show ratings",
 
     // Errors
     errorFormatted: (error) => `Error: ${error}`,

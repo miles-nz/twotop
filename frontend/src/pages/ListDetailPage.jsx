@@ -50,18 +50,18 @@ export default function ListDetailPage() {
         setLoading(true);
         try {
             const token = await getAccessTokenSilently();
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/lists`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/lists/${id}`,
+                { headers: { Authorization: `Bearer ${token}` } },
+            );
+            if (res.status === 404 || res.status === 403) {
+                navigate("/lists");
+                return;
+            }
             const data = await res.json();
             if (res.ok) {
-                const found = data.find((l) => l.id === id);
-                if (!found) {
-                    navigate("/lists");
-                    return;
-                }
-                setList(found);
-                setRestaurants(found.restaurants ?? []);
+                setList(data);
+                setRestaurants(data.restaurants ?? []);
             }
         } catch (err) {
             console.error("Failed to fetch list:", err);
@@ -348,6 +348,35 @@ export default function ListDetailPage() {
         }
     };
 
+    const handleToggleShowRatings = async () => {
+        const newValue = !list.show_ratings;
+        setList((prev) => ({ ...prev, show_ratings: newValue }));
+        try {
+            const token = await getAccessTokenSilently();
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/lists/${id}`,
+                {
+                    method: "PATCH",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ show_ratings: newValue }),
+                },
+            );
+            const data = await res.json();
+            if (res.ok) {
+                setList((prev) => ({
+                    ...prev,
+                    show_ratings: data.show_ratings,
+                }));
+            }
+        } catch (err) {
+            console.error("Failed to toggle show ratings:", err);
+            setList((prev) => ({ ...prev, show_ratings: !newValue }));
+        }
+    };
+
     const handleCheck = async (restaurantId, checked) => {
         setRestaurants((prev) =>
             prev.map((r) => (r.id === restaurantId ? { ...r, checked } : r)),
@@ -414,11 +443,13 @@ export default function ListDetailPage() {
                     canEdit={canEdit}
                     isChecklist={list.is_checklist}
                     isFeatured={list.is_featured}
+                    showRatings={list.show_ratings}
                     confirmDelete={confirmDelete}
                     confirmLeave={confirmLeave}
                     onShare={() => setShareModalOpen(true)}
                     onToggleChecklist={handleToggleChecklist}
                     onToggleFeatured={handleToggleFeatured}
+                    onToggleShowRatings={handleToggleShowRatings}
                     onDeleteConfirm={() => setConfirmDelete(true)}
                     onDeleteCancel={() => setConfirmDelete(false)}
                     onDelete={handleDeleteList}
@@ -503,10 +534,12 @@ export default function ListDetailPage() {
                                     canEdit={canEdit}
                                     onRemove={handleRemoveRestaurant}
                                     isChecklist={list.is_checklist}
+                                    showRatings={list.show_ratings}
                                     onCheck={handleCheck}
                                     onAddressUpdate={
                                         handleUpdateRestaurantAddress
                                     }
+                                    ratings={list.ratings}
                                 />
                             </SortableItem>
                         ) : (
@@ -520,10 +553,12 @@ export default function ListDetailPage() {
                                     canEdit={canEdit}
                                     onRemove={handleRemoveRestaurant}
                                     isChecklist={list.is_checklist}
+                                    showRatings={list.show_ratings}
                                     onCheck={handleCheck}
                                     onAddressUpdate={
                                         handleUpdateRestaurantAddress
                                     }
+                                    ratings={list.ratings}
                                 />
                             </div>
                         ),

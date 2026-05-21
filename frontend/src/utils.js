@@ -82,6 +82,13 @@ export const formatShortAddress = (address) => {
     return parts.slice(-2).join(", ");
 };
 
+export const formatSuburb = (address) => {
+    if (!address) return "";
+    const parts = address.split(",").map((p) => p.trim());
+    if (parts.length === 1) return parts[0];
+    return parts[1] ?? "";
+};
+
 export function applyThemeToCss(themeId, isDarkMode) {
     const themeSet = isDarkMode ? themes.dark : themes.light;
     const theme = themeSet[themeId] || themeSet["default-theme"];

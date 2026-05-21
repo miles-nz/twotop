@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { MapPin, MapPinPen, Trash2, Check } from "lucide-react";
 import { text } from "../../resources";
-import { formatShortAddress } from "../../utils";
+import { formatSuburb } from "../../utils";
+import { RestaurantRatings } from "../ui/RatingPill";
 
 export default function RestaurantRow({
     restaurant,
@@ -11,6 +12,8 @@ export default function RestaurantRow({
     isChecklist,
     onCheck,
     onAddressUpdate,
+    ratings,
+    showRatings,
 }) {
     const [editingAddress, setEditingAddress] = useState(false);
     const [addressInput, setAddressInput] = useState(
@@ -30,7 +33,7 @@ export default function RestaurantRow({
 
     return (
         <div className="flex items-center justify-between gap-2 py-2 pr-3 min-w-0 flex-1">
-            <div className="flex items-center gap-3 min-w-0">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
                 {isChecklist && (
                     <button
                         onClick={() =>
@@ -54,8 +57,8 @@ export default function RestaurantRow({
                 <span className="text-sm font-medium text-text-light shrink-0 w-5 text-center">
                     {index + 1}
                 </span>
-                <div className="min-w-0">
-                    <p
+                <div className="min-w-0 flex-1">
+                    <div
                         className={`text-sm font-medium truncate ${
                             isChecklist && restaurant.checked
                                 ? "text-text-light"
@@ -63,9 +66,51 @@ export default function RestaurantRow({
                         }`}
                     >
                         {restaurant.restaurant_name}
-                    </p>
+                        {hasAddress &&
+                            !editingAddress &&
+                            (hasPlaceId ? (
+                                <a
+                                    href={text.makeGoogleMapsLink(
+                                        restaurant.restaurant_name,
+                                        restaurant.place_id,
+                                    )}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="sm:hidden font-normal text-text-light hover:text-secondary-500 transition-colors ml-1"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    ·{" "}
+                                    {formatSuburb(
+                                        restaurant.restaurant_address,
+                                    )}
+                                </a>
+                            ) : canEdit ? (
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setAddressInput(
+                                            restaurant.restaurant_address,
+                                        );
+                                        setEditingAddress(true);
+                                    }}
+                                    className="sm:hidden font-normal text-text-light hover:text-secondary-500 transition-colors ml-1"
+                                >
+                                    ·{" "}
+                                    {formatSuburb(
+                                        restaurant.restaurant_address,
+                                    )}
+                                </button>
+                            ) : (
+                                <span className="sm:hidden font-normal text-text-light ml-1">
+                                    ·{" "}
+                                    {formatSuburb(
+                                        restaurant.restaurant_address,
+                                    )}
+                                </span>
+                            ))}
+                    </div>
 
-                    {/* Address display */}
+                    {/* Address display - desktop only */}
                     {hasAddress &&
                         !editingAddress &&
                         (hasPlaceId ? (
@@ -76,18 +121,11 @@ export default function RestaurantRow({
                                 )}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center gap-1 text-xs text-text-light hover:text-secondary-500 transition-colors"
+                                className="hidden sm:flex items-center gap-1 text-xs text-text-light hover:text-secondary-500 transition-colors"
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 <MapPin size={10} className="shrink-0" />
-                                <span className="hidden sm:inline">
-                                    {restaurant.restaurant_address}
-                                </span>
-                                <span className="sm:hidden">
-                                    {formatShortAddress(
-                                        restaurant.restaurant_address,
-                                    )}
-                                </span>
+                                {restaurant.restaurant_address}
                             </a>
                         ) : canEdit ? (
                             <button
@@ -97,31 +135,26 @@ export default function RestaurantRow({
                                     );
                                     setEditingAddress(true);
                                 }}
-                                className="flex items-center gap-1 text-xs text-text-light hover:text-secondary-500 transition-colors"
+                                className="hidden sm:flex items-center gap-1 text-xs text-text-light hover:text-secondary-500 transition-colors"
                             >
                                 <MapPinPen size={10} className="shrink-0" />
-                                <span className="hidden sm:inline">
-                                    {restaurant.restaurant_address}
-                                </span>
-                                <span className="sm:hidden">
-                                    {formatShortAddress(
-                                        restaurant.restaurant_address,
-                                    )}
-                                </span>
+                                {restaurant.restaurant_address}
                             </button>
                         ) : (
-                            <p className="flex items-center gap-1 text-xs text-text-light">
+                            <p className="hidden sm:flex items-center gap-1 text-xs text-text-light">
                                 <MapPinPen size={10} className="shrink-0" />
-                                <span className="hidden sm:inline">
-                                    {restaurant.restaurant_address}
-                                </span>
-                                <span className="sm:hidden">
-                                    {formatShortAddress(
-                                        restaurant.restaurant_address,
-                                    )}
-                                </span>
+                                {restaurant.restaurant_address}
                             </p>
                         ))}
+
+                    {/* Ratings - mobile only */}
+                    {showRatings && ratings?.[restaurant.place_id] && (
+                        <div className="sm:hidden mt-0.5">
+                            <RestaurantRatings
+                                ratings={ratings[restaurant.place_id]}
+                            />
+                        </div>
+                    )}
 
                     {/* Add/Edit address affordance for manual entries */}
                     {!hasAddress &&
@@ -173,7 +206,17 @@ export default function RestaurantRow({
                         </div>
                     )}
                 </div>
+
+                {/* Ratings - desktop only */}
+                {showRatings && ratings?.[restaurant.place_id] && (
+                    <div className="hidden sm:flex shrink-0">
+                        <RestaurantRatings
+                            ratings={ratings[restaurant.place_id]}
+                        />
+                    </div>
+                )}
             </div>
+
             {canEdit && (
                 <button
                     onClick={() => onRemove(restaurant.id)}

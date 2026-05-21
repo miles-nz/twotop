@@ -70,13 +70,15 @@ function ReviewList({
                 }
                 const data = await response.json();
                 if (!response.ok) {
-                    setError(text.errorFailedFetch);
+                    setError(
+                        `${text.errorFailedFetch} (${response.status}${data?.error ? `: ${data.error}` : ""})`,
+                    );
                     return;
                 }
                 setReviews(alternateReviewers(data));
                 onReviewsLoaded?.(data.length);
             } catch (err) {
-                setError(text.errorGeneric);
+                setError(`${text.errorGeneric} (${err.message})`);
             } finally {
                 setLoading(false);
             }
