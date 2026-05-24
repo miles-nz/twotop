@@ -27,7 +27,7 @@ export function useUserPreferences() {
                 setPreferencesLoaded(true);
             }
         } catch (err) {
-            setCurrentThemeId("default-theme");
+            console.error("Failed to fetch user preferences:", err);
         }
     };
 
