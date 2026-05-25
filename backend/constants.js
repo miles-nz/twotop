@@ -1,6 +1,8 @@
 const ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "https://mimu-reviews.vercel.app",
+    "https://twotop.co.nz",
+    "https://www.twotop.co.nz",
 ];
 
 const GOOGLE_PLACES_API_URL = "https://places.googleapis.com/v1";
