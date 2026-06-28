@@ -40,7 +40,10 @@ function CollaboratorCircle({ sharedWith, selectedContributors, onToggle }) {
                             transition={{ duration: 0.2 }}
                         >
                             {selectedContributors
-                                .slice(0, 2)
+                                .slice(
+                                    0,
+                                    selectedContributors.length > 2 ? 1 : 2,
+                                )
                                 .map((person, i) => (
                                     <div
                                         key={person.user_id}
