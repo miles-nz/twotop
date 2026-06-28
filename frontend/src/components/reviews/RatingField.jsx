@@ -8,7 +8,7 @@ function RatingField({
     size = "md",
 }) {
     return (
-        <div className="bg-surface-100 rounded-lg px-5 py-3 text-center border border-surface-200">
+        <div className="px-5 py-3 text-center">
             <p className="text-xs text-text-light mb-2 flex items-center justify-center gap-1">
                 {label}
             </p>

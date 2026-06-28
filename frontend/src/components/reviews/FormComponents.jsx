@@ -6,7 +6,7 @@ export function FormError({ error }) {
     if (!error) return null;
     const errors = Array.isArray(error) ? error : [error];
     return (
-        <div className="bg-error-50 border border-error-200 rounded-2xl shadow-md p-6 mb-4">
+        <div className="bg-error-50 border border-error-200 rounded-lg p-3 mb-4">
             {errors.map((err, index) => (
                 <p key={index} className="text-error-600 text-sm">
                     {err}
@@ -26,38 +26,78 @@ export function RatingsFields({
     size = "sm",
 }) {
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-            <RatingField
-                label={
-                    <span className="flex items-center justify-center gap-1">
-                        {text.foodLabel}
-                    </span>
-                }
-                value={foodRating}
-                onChange={setFoodRating}
-                size={size}
-            />
-            <RatingField
-                label={
-                    <span className="flex items-center justify-center gap-1">
-                        {text.drinkLabel}
-                    </span>
-                }
-                value={drinkRating}
-                onChange={setDrinkRating}
-                size={size}
-            />
-            <RatingField
-                label={
-                    <span className="flex items-center justify-center gap-1">
-                        {text.ambienceLabel}
-                    </span>
-                }
-                value={ambienceRating}
-                onChange={setAmbienceRating}
-                size={size}
-            />
-        </div>
+        <>
+            {/* Mobile: vertical stack */}
+            <div className="sm:hidden bg-surface-100 border border-surface-200 rounded-lg divide-y divide-surface-200">
+                <RatingField
+                    label={
+                        <span className="flex items-center gap-1">
+                            {text.foodLabel}
+                        </span>
+                    }
+                    value={foodRating}
+                    onChange={setFoodRating}
+                    size="md"
+                />
+                <RatingField
+                    label={
+                        <span className="flex items-center gap-1">
+                            {text.drinkLabel}
+                        </span>
+                    }
+                    value={drinkRating}
+                    onChange={setDrinkRating}
+                    size="md"
+                />
+                <RatingField
+                    label={
+                        <span className="flex items-center gap-1">
+                            {text.ambienceLabel}
+                        </span>
+                    }
+                    value={ambienceRating}
+                    onChange={setAmbienceRating}
+                    size="md"
+                />
+            </div>
+            {/* Desktop: horizontal joined */}
+            <div className="hidden sm:grid grid-cols-3 bg-surface-100 border border-surface-200 rounded-lg overflow-hidden">
+                <RatingField
+                    label={
+                        <span className="flex items-center justify-center gap-1">
+                            {text.foodLabel}
+                        </span>
+                    }
+                    value={foodRating}
+                    onChange={setFoodRating}
+                    size={size}
+                />
+                <div className="border-l border-surface-200">
+                    <RatingField
+                        label={
+                            <span className="flex items-center justify-center gap-1">
+                                {text.drinkLabel}
+                            </span>
+                        }
+                        value={drinkRating}
+                        onChange={setDrinkRating}
+                        size={size}
+                    />
+                </div>
+                <div className="border-l border-surface-200">
+                    <RatingField
+                        label={
+                            <span className="flex items-center justify-center gap-1">
+                                {text.ambienceLabel}
+                            </span>
+                        }
+                        value={ambienceRating}
+                        onChange={setAmbienceRating}
+                        size={size}
+                    />
+                </div>
+            </div>
+        </>
     );
 }
 
@@ -85,7 +125,7 @@ export function ContributorPicker({
                         onClick={() => onToggle(person)}
                         className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left ${
                             selected
-                                ? "bg-secondary-100 dark:bg-secondary-500 border border-secondary-300"
+                                ? "bg-secondary-100 border border-secondary-300"
                                 : "bg-surface-50 border border-surface-200 hover:bg-surface-100"
                         }`}
                     >

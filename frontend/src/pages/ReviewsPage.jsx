@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import ReviewFormModal from "../components/reviews/ReviewFormModal";
 import ReviewList from "../components/reviews/ReviewList";
 import { text } from "../resources";
@@ -38,13 +38,15 @@ export default function ReviewsPage() {
                 </motion.span>
             </button>
 
-            {formOpen && (
-                <ReviewFormModal
-                    key="review-form-modal"
-                    onClose={() => setFormOpen(false)}
-                    onReviewSubmitted={handleReviewSubmitted}
-                />
-            )}
+            <AnimatePresence>
+                {formOpen && (
+                    <ReviewFormModal
+                        key="review-form-modal"
+                        onClose={() => setFormOpen(false)}
+                        onReviewSubmitted={handleReviewSubmitted}
+                    />
+                )}
+            </AnimatePresence>
 
             <ReviewList
                 refreshTrigger={refreshTrigger}

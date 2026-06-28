@@ -56,6 +56,7 @@ export const text = {
     cancel: "Cancel",
     close: "Close",
     done: "Done",
+    submit: "Submit",
     saving: "Saving...",
     deleting: "Deleting...",
     sending: "Sending...",
@@ -133,7 +134,7 @@ export const text = {
     // Review form
     writeReview: "Write a Review",
     restaurantNameLabel: "Restaurant",
-    restaurantNamePlaceholder: (name) => `e.g. ${name}`,
+    restaurantNamePlaceholder: (name) => `${name}`,
     restaurantAddressLabel: "Address (optional)",
     restaurantAddressPlaceholder: "e.g. 123 Queen St, Auckland CBD, Auckland",
     searchingPlaces: "Searching...",
@@ -147,7 +148,6 @@ export const text = {
     reviewNotesLabel: "Review notes",
     reviewNotesPlaceholder: "Write your review here...",
     markAsPublic: "Mark as Public",
-    submitReview: "Submit Review",
     submitting: "Submitting...",
     draftRestored: "Draft restored",
     clearDraft: "Clear draft",
@@ -158,6 +158,7 @@ export const text = {
         "You haven't added friends yet. Add friends and they will appear here.",
     addYourReviewLabel: "You have been added as a collaborator on this review.",
     addYourReview: "Add your review",
+    addPhotos: "Add photos",
     searchRestaurant: "Search restaurant...",
     markAsPublicHelper:
         "Make this review visible to everyone, not just your friends.",

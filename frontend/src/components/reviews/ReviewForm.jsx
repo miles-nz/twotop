@@ -1,13 +1,13 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { ImagePlus, X } from "lucide-react";
 import ImageCropModal from "./ImageCropModal";
+import CollaboratorCircle from "./CollaboratorCircle";
 import Button from "../ui/Button";
 import LoadingOverlay from "../ui/LoadingOverlay";
-import MarkdownToolbar from "./MarkdownToolbar";
 import PlacesSearch from "../ui/PlacesSearch";
 import Checkbox from "../ui/Checkbox";
-import { FormError, RatingsFields, ContributorPicker } from "./FormComponents";
+import { FormError, RatingsFields } from "./FormComponents";
 import { useAutoResize } from "../../hooks/useAutoResize";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
 import { useImageUpload } from "../../hooks/useImageUpload";
@@ -22,7 +22,7 @@ const DRAFT_KEY = draftKeys.newReview;
 const inputClass =
     "w-full border border-surface-200 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-surface-300";
 
-function ReviewForm({ onReviewSubmitted }) {
+function ReviewForm({ onReviewSubmitted, onCropOpenChange }) {
     const { getAccessTokenSilently } = useAuth0();
 
     const [restaurantName, setRestaurantName] = useState("");
@@ -34,7 +34,6 @@ function ReviewForm({ onReviewSubmitted }) {
     const [ambienceRating, setAmbienceRating] = useState(null);
     const [reviewText, setReviewText] = useState("");
     const [isPublic, setIsPublic] = useState(false);
-    const [isCollaborative, setIsCollaborative] = useState(false);
     const [selectedContributors, setSelectedContributors] = useState([]);
     const [editingAddress, setEditingAddress] = useState(false);
 
@@ -55,7 +54,6 @@ function ReviewForm({ onReviewSubmitted }) {
             return false;
         }
     });
-    const [showClearConfirm, setShowClearConfirm] = useState(false);
 
     const textareaRef = useRef(null);
     useAutoResize(textareaRef, reviewText);
@@ -102,6 +100,10 @@ function ReviewForm({ onReviewSubmitted }) {
         setIsPublic,
     });
 
+    useEffect(() => {
+        onCropOpenChange?.(!!currentCropSrc);
+    }, [onCropOpenChange, currentCropSrc]);
+
     const resetForm = () => {
         setRestaurantName("");
         setRestaurantAddress("");
@@ -112,7 +114,6 @@ function ReviewForm({ onReviewSubmitted }) {
         setAmbienceRating(null);
         setVisitDate(getLocalDate());
         setIsPublic(false);
-        setIsCollaborative(false);
         setSelectedContributors([]);
         resetImages();
         setEditingAddress(false);
@@ -152,7 +153,10 @@ function ReviewForm({ onReviewSubmitted }) {
             formData.append("reviewer_name", currentUserName || "");
             formData.append("reviewer_picture", currentUserPicture || "");
             formData.append("is_public", isPublic);
-            formData.append("is_collaborative", isCollaborative);
+            formData.append(
+                "is_collaborative",
+                selectedContributors.length > 0,
+            );
             formData.append(
                 "allowed_contributors",
                 JSON.stringify(selectedContributors),
@@ -199,32 +203,52 @@ function ReviewForm({ onReviewSubmitted }) {
 
     return (
         <div className="text-text-dark">
+            {/* Draft restored banner */}
             {draftRestored && (
                 <div className="flex items-center justify-between bg-surface-100 border border-surface-200 rounded-lg px-3 py-2 mb-4 text-sm text-text-mid">
                     <span>{text.draftRestored}</span>
-                    <button
-                        onClick={() => setDraftRestored(false)}
-                        className="text-text-light hover:text-text-mid"
-                    >
-                        <X size={14} />
-                    </button>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => {
+                                clearDraft();
+                                resetForm();
+                                setDraftRestored(false);
+                            }}
+                            className="text-xs text-error-500 hover:text-error-600 font-medium transition-colors"
+                        >
+                            {text.clearDraft}
+                        </button>
+                        <button
+                            onClick={() => setDraftRestored(false)}
+                            className="text-text-light hover:text-text-mid"
+                        >
+                            <X size={14} />
+                        </button>
+                    </div>
                 </div>
             )}
 
-            <div className="mb-4">
-                <label className="block text-sm font-medium text-text-mid mb-1">
-                    {text.restaurantNameLabel}
-                </label>
-                <PlacesSearch
-                    value={restaurantName}
-                    onChange={setRestaurantName}
-                    onPlaceSelected={handlePlaceSelected}
-                    onClearPlace={handleClearPlace}
-                    selectedPlaceId={selectedPlaceId}
-                    className={`${inputClass} placeholder-text-light`}
+            {/* Restaurant + collaborator */}
+            <div className="grid grid-cols-[1fr_auto] items-end gap-3 mb-2">
+                <div className="min-w-0">
+                    <PlacesSearch
+                        value={restaurantName}
+                        onChange={setRestaurantName}
+                        onPlaceSelected={handlePlaceSelected}
+                        onClearPlace={handleClearPlace}
+                        selectedPlaceId={selectedPlaceId}
+                        className={`${inputClass} placeholder-text-light`}
+                        showTypingPlaceholder={false}
+                    />
+                </div>
+                <CollaboratorCircle
+                    sharedWith={sharedWith}
+                    selectedContributors={selectedContributors}
+                    onToggle={toggleContributor}
                 />
             </div>
 
+            {/* Address */}
             <div className="mb-4">
                 {!restaurantName ? null : selectedPlaceId &&
                   restaurantAddress &&
@@ -284,13 +308,8 @@ function ReviewForm({ onReviewSubmitted }) {
                 )}
             </div>
 
-            <div className="mb-4 pr-6.5 md:pr-0">
-                <label
-                    htmlFor="visitDate"
-                    className="block text-sm font-medium text-text-mid mb-1"
-                >
-                    {text.dateVisitedLabel}
-                </label>
+            {/* Date */}
+            <div className="mb-4">
                 <input
                     id="visitDate"
                     type="date"
@@ -308,10 +327,8 @@ function ReviewForm({ onReviewSubmitted }) {
                 />
             </div>
 
+            {/* Ratings */}
             <div className="mb-4">
-                <label className="block text-sm font-medium text-text-mid mb-2">
-                    {text.ratingsLabel}
-                </label>
                 <RatingsFields
                     foodRating={foodRating}
                     setFoodRating={setFoodRating}
@@ -323,18 +340,8 @@ function ReviewForm({ onReviewSubmitted }) {
                 />
             </div>
 
+            {/* Notes */}
             <div className="mb-4">
-                <label
-                    htmlFor="reviewNotes"
-                    className="block text-sm font-medium text-text-mid mb-1"
-                >
-                    {text.reviewNotesLabel}
-                </label>
-                <MarkdownToolbar
-                    textareaRef={textareaRef}
-                    value={reviewText}
-                    onChange={setReviewText}
-                />
                 <div className={`${inputClass} relative`}>
                     <textarea
                         id="reviewNotes"
@@ -342,37 +349,33 @@ function ReviewForm({ onReviewSubmitted }) {
                         value={reviewText}
                         onChange={(e) => setReviewText(e.target.value)}
                         maxLength={2000}
-                        className="w-full overflow-hidden placeholder-text-light bg-transparent focus:outline-none pb-10 min-h-24 resize-none"
+                        className="w-full overflow-hidden placeholder-text-light bg-transparent focus:outline-none min-h-24 resize-none"
                         placeholder={text.reviewNotesPlaceholder}
                         aria-label={text.reviewNotesLabel}
                     />
-                    <input
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/gif,image/avif"
-                        multiple
-                        onChange={handleImageChange}
-                        className="hidden"
-                        ref={fileInputRef}
-                    />
-                    <div className="absolute bottom-1 right-1 flex items-center gap-1 p-2">
-                        <div className="flex gap-1">
-                            {images.map((image, index) => (
-                                <div key={index} className="relative">
-                                    <img
-                                        src={URL.createObjectURL(image)}
-                                        className="w-6 h-6 object-cover rounded"
-                                        alt=""
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => handleImageRemove(index)}
-                                        className="absolute -top-1 -right-1 bg-surface-300 rounded-full w-3 h-3 flex items-center justify-center"
-                                    >
-                                        <X size={8} />
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
+                </div>
+            </div>
+
+            {/* Photos */}
+            <div className="mb-4">
+                <div className="bg-surface-100 border border-surface-200 rounded-lg px-4 py-3">
+                    <div className="flex items-center justify-center gap-2">
+                        {images.map((image, index) => (
+                            <div key={index} className="relative">
+                                <img
+                                    src={URL.createObjectURL(image)}
+                                    className="w-12 h-12 object-cover rounded-lg"
+                                    alt=""
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => handleImageRemove(index)}
+                                    className="absolute -top-1.5 -right-1.5 bg-surface-300 hover:bg-surface-400 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
+                                >
+                                    <X size={10} />
+                                </button>
+                            </div>
+                        ))}
                         {images.length < 5 && (
                             <button
                                 type="button"
@@ -380,17 +383,28 @@ function ReviewForm({ onReviewSubmitted }) {
                                     e.preventDefault();
                                     fileInputRef.current.click();
                                 }}
-                                className="text-text-light hover:text-text-mid transition-colors"
+                                className={`flex items-center gap-2 text-sm text-text-light hover:text-text-mid transition-colors ${images.length === 0 ? "w-full justify-center" : ""}`}
                             >
-                                <ImagePlus size={24} />
+                                <ImagePlus size={28} />
+                                {images.length === 0 && (
+                                    <span>{text.addPhotos}</span>
+                                )}
                             </button>
                         )}
                     </div>
                 </div>
+                <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/gif,image/avif"
+                    multiple
+                    onChange={handleImageChange}
+                    className="hidden"
+                    ref={fileInputRef}
+                />
             </div>
 
-            {/* Public + Collaborative checkboxes */}
-            <div className="mb-4 bg-surface-100 rounded-lg border border-surface-200 px-4 py-3 flex flex-col gap-3">
+            {/* Public toggle */}
+            <div className="mb-4 bg-surface-100 rounded-lg border border-surface-200 px-4 py-3">
                 <div className="flex flex-col gap-1">
                     <Checkbox
                         checked={isPublic}
@@ -401,33 +415,7 @@ function ReviewForm({ onReviewSubmitted }) {
                         {text.markAsPublicHelper}
                     </p>
                 </div>
-                <div className="flex flex-col gap-1">
-                    <Checkbox
-                        checked={isCollaborative}
-                        onChange={(checked) => {
-                            setIsCollaborative(checked);
-                            if (!checked) setSelectedContributors([]);
-                        }}
-                        label={text.collaborative}
-                    />
-                    <p className="text-xs text-text-light ml-6">
-                        {text.collaborativeHelper}
-                    </p>
-                </div>
             </div>
-
-            {isCollaborative && (
-                <div className="mb-4 bg-surface-100 rounded-lg px-4 py-3 border border-surface-200">
-                    <p className="text-sm font-medium text-text-dark mb-3">
-                        {text.selectContributors}
-                    </p>
-                    <ContributorPicker
-                        sharedWith={sharedWith}
-                        selectedContributors={selectedContributors}
-                        onToggle={toggleContributor}
-                    />
-                </div>
-            )}
 
             <FormError error={error || uploadError} />
 
@@ -437,37 +425,8 @@ function ReviewForm({ onReviewSubmitted }) {
                     disabled={submitting}
                     variant="secondary"
                 >
-                    {submitting ? text.submitting : text.submitReview}
+                    {submitting ? text.submitting : text.submit}
                 </Button>
-                {showClearConfirm ? (
-                    <div className="flex items-center gap-2 text-sm text-text-light">
-                        <span>{text.clearDraftConfirm}</span>
-                        <button
-                            onClick={() => {
-                                clearDraft();
-                                resetForm();
-                                setDraftRestored(false);
-                                setShowClearConfirm(false);
-                            }}
-                            className="text-error-500 hover:text-error-600 font-medium"
-                        >
-                            {text.yes}
-                        </button>
-                        <button
-                            onClick={() => setShowClearConfirm(false)}
-                            className="text-text-light hover:text-text-mid"
-                        >
-                            {text.no}
-                        </button>
-                    </div>
-                ) : (
-                    <button
-                        onClick={() => setShowClearConfirm(true)}
-                        className="text-xs text-text-light hover:text-text-mid transition-colors"
-                    >
-                        {text.clearDraft}
-                    </button>
-                )}
             </div>
 
             <LoadingOverlay isVisible={submitting} />

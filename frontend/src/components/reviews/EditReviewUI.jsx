@@ -1,15 +1,20 @@
-import { useRef, useState } from "react";
-import { Check, X, ImagePlus } from "lucide-react";
-import MarkdownToolbar from "./MarkdownToolbar";
-import PlacesSearch from "../ui/PlacesSearch";
+import { useRef, useEffect, useState } from "react";
+import { X, ImagePlus } from "lucide-react";
 import ImageCropModal from "./ImageCropModal";
-import { RatingsFields, ContributorPicker } from "./FormComponents";
+import CollaboratorCircle from "./CollaboratorCircle";
+import LoadingOverlay from "../ui/LoadingOverlay";
+import PlacesSearch from "../ui/PlacesSearch";
+import { RatingsFields } from "./FormComponents";
 import { getLocalDate } from "../../utils";
 import { useImageUpload } from "../../hooks/useImageUpload";
 import { useAutoResize } from "../../hooks/useAutoResize";
 import { useUser } from "../../contexts/UserContext";
 import Checkbox from "../ui/Checkbox";
+import Button from "../ui/Button";
 import { text } from "../../resources";
+
+const inputClass =
+    "w-full border border-surface-200 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-surface-300";
 
 function EditReviewUI({ editingState, handleSave, onClose, review }) {
     const {
@@ -37,16 +42,16 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
         draftWasRestored,
         resetToSaved,
         saveError,
-        editedIsCollaborative,
         editedAllowedContributors,
-        handleToggleCollaborative,
         handleRemoveContributor,
         handleAddContributor,
+        saving,
     } = editingState;
 
     const textareaRef = useRef(null);
     const [isPublic, setIsPublic] = useState(review.is_public);
     const [draftDismissed, setDraftDismissed] = useState(false);
+    const [editingAddress, setEditingAddress] = useState(false);
     const { sharedWith } = useUser();
 
     const currentPhotoCount =
@@ -65,29 +70,44 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
 
     useAutoResize(textareaRef, editedReviewText);
 
+    const toggleContributor = (person) => {
+        if (
+            editedAllowedContributors.some((c) => c.user_id === person.user_id)
+        ) {
+            handleRemoveContributor(person.user_id);
+        } else {
+            handleAddContributor(person);
+        }
+    };
+
     const handleSaveWithPublic = async () => {
-        await handleSave(isPublic);
-        onClose();
+        try {
+            await handleSave(isPublic);
+            onClose();
+        } catch {
+            // saveError is set inside the hook, stays open on failure
+        }
     };
 
     return (
         <div className="px-6 pt-6 pb-4">
+            {/* Draft restored banner */}
             {draftWasRestored && !draftDismissed && (
-                <div className="flex items-center justify-between bg-secondary-50 border border-secondary-200 rounded-lg px-3 py-2 mb-4 text-sm text-secondary-600">
+                <div className="flex items-center justify-between bg-surface-100 border border-surface-200 rounded-lg px-3 py-2 mb-4 text-sm text-text-mid">
                     <span>{text.draftRestored}</span>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                         <button
                             onClick={() => {
                                 resetToSaved();
                                 setDraftDismissed(true);
                             }}
-                            className="text-secondary-400 hover:text-secondary-600 text-xs"
+                            className="text-xs text-error-500 hover:text-error-600 font-medium transition-colors"
                         >
                             {text.clearDraft}
                         </button>
                         <button
                             onClick={() => setDraftDismissed(true)}
-                            className="text-secondary-400 hover:text-secondary-600"
+                            className="text-text-light hover:text-text-mid"
                         >
                             <X size={14} />
                         </button>
@@ -95,27 +115,71 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
                 </div>
             )}
 
-            <div className="mb-4">
-                <PlacesSearch
-                    value={editedName}
-                    onChange={setEditedName}
-                    onPlaceSelected={handlePlaceSelected}
-                    onClearPlace={handleClearPlace}
-                    selectedPlaceId={editedPlaceId}
-                    className="text-2xl font-bold text-text-dark bg-transparent border-b border-secondary-400 focus:outline-none w-full"
+            {/* Restaurant + collaborator */}
+            <div className="grid grid-cols-[1fr_auto] items-end gap-3 mb-2">
+                <div className="min-w-0">
+                    <PlacesSearch
+                        value={editedName}
+                        onChange={setEditedName}
+                        onPlaceSelected={handlePlaceSelected}
+                        onClearPlace={handleClearPlace}
+                        selectedPlaceId={editedPlaceId}
+                        className={`${inputClass} placeholder-text-light`}
+                    />
+                </div>
+                <CollaboratorCircle
+                    sharedWith={sharedWith}
+                    selectedContributors={editedAllowedContributors}
+                    onToggle={toggleContributor}
                 />
             </div>
 
+            {/* Address */}
+            <div className="mb-4">
+                {editingAddress ? (
+                    <input
+                        type="text"
+                        value={editedAddress}
+                        onChange={(e) => setEditedAddress(e.target.value)}
+                        placeholder={text.restaurantAddressPlaceholder}
+                        className={`${inputClass} placeholder-text-light`}
+                        autoFocus
+                        onBlur={() => setEditingAddress(false)}
+                    />
+                ) : (
+                    <div className="flex items-center justify-between px-1 py-1">
+                        <span className="text-sm text-text-light">
+                            {editedAddress || text.restaurantAddressPlaceholder}
+                        </span>
+                        <button
+                            type="button"
+                            onClick={() => setEditingAddress(true)}
+                            className="text-xs text-text-light hover:text-text-mid transition-colors ml-2 shrink-0"
+                        >
+                            {text.edit}
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            {/* Date */}
             <div className="mb-4">
                 <input
-                    type="text"
-                    value={editedAddress}
-                    onChange={(e) => setEditedAddress(e.target.value)}
-                    placeholder={text.restaurantAddressPlaceholder}
-                    className="w-full border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-dark text-sm placeholder-text-light"
+                    type="date"
+                    value={editedVisitDate}
+                    onChange={(e) => setEditedVisitDate(e.target.value)}
+                    max={getLocalDate()}
+                    className={`${inputClass} cursor-pointer`}
+                    style={{
+                        color: editedVisitDate
+                            ? "var(--color-text-dark)"
+                            : "var(--color-text-mid)",
+                        opacity: 1,
+                    }}
                 />
             </div>
 
+            {/* Ratings */}
             <div className="mb-4">
                 <RatingsFields
                     foodRating={editedFoodRating}
@@ -127,110 +191,107 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
                 />
             </div>
 
-            <div className="mb-3 pr-6.5 md:pr-0">
-                <input
-                    type="date"
-                    value={editedVisitDate}
-                    onChange={(e) => setEditedVisitDate(e.target.value)}
-                    max={getLocalDate()}
-                    className="w-full border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-dark cursor-pointer"
-                />
+            {/* Notes */}
+            <div className="mb-4">
+                <div className={`${inputClass} relative`}>
+                    <textarea
+                        ref={textareaRef}
+                        value={editedReviewText}
+                        onChange={(e) => setEditedReviewText(e.target.value)}
+                        maxLength={2000}
+                        className="w-full overflow-hidden placeholder-text-light bg-transparent focus:outline-none min-h-24 resize-none"
+                        placeholder={text.reviewNotesPlaceholder}
+                    />
+                </div>
             </div>
 
-            <MarkdownToolbar
-                textareaRef={textareaRef}
-                value={editedReviewText}
-                onChange={setEditedReviewText}
-            />
-            <textarea
-                ref={textareaRef}
-                value={editedReviewText}
-                onChange={(e) => setEditedReviewText(e.target.value)}
-                maxLength={2000}
-                className="w-full border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 overflow-hidden text-text-dark"
-            />
-
-            <div className="border border-surface-200 rounded-xl p-4 bg-surface-50 mt-4">
-                <div className="flex flex-wrap gap-2">
-                    {review.image_urls &&
-                        review.image_urls
-                            .filter((url) => !removedPhotoUrls.includes(url))
-                            .map((url, index) => (
-                                <div key={index} className="relative">
-                                    <img
-                                        src={url}
-                                        className="w-16 h-16 object-cover rounded-lg"
-                                        alt=""
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            handleRemoveExistingPhoto(url)
-                                        }
-                                        className="absolute -top-1 -right-1 bg-surface-300 rounded-full w-4 h-4 flex items-center justify-center"
-                                    >
-                                        <X size={10} />
-                                    </button>
-                                </div>
-                            ))}
-                    {addPhotoImages.map((image, index) => (
-                        <div key={index} className="relative">
-                            <img
-                                src={URL.createObjectURL(image)}
-                                className="w-16 h-16 object-cover rounded-lg"
-                                alt=""
-                            />
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    setAddPhotoImages((prev) =>
-                                        prev.filter((_, i) => i !== index),
-                                    )
-                                }
-                                className="absolute -top-1 -right-1 bg-surface-300 rounded-full w-4 h-4 flex items-center justify-center"
-                            >
-                                <X size={10} />
-                            </button>
-                        </div>
-                    ))}
-                    {currentPhotoCount < 5 && (
-                        <>
-                            <input
-                                type="file"
-                                accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/gif,image/avif"
-                                multiple
-                                onChange={handleImageChange}
-                                className="hidden"
-                                ref={fileInputRef}
-                            />
+            {/* Photos */}
+            <div className="mb-4">
+                <div className="bg-surface-100 border border-surface-200 rounded-lg px-4 py-3">
+                    <div className="flex items-center justify-center gap-3">
+                        {review.image_urls &&
+                            review.image_urls
+                                .filter(
+                                    (url) => !removedPhotoUrls.includes(url),
+                                )
+                                .map((url, index) => (
+                                    <div key={index} className="relative">
+                                        <img
+                                            src={url}
+                                            className="w-12 h-12 object-cover rounded-lg"
+                                            alt=""
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                handleRemoveExistingPhoto(url)
+                                            }
+                                            className="absolute -top-1.5 -right-1.5 bg-surface-300 hover:bg-surface-400 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
+                                        >
+                                            <X size={10} />
+                                        </button>
+                                    </div>
+                                ))}
+                        {addPhotoImages.map((image, index) => (
+                            <div key={index} className="relative">
+                                <img
+                                    src={URL.createObjectURL(image)}
+                                    className="w-12 h-12 object-cover rounded-lg"
+                                    alt=""
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setAddPhotoImages((prev) =>
+                                            prev.filter((_, i) => i !== index),
+                                        )
+                                    }
+                                    className="absolute -top-1.5 -right-1.5 bg-surface-300 hover:bg-surface-400 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
+                                >
+                                    <X size={10} />
+                                </button>
+                            </div>
+                        ))}
+                        {currentPhotoCount < 5 && (
                             <button
                                 type="button"
                                 onClick={() => fileInputRef.current.click()}
-                                className="w-16 h-16 flex items-center justify-center text-secondary-400 hover:text-secondary-600 transition-colors"
+                                className={`flex items-center gap-2 text-sm text-text-light hover:text-text-mid transition-colors h-12 ${currentPhotoCount === 0 ? "w-full justify-center" : ""}`}
                             >
-                                <ImagePlus size={24} />
+                                <ImagePlus size={28} />
+                                {currentPhotoCount === 0 && (
+                                    <span>{text.addPhotos}</span>
+                                )}
                             </button>
-                        </>
-                    )}
-                </div>
-                {uploadError && (
-                    <div className="mt-2">
-                        {Array.isArray(uploadError) ? (
-                            uploadError.map((err, index) => (
-                                <p
-                                    key={index}
-                                    className="text-error-600 text-sm"
-                                >
-                                    {err}
-                                </p>
-                            ))
-                        ) : (
-                            <p className="text-error-600 text-sm">
-                                {uploadError}
-                            </p>
                         )}
                     </div>
-                )}
+                    {uploadError && (
+                        <div className="mt-2">
+                            {Array.isArray(uploadError) ? (
+                                uploadError.map((err, index) => (
+                                    <p
+                                        key={index}
+                                        className="text-error-600 text-sm"
+                                    >
+                                        {err}
+                                    </p>
+                                ))
+                            ) : (
+                                <p className="text-error-600 text-sm">
+                                    {uploadError}
+                                </p>
+                            )}
+                        </div>
+                    )}
+                </div>
+                <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/gif,image/avif"
+                    multiple
+                    onChange={handleImageChange}
+                    className="hidden"
+                    ref={fileInputRef}
+                />
                 {currentCropSrc && (
                     <ImageCropModal
                         imageSrc={currentCropSrc}
@@ -240,56 +301,42 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
                 )}
             </div>
 
-            {saveError && (
-                <p className="text-error-600 text-sm mt-3">{saveError}</p>
-            )}
-
-            <div className="mt-4 bg-surface-100 rounded-lg border border-surface-200 px-4 py-3 flex flex-col gap-2">
-                <Checkbox
-                    checked={isPublic}
-                    onChange={setIsPublic}
-                    label={text.markAsPublic}
-                />
-                <Checkbox
-                    checked={editedIsCollaborative}
-                    onChange={handleToggleCollaborative}
-                    label={text.collaborative}
-                />
+            {/* Public toggle */}
+            <div className="mb-4 bg-surface-100 rounded-lg border border-surface-200 px-4 py-3">
+                <div className="flex flex-col gap-1">
+                    <Checkbox
+                        checked={isPublic}
+                        onChange={setIsPublic}
+                        label={text.markAsPublic}
+                    />
+                    <p className="text-xs text-text-light ml-6">
+                        {text.markAsPublicHelper}
+                    </p>
+                </div>
             </div>
 
-            {editedIsCollaborative && (
-                <div className="mt-3 bg-surface-100 rounded-lg border border-surface-200 px-4 py-3">
-                    <p className="text-sm font-medium text-text-dark mb-3">
-                        {text.selectContributors}
-                    </p>
-                    <ContributorPicker
-                        sharedWith={sharedWith}
-                        selectedContributors={editedAllowedContributors}
-                        onToggle={(person) =>
-                            editedAllowedContributors.some(
-                                (c) => c.user_id === person.user_id,
-                            )
-                                ? handleRemoveContributor(person.user_id)
-                                : handleAddContributor(person)
-                        }
-                    />
-                </div>
+            {saveError && (
+                <p className="text-error-600 text-sm mb-4">{saveError}</p>
             )}
 
-            <div className="flex justify-end gap-2 mt-4">
+            {/* Actions */}
+            <div className="flex items-center gap-3">
+                <Button
+                    onClick={handleSaveWithPublic}
+                    disabled={saving}
+                    variant="secondary"
+                >
+                    {saving ? text.submitting : text.save}
+                </Button>
                 <button
                     onClick={onClose}
-                    className="text-text-light hover:text-text-mid transition-colors"
+                    className="text-sm text-text-light hover:text-text-mid transition-colors"
                 >
-                    <X size={18} className="sm:w-4.5 sm:h-4.5 w-6 h-6" />
-                </button>
-                <button
-                    onClick={handleSaveWithPublic}
-                    className="text-secondary-500 hover:text-secondary-600 transition-colors"
-                >
-                    <Check size={18} className="sm:w-4.5 sm:h-4.5 w-6 h-6" />
+                    {text.cancel}
                 </button>
             </div>
+
+            <LoadingOverlay isVisible={saving} />
         </div>
     );
 }

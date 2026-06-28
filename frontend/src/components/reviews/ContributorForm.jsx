@@ -1,11 +1,14 @@
 import { useState, useRef } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import { Check, X } from "lucide-react";
 import { RatingsFields } from "./FormComponents";
-import MarkdownToolbar from "./MarkdownToolbar";
+import Button from "../ui/Button";
+import LoadingOverlay from "../ui/LoadingOverlay";
 import { useAutoResize } from "../../hooks/useAutoResize";
 import { useUser } from "../../contexts/UserContext";
 import { text } from "../../resources";
+
+const inputClass =
+    "w-full border border-surface-200 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-surface-300";
 
 function ContributorForm({ review, existingContribution, onSaved, onCancel }) {
     const { getAccessTokenSilently } = useAuth0();
@@ -64,6 +67,7 @@ function ContributorForm({ review, existingContribution, onSaved, onCancel }) {
 
     return (
         <div className="px-6 py-4">
+            {/* Ratings */}
             <div className="mb-4">
                 <RatingsFields
                     foodRating={foodRating}
@@ -75,39 +79,41 @@ function ContributorForm({ review, existingContribution, onSaved, onCancel }) {
                 />
             </div>
 
-            <MarkdownToolbar
-                textareaRef={textareaRef}
-                value={reviewText}
-                onChange={setReviewText}
-            />
-            <textarea
-                ref={textareaRef}
-                value={reviewText}
-                onChange={(e) => setReviewText(e.target.value)}
-                maxLength={2000}
-                className="w-full border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 overflow-hidden text-text-dark placeholder-text-light"
-                placeholder={text.reviewNotesPlaceholder}
-            />
+            {/* Notes */}
+            <div className="mb-4">
+                <div className={`${inputClass} relative`}>
+                    <textarea
+                        ref={textareaRef}
+                        value={reviewText}
+                        onChange={(e) => setReviewText(e.target.value)}
+                        maxLength={2000}
+                        className="w-full overflow-hidden placeholder-text-light bg-transparent focus:outline-none min-h-24 resize-none"
+                        placeholder={text.reviewNotesPlaceholder}
+                    />
+                </div>
+            </div>
 
-            {error && <p className="text-error-600 text-sm mt-2">{error}</p>}
+            {error && <p className="text-error-600 text-sm mb-4">{error}</p>}
 
-            <div className="flex justify-end gap-2 mt-3">
+            <div className="flex items-center gap-3">
+                <Button
+                    onClick={handleSave}
+                    disabled={saving}
+                    variant="secondary"
+                >
+                    {saving ? text.submitting : text.save}
+                </Button>
                 {onCancel && (
                     <button
                         onClick={onCancel}
-                        className="text-text-light hover:text-text-mid transition-colors"
+                        className="text-sm text-text-light hover:text-text-mid transition-colors"
                     >
-                        <X size={18} className="sm:w-4.5 sm:h-4.5 w-6 h-6" />
+                        {text.cancel}
                     </button>
                 )}
-                <button
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="text-secondary-500 hover:text-secondary-600 transition-colors disabled:opacity-50"
-                >
-                    <Check size={18} className="sm:w-4.5 sm:h-4.5 w-6 h-6" />
-                </button>
             </div>
+
+            <LoadingOverlay isVisible={saving} />
         </div>
     );
 }

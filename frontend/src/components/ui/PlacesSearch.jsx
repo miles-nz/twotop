@@ -77,6 +77,7 @@ function PlacesSearch({
                 setSuggestions(data);
                 setOpen(true);
             } catch (err) {
+                console.error("Places search error:", err);
                 setSearchError(true);
                 setOpen(true);
             } finally {
@@ -146,7 +147,7 @@ function PlacesSearch({
     const showManualAdd = !!onManualAdd && value.trim().length > 0;
 
     return (
-        <div className="relative" ref={containerRef}>
+        <div className="relative w-full" ref={containerRef}>
             <div className="relative">
                 <Search
                     size={15}
