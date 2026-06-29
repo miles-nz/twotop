@@ -7,6 +7,7 @@ import Button from "../ui/Button";
 import LoadingOverlay from "../ui/LoadingOverlay";
 import PlacesSearch from "../ui/PlacesSearch";
 import Checkbox from "../ui/Checkbox";
+import DateSelect from "../ui/DateSelect";
 import { FormError, RatingsFields } from "./FormComponents";
 import { useAutoResize } from "../../hooks/useAutoResize";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
@@ -229,7 +230,7 @@ function ReviewForm({ onReviewSubmitted, onCropOpenChange }) {
             )}
 
             {/* Restaurant + collaborator */}
-            <div className="grid grid-cols-[1fr_auto] items-end gap-3 mb-2">
+            <div className="grid grid-cols-[1fr_auto] items-center gap-3 mb-2">
                 <div className="min-w-0">
                     <PlacesSearch
                         value={restaurantName}
@@ -237,7 +238,7 @@ function ReviewForm({ onReviewSubmitted, onCropOpenChange }) {
                         onPlaceSelected={handlePlaceSelected}
                         onClearPlace={handleClearPlace}
                         selectedPlaceId={selectedPlaceId}
-                        className={`${inputClass} placeholder-text-light`}
+                        className="w-full border border-surface-200 rounded-lg px-3 py-3 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-surface-300 text-base placeholder-text-light"
                         showTypingPlaceholder={false}
                     />
                 </div>
@@ -248,45 +249,32 @@ function ReviewForm({ onReviewSubmitted, onCropOpenChange }) {
                 />
             </div>
 
-            {/* Address */}
-            <div className="mb-4">
-                {!restaurantName ? null : selectedPlaceId &&
-                  restaurantAddress &&
-                  !editingAddress ? (
-                    <div className="flex items-center justify-between px-1 py-1">
-                        <span className="text-sm text-text-light">
-                            {restaurantAddress}
-                        </span>
+            {/* Address + Date */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-3">
+                {restaurantName &&
+                    (selectedPlaceId && restaurantAddress && !editingAddress ? (
                         <button
                             type="button"
                             onClick={() => {
                                 addressFocusRef.current = true;
                                 setEditingAddress(true);
                             }}
-                            className="text-xs text-text-light hover:text-text-mid transition-colors ml-2 shrink-0"
+                            className="flex-1 min-w-0 text-left text-sm text-text-light bg-surface-100 rounded-lg px-3 py-2 hover:bg-surface-200/50 hover:text-text-mid transition-colors truncate"
                         >
-                            {text.edit}
+                            {restaurantAddress}
                         </button>
-                    </div>
-                ) : !selectedPlaceId && !editingAddress ? (
-                    <button
-                        type="button"
-                        onClick={() => {
-                            addressFocusRef.current = true;
-                            setEditingAddress(true);
-                        }}
-                        className="text-xs text-text-light hover:text-text-mid transition-colors"
-                    >
-                        + {text.restaurantAddressLabel}
-                    </button>
-                ) : (
-                    <>
-                        <label
-                            htmlFor="restaurantAddress"
-                            className="block text-sm font-medium text-text-mid mb-1"
+                    ) : !selectedPlaceId && !editingAddress ? (
+                        <button
+                            type="button"
+                            onClick={() => {
+                                addressFocusRef.current = true;
+                                setEditingAddress(true);
+                            }}
+                            className="flex-1 text-left text-sm text-text-light bg-surface-100 rounded-lg px-3 py-2 hover:bg-surface-200/50 hover:text-text-mid transition-colors"
                         >
-                            {text.restaurantAddressLabel}
-                        </label>
+                            + {text.restaurantAddressLabel}
+                        </button>
+                    ) : (
                         <input
                             id="restaurantAddress"
                             type="text"
@@ -294,9 +282,10 @@ function ReviewForm({ onReviewSubmitted, onCropOpenChange }) {
                             onChange={(e) =>
                                 setRestaurantAddress(e.target.value)
                             }
-                            className={`${inputClass} placeholder-text-light`}
+                            className="flex-1 border border-surface-200 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-surface-300 placeholder-text-light text-sm"
                             placeholder={text.restaurantAddressPlaceholder}
                             autoFocus={false}
+                            onBlur={() => setEditingAddress(false)}
                             ref={(el) => {
                                 if (el && addressFocusRef.current) {
                                     el.focus();
@@ -304,26 +293,11 @@ function ReviewForm({ onReviewSubmitted, onCropOpenChange }) {
                                 }
                             }}
                         />
-                    </>
-                )}
-            </div>
-
-            {/* Date */}
-            <div className="mb-4">
-                <input
-                    id="visitDate"
-                    type="date"
+                    ))}
+                <DateSelect
                     value={visitDate}
-                    onChange={(e) => setVisitDate(e.target.value)}
+                    onChange={setVisitDate}
                     max={getLocalDate()}
-                    className={`${inputClass} cursor-pointer`}
-                    style={{
-                        color: visitDate
-                            ? "var(--color-text-dark)"
-                            : "var(--color-text-mid)",
-                        opacity: 1,
-                    }}
-                    aria-label={text.dateVisitedLabel}
                 />
             </div>
 
@@ -358,7 +332,7 @@ function ReviewForm({ onReviewSubmitted, onCropOpenChange }) {
 
             {/* Photos */}
             <div className="mb-4">
-                <div className="bg-surface-100 border border-surface-200 rounded-lg px-4 py-3">
+                <div className="bg-transparent border border-surface-200 rounded-lg px-4 py-3">
                     <div className="flex items-center justify-center gap-2">
                         {images.map((image, index) => (
                             <div key={index} className="relative">
@@ -404,7 +378,7 @@ function ReviewForm({ onReviewSubmitted, onCropOpenChange }) {
             </div>
 
             {/* Public toggle */}
-            <div className="mb-4 bg-surface-100 rounded-lg border border-surface-200 px-4 py-3">
+            <div className="mb-4 bg-surface-100 rounded-lg px-4 py-3">
                 <div className="flex flex-col gap-1">
                     <Checkbox
                         checked={isPublic}

@@ -28,7 +28,7 @@ export function RatingsFields({
     return (
         <>
             {/* Mobile: vertical stack */}
-            <div className="sm:hidden bg-surface-100 border border-surface-200 rounded-lg divide-y divide-surface-200">
+            <div className="sm:hidden bg-transparent border border-surface-200 rounded-lg divide-y divide-surface-200">
                 <RatingField
                     label={
                         <span className="flex items-center gap-1">
@@ -61,7 +61,7 @@ export function RatingsFields({
                 />
             </div>
             {/* Desktop: horizontal joined */}
-            <div className="hidden sm:grid grid-cols-3 bg-surface-100 border border-surface-200 rounded-lg overflow-hidden">
+            <div className="hidden sm:grid grid-cols-3 bg-transparent border border-surface-200 rounded-lg overflow-hidden">
                 <RatingField
                     label={
                         <span className="flex items-center justify-center gap-1">

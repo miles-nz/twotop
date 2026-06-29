@@ -135,7 +135,7 @@ export const text = {
     writeReview: "Write a Review",
     restaurantNameLabel: "Restaurant",
     restaurantNamePlaceholder: (name) => `${name}`,
-    restaurantAddressLabel: "Address (optional)",
+    restaurantAddressLabel: "Address",
     restaurantAddressPlaceholder: "e.g. 123 Queen St, Auckland CBD, Auckland",
     searchingPlaces: "Searching...",
     noPlacesFound: "No results found",

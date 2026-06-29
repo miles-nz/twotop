@@ -4,6 +4,7 @@ import ImageCropModal from "./ImageCropModal";
 import CollaboratorCircle from "./CollaboratorCircle";
 import LoadingOverlay from "../ui/LoadingOverlay";
 import PlacesSearch from "../ui/PlacesSearch";
+import DateSelect from "../ui/DateSelect";
 import { RatingsFields } from "./FormComponents";
 import { getLocalDate } from "../../utils";
 import { useImageUpload } from "../../hooks/useImageUpload";
@@ -116,7 +117,7 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
             )}
 
             {/* Restaurant + collaborator */}
-            <div className="grid grid-cols-[1fr_auto] items-end gap-3 mb-2">
+            <div className="grid grid-cols-[1fr_auto] items-center gap-3 mb-2">
                 <div className="min-w-0">
                     <PlacesSearch
                         value={editedName}
@@ -124,7 +125,7 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
                         onPlaceSelected={handlePlaceSelected}
                         onClearPlace={handleClearPlace}
                         selectedPlaceId={editedPlaceId}
-                        className={`${inputClass} placeholder-text-light`}
+                        className="w-full border border-surface-200 rounded-lg px-3 py-3 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-surface-300 text-base placeholder-text-light"
                     />
                 </div>
                 <CollaboratorCircle
@@ -134,48 +135,31 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
                 />
             </div>
 
-            {/* Address */}
-            <div className="mb-4">
+            {/* Address + Date */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-3">
                 {editingAddress ? (
                     <input
                         type="text"
                         value={editedAddress}
                         onChange={(e) => setEditedAddress(e.target.value)}
                         placeholder={text.restaurantAddressPlaceholder}
-                        className={`${inputClass} placeholder-text-light`}
+                        className="flex-1 border border-surface-200 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-surface-300 placeholder-text-light text-sm"
                         autoFocus
                         onBlur={() => setEditingAddress(false)}
                     />
                 ) : (
-                    <div className="flex items-center justify-between px-1 py-1">
-                        <span className="text-sm text-text-light">
-                            {editedAddress || text.restaurantAddressPlaceholder}
-                        </span>
-                        <button
-                            type="button"
-                            onClick={() => setEditingAddress(true)}
-                            className="text-xs text-text-light hover:text-text-mid transition-colors ml-2 shrink-0"
-                        >
-                            {text.edit}
-                        </button>
-                    </div>
+                    <button
+                        type="button"
+                        onClick={() => setEditingAddress(true)}
+                        className="flex-1 min-w-0 text-left text-sm text-text-light bg-surface-100 rounded-lg px-3 py-2 hover:bg-surface-200/50 hover:text-text-mid transition-colors truncate"
+                    >
+                        {editedAddress || text.restaurantAddressPlaceholder}
+                    </button>
                 )}
-            </div>
-
-            {/* Date */}
-            <div className="mb-4">
-                <input
-                    type="date"
+                <DateSelect
                     value={editedVisitDate}
-                    onChange={(e) => setEditedVisitDate(e.target.value)}
+                    onChange={setEditedVisitDate}
                     max={getLocalDate()}
-                    className={`${inputClass} cursor-pointer`}
-                    style={{
-                        color: editedVisitDate
-                            ? "var(--color-text-dark)"
-                            : "var(--color-text-mid)",
-                        opacity: 1,
-                    }}
                 />
             </div>
 
@@ -207,8 +191,8 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
 
             {/* Photos */}
             <div className="mb-4">
-                <div className="bg-surface-100 border border-surface-200 rounded-lg px-4 py-3">
-                    <div className="flex items-center justify-center gap-3">
+                <div className="border border-surface-200 rounded-lg px-4 py-3">
+                    <div className="flex items-center justify-center gap-2">
                         {review.image_urls &&
                             review.image_urls
                                 .filter(
@@ -256,7 +240,7 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
                             <button
                                 type="button"
                                 onClick={() => fileInputRef.current.click()}
-                                className={`flex items-center gap-2 text-sm text-text-light hover:text-text-mid transition-colors h-12 ${currentPhotoCount === 0 ? "w-full justify-center" : ""}`}
+                                className={`flex items-center gap-2 text-sm text-text-light hover:text-text-mid transition-colors ${currentPhotoCount === 0 ? "w-full justify-center" : ""}`}
                             >
                                 <ImagePlus size={28} />
                                 {currentPhotoCount === 0 && (
@@ -302,7 +286,7 @@ function EditReviewUI({ editingState, handleSave, onClose, review }) {
             </div>
 
             {/* Public toggle */}
-            <div className="mb-4 bg-surface-100 rounded-lg border border-surface-200 px-4 py-3">
+            <div className="mb-4 bg-surface-100 rounded-lg px-4 py-3">
                 <div className="flex flex-col gap-1">
                     <Checkbox
                         checked={isPublic}
