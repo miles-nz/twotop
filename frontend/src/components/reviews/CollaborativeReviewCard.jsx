@@ -3,6 +3,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { createPortal } from "react-dom";
 import { useReviewCardEditing } from "../../hooks/useReviewCardEditing";
 import CollaboratorAvatars from "./CollaboratorAvatars";
+import { buildInterleavedGallery } from "./reviewCardUtils";
 import EditReviewUI from "./EditReviewUI";
 import ContributorForm from "./ContributorForm";
 import LoadingOverlay from "../ui/LoadingOverlay";
@@ -175,7 +176,7 @@ function ReviewerSection({ review }) {
                     />
                 </div>
             )}
-            {hasRatings && review.review_text && (
+            {review.review_text && (
                 <div className="border-t border-surface-200 mt-3 mb-3" />
             )}
             <ReviewText className="pb-4">{review.review_text}</ReviewText>
@@ -234,7 +235,7 @@ function ContributionSection({
                             />
                         </div>
                     )}
-                    {hasRatings && contribution.review_text && (
+                    {contribution.review_text && (
                         <div className="border-t border-surface-200 mt-3 mb-3" />
                     )}
                     <ReviewText className="pb-0">
@@ -272,6 +273,12 @@ function CollaborativeReviewCard({
     const hasContributed = visibleContributions.some(
         (c) => c.user_id === currentUserId,
     );
+
+    const {
+        images: galleryImages,
+        lqips: galleryLqips,
+        labels: galleryLabels,
+    } = buildInterleavedGallery(review, visibleContributions);
 
     if (editing) {
         return (
@@ -329,12 +336,13 @@ function CollaborativeReviewCard({
                 </div>
             </div>
 
-            {review.image_urls && review.image_urls.length > 0 && (
+            {galleryImages.length > 0 && (
                 <div className="flex justify-center w-full px-4 py-3">
                     <div className="w-full max-w-xl aspect-square rounded-2xl overflow-hidden">
                         <ReviewCardCarousel
-                            images={review.image_urls}
-                            lqips={review.image_lqips}
+                            images={galleryImages}
+                            lqips={galleryLqips}
+                            labels={galleryLabels}
                             reviewId={review.id}
                         />
                     </div>
@@ -356,18 +364,20 @@ function CollaborativeReviewCard({
             {isContributor &&
                 !hasContributed &&
                 (addingContribution ? (
-                    <div className="border-t border-surface-200 mx-6 mt-2 pt-4">
-                        <ContributorForm
-                            review={review}
-                            onSaved={() => {
-                                setAddingContribution(false);
-                                onReviewUpdated(review.id);
-                            }}
-                            onCancel={() => setAddingContribution(false)}
-                        />
+                    <div className="mx-6 mt-2 pt-4">
+                        <div className="bg-surface-100/50 border border-surface-200 rounded-xl overflow-hidden">
+                            <ContributorForm
+                                review={review}
+                                onSaved={() => {
+                                    setAddingContribution(false);
+                                    onReviewUpdated(review.id);
+                                }}
+                                onCancel={() => setAddingContribution(false)}
+                            />
+                        </div>
                     </div>
                 ) : (
-                    <div className="border-t border-surface-200 mx-6 pb-0 pt-4 flex justify-center">
+                    <div className="mx-6 pb-0 pt-4 flex justify-center">
                         <div className="flex flex-col items-center gap-3">
                             <span className="text-xs text-text-mid italic mr-2">
                                 {text.addYourReviewLabel}
@@ -376,7 +386,7 @@ function CollaborativeReviewCard({
                                 onClick={() => setAddingContribution(true)}
                                 className="text-sm bg-secondary-500 hover:bg-secondary-600 text-white px-4 py-1.5 rounded-lg transition-colors"
                             >
-                                {text.addYourReview}
+                                {text.addYourReviewButtonLabel}
                             </button>
                         </div>
                     </div>

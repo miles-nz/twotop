@@ -189,26 +189,9 @@ const notifyListUpdated = async (listId, editorUserId, ownerUserId) => {
     }
 };
 
-const validateReview = (body) => {
-    const {
-        restaurant_name,
-        review_text,
-        food_rating,
-        drink_rating,
-        ambience_rating,
-    } = body;
+const validateRatingsAndText = (body) => {
+    const { review_text, food_rating, drink_rating, ambience_rating } = body;
     const errors = [];
-
-    if (!restaurant_name) {
-        errors.push(ERRORS.restaurantNameRequired);
-    } else if (
-        typeof restaurant_name !== "string" ||
-        restaurant_name.trim().length === 0
-    ) {
-        errors.push(ERRORS.restaurantNameInvalid);
-    } else if (restaurant_name.trim().length > MAX_RESTAURANT_NAME_LENGTH) {
-        errors.push(ERRORS.restaurantNameTooLong);
-    }
 
     if (review_text && typeof review_text !== "string") {
         errors.push(ERRORS.reviewTextInvalid);
@@ -238,11 +221,32 @@ const validateReview = (body) => {
     return errors;
 };
 
+const validateReview = (body) => {
+    const { restaurant_name } = body;
+    const errors = [];
+
+    if (!restaurant_name) {
+        errors.push(ERRORS.restaurantNameRequired);
+    } else if (
+        typeof restaurant_name !== "string" ||
+        restaurant_name.trim().length === 0
+    ) {
+        errors.push(ERRORS.restaurantNameInvalid);
+    } else if (restaurant_name.trim().length > MAX_RESTAURANT_NAME_LENGTH) {
+        errors.push(ERRORS.restaurantNameTooLong);
+    }
+
+    errors.push(...validateRatingsAndText(body));
+
+    return errors;
+};
+
 module.exports = {
     getMgmtToken,
     uploadImage,
     deleteImages,
     attachContributions,
     notifyListUpdated,
+    validateRatingsAndText,
     validateReview,
 };

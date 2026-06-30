@@ -19,6 +19,10 @@ function SingleReviewCard({
     const editingState = useReviewCardEditing(review, onReviewUpdated, editing);
     const isOwner = review.user_id === currentUserId;
 
+    const hasRatings =
+        review.food_rating || review.drink_rating || review.ambience_rating;
+    const hasImages = review.image_urls && review.image_urls.length > 0;
+
     return editing ? (
         <EditReviewUI
             editingState={editingState}
@@ -57,40 +61,39 @@ function SingleReviewCard({
                 </div>
             </div>
 
-            {/* Ratings */}
-            {(review.food_rating ||
-                review.drink_rating ||
-                review.ambience_rating) && (
-                <div className="mt-2 flex justify-start lg:justify-center">
-                    <ReviewCardRatings
-                        foodRating={review.food_rating}
-                        drinkRating={review.drink_rating}
-                        ambienceRating={review.ambience_rating}
-                    />
-                </div>
-            )}
-
-            {/* Images */}
-            {review.image_urls && review.image_urls.length > 0 && (
-                <div className="flex justify-center w-full px-4 pt-2">
-                    <div className="w-full max-w-xl aspect-square rounded-2xl overflow-hidden">
-                        <ReviewCardCarousel
-                            images={review.image_urls}
-                            lqips={review.image_lqips}
-                            reviewId={review.id}
+            {/* Images, ratings, and text */}
+            <div
+                className={`mx-6 mt-2 ${hasImages || hasRatings ? "pt-4" : ""}`}
+            >
+                {/* Images */}
+                {hasImages && (
+                    <div className="flex justify-center w-full pb-6">
+                        <div className="w-full max-w-xl aspect-square rounded-2xl overflow-hidden">
+                            <ReviewCardCarousel
+                                images={review.image_urls}
+                                lqips={review.image_lqips}
+                                reviewId={review.id}
+                            />
+                        </div>
+                    </div>
+                )}
+                {/* Ratings */}
+                {hasRatings && (
+                    <div className="flex justify-start lg:justify-center">
+                        <ReviewCardRatings
+                            foodRating={review.food_rating}
+                            drinkRating={review.drink_rating}
+                            ambienceRating={review.ambience_rating}
                         />
                     </div>
-                </div>
-            )}
-
-            {/* Divider before text if no images */}
-            {(!review.image_urls || review.image_urls.length === 0) &&
-                review.review_text && (
-                    <div className="border-t border-surface-200 mx-6" />
                 )}
-
-            {/* Review text */}
-            <ReviewText>{review.review_text}</ReviewText>
+                {/* Divider */}
+                {review.review_text && (
+                    <div className="border-t border-surface-200 mt-3 mb-3" />
+                )}
+                {/* Review text */}
+                <ReviewText className="pb-4">{review.review_text}</ReviewText>
+            </div>
         </div>
     );
 }

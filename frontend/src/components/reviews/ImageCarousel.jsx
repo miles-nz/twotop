@@ -7,7 +7,7 @@ import { useTheme } from "../../contexts/ThemeContext";
 const arrowButtonClasses =
     "absolute top-1/2 -translate-y-1/2 bg-black/50 enabled:hover:bg-black/70 disabled:opacity-30 text-white rounded-full p-2 transition-all duration-200 z-10 enabled:cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400";
 
-function ImageCarousel({ images, lqips }) {
+function ImageCarousel({ images, lqips, labels }) {
     const scrollRef = useRef(null);
     const [enableLeftArrow, setEnableLeftArrow] = useState(false);
     const [enableRightArrow, setEnableRightArrow] = useState(true);
@@ -70,6 +70,7 @@ function ImageCarousel({ images, lqips }) {
             >
                 {images.map((url, index) => {
                     const lqip = lqips?.[index];
+                    const label = labels?.[index];
                     return (
                         <div
                             key={index}
@@ -120,6 +121,12 @@ function ImageCarousel({ images, lqips }) {
                                     }))
                                 }
                             />
+
+                            {label && (
+                                <span className="absolute bottom-3 left-3 z-20 bg-black/50 text-white text-xs px-2 py-1 rounded-full">
+                                    {label}
+                                </span>
+                            )}
                         </div>
                     );
                 })}

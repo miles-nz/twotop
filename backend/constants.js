@@ -41,7 +41,7 @@ const ERRORS = {
     reviewTextTooLong: `Review text must be ${MAX_REVIEW_TEXT_LENGTH} characters or less.`,
     ratingInvalid: (name) =>
         `${name} must be a number between ${RATING_MIN} and ${RATING_MAX}.`,
-    missingRequiredFields: "Review notes or all ratings are required.",
+    missingRequiredFields: "Review notes or ratings are required.",
     restaurantNameTooLong: `Restaurant name must be ${MAX_RESTAURANT_NAME_LENGTH} characters or less.`,
     userNameTooLong: `Name must be ${MAX_USER_NAME_LENGTH} characters or less.`,
     userNameRequired: "Name is required.",

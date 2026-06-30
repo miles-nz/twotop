@@ -15,6 +15,7 @@ const {
     deleteImages,
     attachContributions,
     validateReview,
+    validateRatingsAndText,
 } = require("../helpers");
 
 router.get("/", checkJwt, async (req, res) => {
@@ -473,57 +474,125 @@ router.patch(
     },
 );
 
-router.post("/:id/contributions", checkJwt, async (req, res) => {
-    const { id } = req.params;
-    const user_id = req.auth.payload.sub;
+router.post(
+    "/:id/contributions",
+    checkJwt,
+    (req, res, next) => {
+        upload.array("images", MAX_IMAGES_PER_REVIEW)(req, res, (err) => {
+            if (err) return res.status(400).json({ errors: [err.message] });
+            next();
+        });
+    },
+    async (req, res) => {
+        const { id } = req.params;
+        const user_id = req.auth.payload.sub;
 
-    const { data: review, error: fetchError } = await supabase
-        .from("reviews")
-        .select("*")
-        .eq("id", id)
-        .single();
+        const errors = validateRatingsAndText(req.body);
+        if (errors.length > 0) return res.status(400).json({ errors });
 
-    if (fetchError || !review)
-        return res.status(404).json({ error: ERRORS.reviewNotFound });
+        const { data: review, error: fetchError } = await supabase
+            .from("reviews")
+            .select("*")
+            .eq("id", id)
+            .single();
 
-    const isAllowed = (review.allowed_contributors || []).some(
-        (c) => c.user_id === user_id,
-    );
-    if (!isAllowed) return res.status(403).json({ error: ERRORS.unauthorised });
+        if (fetchError || !review)
+            return res.status(404).json({ error: ERRORS.reviewNotFound });
 
-    const {
-        review_text,
-        food_rating,
-        drink_rating,
-        ambience_rating,
-        reviewer_name,
-        reviewer_picture,
-    } = req.body;
+        const isAllowed = (review.allowed_contributors || []).some(
+            (c) => c.user_id === user_id,
+        );
+        if (!isAllowed)
+            return res.status(403).json({ error: ERRORS.unauthorised });
 
-    const contribution = {
-        review_id: id,
-        user_id,
-        reviewer_name: reviewer_name || null,
-        reviewer_picture: reviewer_picture || null,
-        review_text: review_text ? review_text.trim() : null,
-        food_rating: food_rating ?? null,
-        drink_rating: drink_rating ?? null,
-        ambience_rating: ambience_rating ?? null,
-        updated_at: new Date().toISOString(),
-    };
+        const {
+            review_text,
+            food_rating,
+            drink_rating,
+            ambience_rating,
+            reviewer_name,
+            reviewer_picture,
+        } = req.body;
 
-    try {
-        const { data, error } = await supabase
-            .from("review_contributions")
-            .upsert(contribution, { onConflict: "review_id,user_id" })
-            .select();
+        try {
+            const { data: existingContribution } = await supabase
+                .from("review_contributions")
+                .select("image_urls, image_lqips")
+                .eq("review_id", id)
+                .eq("user_id", user_id)
+                .maybeSingle();
 
-        if (error) return res.status(500).json({ error: error.message });
-        res.status(200).json(data[0]);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
+            const existingUrls = existingContribution?.image_urls || [];
+            const existingLqips = existingContribution?.image_lqips || [];
+
+            let keptUrls = existingUrls;
+            if (req.body.image_urls !== undefined) {
+                keptUrls = JSON.parse(req.body.image_urls);
+                const removedUrls = existingUrls.filter(
+                    (url) => !keptUrls.includes(url),
+                );
+                await deleteImages(removedUrls);
+            }
+
+            const keptIndices = existingUrls
+                .map((url, i) => (keptUrls.includes(url) ? i : -1))
+                .filter((i) => i !== -1);
+            let keptLqips = keptIndices.map((i) => existingLqips[i] || null);
+
+            let finalUrls = keptUrls;
+            let finalLqips = keptLqips;
+
+            if (req.files && req.files.length > 0) {
+                if (
+                    keptUrls.length + req.files.length >
+                    MAX_IMAGES_PER_REVIEW
+                ) {
+                    return res.status(400).json({ error: ERRORS.maxPhotos });
+                }
+                const uploadResults = await Promise.all(
+                    req.files.map((file) => uploadImage(file, user_id)),
+                );
+                const newUrls = uploadResults.map((r) => r.url);
+                const newLqips = uploadResults.map((r) => r.lqip);
+                finalUrls = [...keptUrls, ...newUrls];
+                finalLqips = [...keptLqips, ...newLqips];
+            }
+
+            const contribution = {
+                review_id: id,
+                user_id,
+                reviewer_name: reviewer_name || null,
+                reviewer_picture: reviewer_picture || null,
+                review_text: review_text ? review_text.trim() : null,
+                food_rating:
+                    food_rating && food_rating !== ""
+                        ? parseFloat(food_rating)
+                        : null,
+                drink_rating:
+                    drink_rating && drink_rating !== ""
+                        ? parseFloat(drink_rating)
+                        : null,
+                ambience_rating:
+                    ambience_rating && ambience_rating !== ""
+                        ? parseFloat(ambience_rating)
+                        : null,
+                image_urls: finalUrls,
+                image_lqips: finalLqips,
+                updated_at: new Date().toISOString(),
+            };
+
+            const { data, error } = await supabase
+                .from("review_contributions")
+                .upsert(contribution, { onConflict: "review_id,user_id" })
+                .select();
+
+            if (error) return res.status(500).json({ error: error.message });
+            res.status(200).json(data[0]);
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    },
+);
 
 router.delete("/:id", checkJwt, async (req, res) => {
     const { id } = req.params;

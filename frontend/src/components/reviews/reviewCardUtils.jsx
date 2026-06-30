@@ -202,3 +202,42 @@ export function ShareReviewButton({ reviewId }) {
         </button>
     );
 }
+
+export function buildInterleavedGallery(review, contributions) {
+    const groups = [
+        {
+            name: review.reviewer_name,
+            images: review.image_urls || [],
+            lqips: review.image_lqips || [],
+        },
+        ...contributions.map((c) => ({
+            name: c.reviewer_name,
+            images: c.image_urls || [],
+            lqips: c.image_lqips || [],
+        })),
+    ];
+
+    const hasCollaborators = contributions.length > 0;
+    const photoGroups = groups.filter((g) => g.images.length > 0);
+
+    const images = [];
+    const lqips = [];
+    const labels = [];
+
+    let index = 0;
+    let remaining = photoGroups.reduce((sum, g) => sum + g.images.length, 0);
+
+    while (remaining > 0) {
+        const group = photoGroups[index % photoGroups.length];
+        const groupIndex = Math.floor(index / photoGroups.length);
+        if (groupIndex < group.images.length) {
+            images.push(group.images[groupIndex]);
+            lqips.push(group.lqips[groupIndex] || null);
+            labels.push(hasCollaborators ? group.name : null);
+            remaining -= 1;
+        }
+        index += 1;
+    }
+
+    return { images, lqips, labels };
+}

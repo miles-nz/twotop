@@ -157,9 +157,10 @@ export const text = {
     noSharedWithForCollaboration:
         "You haven't added friends yet. Add friends and they will appear here.",
     addYourReviewLabel: "You have been added as a collaborator on this review.",
-    addYourReview: "Add your review",
+    addYourReviewButtonLabel: "Add your review",
     addPhotos: "Add photos",
     searchRestaurant: "Search restaurant...",
+    contributionFormHeading: "Add Your Review",
     markAsPublicHelper:
         "Make this review visible to everyone, not just your friends.",
     collaborativeHelper:
@@ -282,6 +283,7 @@ export const text = {
     selfFriendRequest: "You're already your own friend!",
     errorFailedRemoveFriend: "Failed to remove friend.",
     errorFailedCancelRequest: "Failed to cancel request.",
+    errorMissingRequiredFields: "Review notes or ratings are required.",
 
     // Time / Utils
     today: "Today",
