@@ -1,5 +1,7 @@
 import { NavLink } from "react-router-dom";
-import { NotebookText, List, User } from "lucide-react";
+import { List, User } from "lucide-react";
+import ReviewIcon from "../ui/ReviewIcon";
+
 import { text } from "../../resources";
 
 export default function BottomNav() {
@@ -17,7 +19,7 @@ export default function BottomNav() {
                     `${baseClass} ${isActive ? activeClass : inactiveClass}`
                 }
             >
-                <NotebookText size={22} />
+                <ReviewIcon size={22} />
                 <span className="text-xs font-medium">{text.reviews}</span>
             </NavLink>
             <NavLink

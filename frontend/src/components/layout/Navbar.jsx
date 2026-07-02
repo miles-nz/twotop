@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Bell, NotebookText, List } from "lucide-react";
+import { Menu, X, Bell, List } from "lucide-react";
+import ReviewIcon from "../ui/ReviewIcon";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import Button from "../ui/Button";
 import AvatarDropdown from "./AvatarDropdown";
@@ -142,7 +143,7 @@ function Navbar({ onListShareAccepted }) {
                                         }`
                                     }
                                 >
-                                    <NotebookText size={16} />
+                                    <ReviewIcon size={18} />
                                     {text.reviews}
                                 </NavLink>
                                 <NavLink
@@ -155,7 +156,7 @@ function Navbar({ onListShareAccepted }) {
                                         }`
                                     }
                                 >
-                                    <List size={16} />
+                                    <List size={18} />
                                     {text.lists}
                                 </NavLink>
                             </div>
