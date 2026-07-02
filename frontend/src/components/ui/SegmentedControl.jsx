@@ -21,9 +21,20 @@ export default function SegmentedControl({
 
     useLayoutEffect(() => {
         if (fullWidth) return;
-        const widths = buttonRefs.current.map((b) => b?.offsetWidth ?? 0);
-        const maxWidth = Math.max(...widths);
-        if (maxWidth > 0) setSegmentWidth(maxWidth);
+
+        const calculate = () => {
+            const widths = buttonRefs.current.map((b) => b?.offsetWidth ?? 0);
+            const maxWidth = Math.max(...widths);
+            if (maxWidth > 0) setSegmentWidth(maxWidth);
+        };
+
+        calculate();
+
+        const observer = new ResizeObserver(calculate);
+        buttonRefs.current.forEach((b) => {
+            if (b) observer.observe(b);
+        });
+        return () => observer.disconnect();
     }, [options, showText, showIcon, fullWidth]);
 
     useLayoutEffect(() => {
