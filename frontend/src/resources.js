@@ -284,6 +284,8 @@ export const text = {
     errorFailedRemoveFriend: "Failed to remove friend.",
     errorFailedCancelRequest: "Failed to cancel request.",
     errorMissingRequiredFields: "Review notes or ratings are required.",
+    errorUserNameRequired: "Please enter a name.",
+    errorUserNameTooLong: "Name must be less than 20 characters.",
 
     // Time / Utils
     today: "Today",
@@ -563,7 +565,7 @@ const listSets = [
     },
 ];
 
-export const tutorialExamples = {
+export const tutorial = {
     slideText,
     randomUserSet: () => userSets[Math.floor(Math.random() * userSets.length)],
     randomRestaurantName: () =>
@@ -608,4 +610,11 @@ export const tutorialExamples = {
             null
         );
     },
+    setNameSlideHeading: "What's your name?",
+    setNameSlideSubheading: "This is how you'll appear on your reviews.",
+    setNameSlidePlaceholder: "e.g. Jamie",
+    setNameSkip: "I'll do this later",
+    editProfileHeading: "Edit Your Profile",
+    editProfileSubheading:
+        "Edit your name or add a profile photo at any time on your profile page.",
 };

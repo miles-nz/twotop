@@ -139,3 +139,16 @@ export function makeContributorList(ownerName, contributorNames) {
         return `${ownerName} & ${contributorNames[0]}`;
     return `${ownerName} +${contributorNames.length}`;
 }
+
+export const makeExampleTutorialEmail = (name) => {
+    const nameParts = name.split(" ");
+    if (nameParts.length === 1) {
+        return `${nameParts[0].toLowerCase().replaceAll(".", "")}@example.com`;
+    }
+
+    if (nameParts[0].length === 2 && nameParts[1].length > 2) {
+        return `${nameParts[1].toLowerCase().replaceAll(".", "")}@example.com`;
+    }
+
+    return `${nameParts[0].toLowerCase().replaceAll(".", "")}@example.com`;
+};

@@ -1,19 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { text } from "../../resources";
-
-const makeEmail = (name) => {
-    const nameParts = name.split(" ");
-    if (nameParts.length === 1) {
-        return `${nameParts[0].toLowerCase().replaceAll(".", "")}@example.com`;
-    }
-
-    if (nameParts[0].length === 2 && nameParts[1].length > 2) {
-        return `${nameParts[1].toLowerCase().replaceAll(".", "")}@example.com`;
-    }
-
-    return `${nameParts[0].toLowerCase().replaceAll(".", "")}@example.com`;
-};
+import { makeExampleTutorialEmail as makeEmail } from "../../utils";
 
 export default function SlideSharing({ userSet, onDone = () => {} }) {
     const [visible, setVisible] = useState(1);

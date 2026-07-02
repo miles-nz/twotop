@@ -6,11 +6,14 @@ import SlideSharing from "./SlideSharing";
 import SlideCollaborative from "./SlideCollaborative";
 import SlideThemes from "./SlideThemes";
 import SlideLists from "./SlideLists";
+import SlideSetName from "./SlideSetName";
+import SlideEditProfile from "./SlideEditProfile";
 import ReplayButton from "./ReplayButton";
-import { text, tutorialExamples } from "../../resources";
+import { text, tutorial } from "../../resources";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useUser } from "../../contexts/UserContext";
 
-const SLIDES = [
+const BASE_SLIDES = [
     {
         title: "",
         sub: "",
@@ -18,69 +21,94 @@ const SLIDES = [
         hasReplay: false,
     },
     {
-        title: tutorialExamples.slideText.writeReview.title,
-        sub: tutorialExamples.slideText.writeReview.sub,
+        title: tutorial.slideText.writeReview.title,
+        sub: tutorial.slideText.writeReview.sub,
         Component: SlideWriteReview,
         hasReplay: true,
     },
     {
-        title: tutorialExamples.slideText.sharing.title,
-        sub: tutorialExamples.slideText.sharing.sub,
+        title: tutorial.slideText.sharing.title,
+        sub: tutorial.slideText.sharing.sub,
         Component: SlideSharing,
         hasReplay: true,
     },
     {
-        title: tutorialExamples.slideText.collaborative.title,
-        sub: tutorialExamples.slideText.collaborative.sub,
+        title: tutorial.slideText.collaborative.title,
+        sub: tutorial.slideText.collaborative.sub,
         Component: SlideCollaborative,
         hasReplay: true,
     },
     {
-        title: tutorialExamples.slideText.lists.title,
-        sub: tutorialExamples.slideText.lists.sub,
+        title: tutorial.slideText.lists.title,
+        sub: tutorial.slideText.lists.sub,
         Component: SlideLists,
         hasReplay: true,
     },
     {
-        title: tutorialExamples.slideText.themes.title,
-        sub: tutorialExamples.slideText.themes.sub,
+        title: tutorial.slideText.themes.title,
+        sub: tutorial.slideText.themes.sub,
         Component: SlideThemes,
         hasReplay: false,
     },
 ];
 
-// animations for transitioning between slides
+const NAME_SLIDE = {
+    title: tutorial.setNameSlideHeading,
+    sub: tutorial.setNameSlideSubheading,
+    Component: SlideSetName,
+    hasReplay: false,
+    isNameSlide: true,
+};
+
+const EDITPROFILE_SLIDE = {
+    title: tutorial.editProfileHeading,
+    sub: tutorial.editProfileSubheading,
+    Component: SlideEditProfile,
+    hasReplay: true,
+    isEditProfileSlide: true,
+};
+
 const variants = {
     enter: (dir) => ({ opacity: 0, x: dir * 24 }),
     center: { opacity: 1, x: 0 },
     exit: (dir) => ({ opacity: 0, x: dir * -24 }),
 };
 
-export default function WelcomeTutorial({ onDismiss }) {
+export default function WelcomeTutorial({
+    onDismiss,
+    showNamePrompt,
+    onNameSaved,
+}) {
+    const SLIDES = [
+        ...BASE_SLIDES,
+        ...(showNamePrompt ? [NAME_SLIDE] : []),
+        EDITPROFILE_SLIDE,
+    ];
+
     const [current, setCurrent] = useState(0);
     const [direction, setDirection] = useState(1);
     const [slideKey, setSlideKey] = useState(0);
     const [done, setDone] = useState(false);
 
-    const { user } = useAuth0();
+    const [name, setName] = useState("");
+    const [nameError, setNameError] = useState(null);
+    const [saving, setSaving] = useState(false);
+
+    const { getAccessTokenSilently, user } = useAuth0();
+    const { updateCurrentUserName, setReviewerNameUpdate } = useUser();
+
     const email = user?.email ?? null;
     const [userSet, setUserSet] = useState(() => {
-        return (
-            tutorialExamples.getUserSetForEmail(email) ??
-            tutorialExamples.randomUserSet()
-        );
+        return tutorial.getUserSetForEmail(email) ?? tutorial.randomUserSet();
     });
     const [restaurantName, setRestaurantName] = useState(() => {
         return (
-            tutorialExamples.getRestaurantNameForEmail(email) ??
-            tutorialExamples.randomRestaurantName()
+            tutorial.getRestaurantNameForEmail(email) ??
+            tutorial.randomRestaurantName()
         );
     });
     const [listSet, setListSet] = useState(() => {
-        return (
-            tutorialExamples.getListSetForEmail(email) ??
-            tutorialExamples.randomListSet()
-        );
+        return tutorial.getListSetForEmail(email) ?? tutorial.randomListSet();
     });
 
     const goto = (n) => {
@@ -89,6 +117,8 @@ export default function WelcomeTutorial({ onDismiss }) {
         setSlideKey((k) => k + 1);
         setDone(false);
     };
+
+    const isNameSlide = SLIDES[current]?.isNameSlide;
 
     const next = () => {
         if (current < SLIDES.length - 1) goto(current + 1);
@@ -99,13 +129,45 @@ export default function WelcomeTutorial({ onDismiss }) {
         if (current > 0) goto(current - 1);
     };
 
+    const handleNameSave = async () => {
+        const trimmed = name.trim();
+        if (!trimmed) {
+            setNameError(text.errorUserNameRequired);
+            return;
+        }
+        setSaving(true);
+        setNameError(null);
+        try {
+            const token = await getAccessTokenSilently();
+            const response = await fetch(
+                `${import.meta.env.VITE_API_URL}/user/name`,
+                {
+                    method: "PATCH",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ name: trimmed }),
+                },
+            );
+            if (!response.ok) throw new Error(text.errorGeneric);
+            updateCurrentUserName(trimmed);
+            setReviewerNameUpdate({ name: trimmed, userId: user.sub });
+            onNameSaved();
+            next();
+        } catch (err) {
+            setNameError(err.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
     const handleReplay = () => {
         setDone(false);
         setSlideKey((k) => k + 1);
-        if (current === 1)
-            setRestaurantName(tutorialExamples.randomRestaurantName());
-        if (current === 2) setUserSet(tutorialExamples.nextUserSet(userSet));
-        if (current === 4) setListSet(tutorialExamples.randomListSet());
+        if (current === 1) setRestaurantName(tutorial.randomRestaurantName());
+        if (current === 2) setUserSet(tutorial.nextUserSet(userSet));
+        if (current === 4) setListSet(tutorial.randomListSet());
     };
 
     const { title, sub, Component, hasReplay } = SLIDES[current];
@@ -120,7 +182,7 @@ export default function WelcomeTutorial({ onDismiss }) {
         if (touchStartX.current === null) return;
         const diff = touchStartX.current - e.changedTouches[0].clientX;
         if (Math.abs(diff) > 50) {
-            if (diff > 0) next();
+            if (diff > 0 && !isNameSlide) next();
             else prev();
         }
         touchStartX.current = null;
@@ -186,6 +248,10 @@ export default function WelcomeTutorial({ onDismiss }) {
                                 onDone={
                                     hasReplay ? () => setDone(true) : undefined
                                 }
+                                name={name}
+                                setName={setName}
+                                nameError={nameError}
+                                onSkip={next}
                             />
                         </div>
                     </motion.div>
@@ -193,18 +259,35 @@ export default function WelcomeTutorial({ onDismiss }) {
 
                 <div className="px-8 pb-7 flex items-center justify-between border-t border-surface-200 pt-4">
                     <div className="flex gap-1.5">
-                        {SLIDES.map((_, i) => (
-                            <div
-                                key={i}
-                                className={`w-2 h-2 rounded-full transition-colors duration-200 ${
-                                    i === current
-                                        ? "bg-text-dark"
-                                        : "bg-surface-300"
-                                }`}
-                            />
-                        ))}
+                        <div className="flex gap-1.5">
+                            {current !== 0 &&
+                                !SLIDES[current]?.isNameSlide &&
+                                !(
+                                    SLIDES[current]?.isEditProfileSlide &&
+                                    showNamePrompt
+                                ) &&
+                                SLIDES.map((slide, i) => {
+                                    if (i === 0 || slide.isNameSlide)
+                                        return null;
+                                    if (
+                                        slide.isEditProfileSlide &&
+                                        showNamePrompt
+                                    )
+                                        return null;
+                                    return (
+                                        <div
+                                            key={i}
+                                            className={`w-2 h-2 rounded-full transition-colors duration-200 ${
+                                                i === current
+                                                    ? "bg-text-dark"
+                                                    : "bg-surface-300"
+                                            }`}
+                                        />
+                                    );
+                                })}
+                        </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 items-center">
                         {current > 0 && (
                             <button
                                 onClick={prev}
@@ -213,14 +296,24 @@ export default function WelcomeTutorial({ onDismiss }) {
                                 {text.back}
                             </button>
                         )}
-                        <button
-                            onClick={next}
-                            className="px-4 py-1.5 rounded-lg text-sm bg-primary-500 text-white hover:bg-primary-600 transition-colors"
-                        >
-                            {current === SLIDES.length - 1
-                                ? text.gotIt
-                                : text.next}
-                        </button>
+                        {isNameSlide ? (
+                            <button
+                                onClick={handleNameSave}
+                                disabled={!name.trim() || saving}
+                                className="px-4 py-1.5 rounded-lg text-sm bg-primary-500 text-white hover:bg-primary-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                            >
+                                {saving ? text.saving : text.save}
+                            </button>
+                        ) : (
+                            <button
+                                onClick={next}
+                                className="px-4 py-1.5 rounded-lg text-sm bg-primary-500 text-white hover:bg-primary-600 transition-colors"
+                            >
+                                {current === SLIDES.length - 1
+                                    ? text.gotIt
+                                    : text.next}
+                            </button>
+                        )}
                     </div>
                 </div>
             </motion.div>

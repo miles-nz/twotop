@@ -70,7 +70,9 @@ router.get("/preferences", checkJwt, async (req, res) => {
     try {
         const { data, error } = await supabase
             .from("user_preferences")
-            .select("theme_id, shared_with, has_seen_tutorial")
+            .select(
+                "theme_id, shared_with, has_seen_tutorial, has_seen_name_prompt",
+            )
             .eq("user_id", user_id)
             .single();
 
@@ -82,6 +84,7 @@ router.get("/preferences", checkJwt, async (req, res) => {
             theme_id: data?.theme_id || "default-theme",
             shared_with: data?.shared_with || [],
             has_seen_tutorial: data?.has_seen_tutorial || false,
+            has_seen_name_prompt: data?.has_seen_name_prompt || false,
         });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -269,6 +272,17 @@ router.patch("/name", checkJwt, async (req, res) => {
                 reviewsError.message,
             );
 
+        const { error: contributionsError } = await supabase
+            .from("review_contributions")
+            .update({ reviewer_name: name.trim() })
+            .eq("user_id", user_id);
+
+        if (contributionsError)
+            console.error(
+                "Failed to update contribution names:",
+                contributionsError.message,
+            );
+
         res.status(200).json({ name: name.trim() });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -277,7 +291,8 @@ router.patch("/name", checkJwt, async (req, res) => {
 
 router.patch("/preferences", checkJwt, async (req, res) => {
     const user_id = req.auth.payload.sub;
-    const { theme_id, shared_with, has_seen_tutorial } = req.body;
+    const { theme_id, shared_with, has_seen_tutorial, has_seen_name_prompt } =
+        req.body;
 
     if (theme_id !== undefined && typeof theme_id !== "string") {
         return res.status(400).json({ error: "Invalid theme_id" });
@@ -294,11 +309,20 @@ router.patch("/preferences", checkJwt, async (req, res) => {
         return res.status(400).json({ error: "Invalid has_seen_tutorial" });
     }
 
+    if (
+        has_seen_name_prompt !== undefined &&
+        typeof has_seen_name_prompt !== "boolean"
+    ) {
+        return res.status(400).json({ error: "Invalid has_seen_name_prompt" });
+    }
+
     const updates = { updated_at: new Date().toISOString() };
     if (theme_id !== undefined) updates.theme_id = theme_id;
     if (shared_with !== undefined) updates.shared_with = shared_with;
     if (has_seen_tutorial !== undefined)
         updates.has_seen_tutorial = has_seen_tutorial;
+    if (has_seen_name_prompt !== undefined)
+        updates.has_seen_name_prompt = has_seen_name_prompt;
 
     try {
         const { error: upsertError } = await supabase
@@ -322,6 +346,9 @@ router.patch("/preferences", checkJwt, async (req, res) => {
             ...(theme_id !== undefined && { theme_id }),
             ...(shared_with !== undefined && { shared_with }),
             ...(has_seen_tutorial !== undefined && { has_seen_tutorial }),
+            ...(has_seen_name_prompt !== undefined && {
+                has_seen_name_prompt,
+            }),
         });
     } catch (err) {
         res.status(500).json({ error: err.message });

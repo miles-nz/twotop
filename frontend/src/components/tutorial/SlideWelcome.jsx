@@ -1,5 +1,5 @@
 import Logo from "../ui/Logo";
-import { tutorialExamples } from "../../resources";
+import { tutorial } from "../../resources";
 
 export default function SlideWelcome() {
     return (
@@ -12,12 +12,12 @@ export default function SlideWelcome() {
             </div>
             <div>
                 <p className="text-sm text-text-light text-center leading-relaxed max-w-xs pt-5">
-                    {tutorialExamples.welcomeMessage[0]}
+                    {tutorial.welcomeMessage[0]}
                 </p>
             </div>
             <div>
                 <p className="text-sm text-text-light text-center leading-relaxed max-w-xs mx-15">
-                    {tutorialExamples.welcomeMessage[1]}
+                    {tutorial.welcomeMessage[1]}
                 </p>
             </div>
         </div>

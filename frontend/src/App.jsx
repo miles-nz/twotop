@@ -28,7 +28,10 @@ function AppContent() {
         markTutorialSeen,
         showTutorial,
         setShowTutorial,
+        hasSeenNamePrompt,
+        markNamePromptSeen,
         setReviewerThemeUpdate,
+        preferencesLoaded,
     } = useUser();
 
     const [listRefreshTrigger, setListRefreshTrigger] = useState(0);
@@ -106,12 +109,15 @@ function AppContent() {
                 pullDistance={pullDistance}
                 refreshing={refreshing}
             />
-            {(showTutorial || !hasSeenTutorial) && (
+            {preferencesLoaded && (showTutorial || !hasSeenTutorial) && (
                 <WelcomeTutorial
+                    showNamePrompt={!hasSeenNamePrompt}
                     onDismiss={() => {
                         setShowTutorial(false);
                         markTutorialSeen();
+                        markNamePromptSeen();
                     }}
+                    onNameSaved={markNamePromptSeen}
                 />
             )}
             <Navbar

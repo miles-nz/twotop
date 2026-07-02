@@ -21,6 +21,8 @@ export function UserProvider({ children }) {
         hasSeenTutorial,
         markTutorialSeen,
         preferencesLoaded,
+        hasSeenNamePrompt,
+        markNamePromptSeen,
     } = useUserPreferences();
 
     const [reviewerPictureUpdate, setReviewerPictureUpdate] = useState(null);
@@ -41,6 +43,8 @@ export function UserProvider({ children }) {
                 fetchPreferences,
                 hasSeenTutorial,
                 markTutorialSeen,
+                hasSeenNamePrompt,
+                markNamePromptSeen,
                 reviewerPictureUpdate,
                 setReviewerPictureUpdate,
                 reviewerNameUpdate,

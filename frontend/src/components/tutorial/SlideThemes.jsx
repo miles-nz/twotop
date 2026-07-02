@@ -1,14 +1,14 @@
 import { useTheme } from "../../contexts/ThemeContext";
 import { themes } from "../../themes";
-import { tutorialExamples } from "../../resources";
+import { tutorial } from "../../resources";
 
 export default function SlideThemes() {
     const { isDarkMode } = useTheme();
     const mode = isDarkMode ? "dark" : "light";
 
-    const scrollDuration = (5 * tutorialExamples.reviewCardExamples.length) / 3;
+    const scrollDuration = (5 * tutorial.reviewCardExamples.length) / 3;
 
-    const cards = tutorialExamples.reviewCardExamples
+    const cards = tutorial.reviewCardExamples
         .filter((example) => themes[mode][example.theme])
         .map((example) => {
             const t = themes[mode][example.theme];

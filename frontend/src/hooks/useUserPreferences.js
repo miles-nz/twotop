@@ -8,6 +8,7 @@ export function useUserPreferences() {
     );
     const [sharedWith, setSharedWith] = useState([]);
     const [hasSeenTutorial, setHasSeenTutorial] = useState(true);
+    const [hasSeenNamePrompt, setHasSeenNamePrompt] = useState(false);
     const [preferencesLoaded, setPreferencesLoaded] = useState(false);
 
     const fetchPreferences = async () => {
@@ -24,6 +25,7 @@ export function useUserPreferences() {
                 localStorage.setItem("twotop-theme-id", themeId);
                 setSharedWith(data.shared_with || []);
                 setHasSeenTutorial(data.has_seen_tutorial === true);
+                setHasSeenNamePrompt(data.has_seen_name_prompt === true);
                 setPreferencesLoaded(true);
             }
         } catch (err) {
@@ -94,6 +96,24 @@ export function useUserPreferences() {
         setCurrentThemeId(themeId);
     };
 
+    const markNamePromptSeen = async () => {
+        setHasSeenNamePrompt(true);
+        try {
+            const token = await getAccessTokenSilently();
+            await fetch(`${import.meta.env.VITE_API_URL}/user/preferences`, {
+                method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ has_seen_name_prompt: true }),
+            });
+        } catch (err) {
+            console.error("Failed to mark name modal dismissed:", err);
+            setHasSeenNamePrompt(false);
+        }
+    };
+
     return {
         currentThemeId,
         setCurrentThemeId,
@@ -104,6 +124,8 @@ export function useUserPreferences() {
         handleThemePreview,
         hasSeenTutorial,
         markTutorialSeen,
+        hasSeenNamePrompt,
+        markNamePromptSeen,
         preferencesLoaded,
     };
 }

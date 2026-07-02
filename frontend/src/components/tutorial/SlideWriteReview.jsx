@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { text, tutorialExamples } from "../../resources";
+import { text, tutorial } from "../../resources";
 
-const REVIEW_TEXT = tutorialExamples.reviewTextExample;
+const REVIEW_TEXT = tutorial.reviewTextExample;
 
 export default function SlideWriteReview({
     restaurantName,

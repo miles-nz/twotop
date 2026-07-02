@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { text, tutorialExamples } from "../../resources";
+import { text, tutorial } from "../../resources";
 
-const REVIEW_TEXT = tutorialExamples.reviewTextExampleCollaborator;
+const REVIEW_TEXT = tutorial.reviewTextExampleCollaborator;
 
 export default function SlideCollaborative({
     userSet,
@@ -146,7 +146,7 @@ export default function SlideCollaborative({
                     transition={{ duration: 0.1 }}
                     tabIndex={-1}
                 >
-                    {text.addYourReview}
+                    {text.addYourReviewButtonLabel}
                 </motion.button>
             ) : (
                 <motion.div
