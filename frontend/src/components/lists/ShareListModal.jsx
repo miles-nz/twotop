@@ -62,7 +62,7 @@ export default function ShareListModal({
             const data = await res.json();
 
             if (!res.ok) {
-                setError(data.error || text.errorGeneric);
+                setError(`${data.error || text.errorGeneric} (${res.status})`);
                 return;
             }
 
@@ -79,8 +79,7 @@ export default function ShareListModal({
             setSelectedUserId(null);
             setSelectedPermission("view");
         } catch (err) {
-            console.error("Failed to share list:", err);
-            setError(text.errorGeneric);
+            setError(`${text.errorGeneric} (${err.message})`);
         } finally {
             setLoading(false);
         }
@@ -96,14 +95,18 @@ export default function ShareListModal({
                     headers: { Authorization: `Bearer ${token}` },
                 },
             );
-            if (res.ok) {
-                setCurrentShares((prev) =>
-                    prev.filter((s) => s.user_id !== confirmRemoveId),
+            if (!res.ok) {
+                const data = await res.json();
+                setError(
+                    `${text.errorGeneric} (${res.status}${data?.error ? `: ${data.error}` : ""})`,
                 );
+                return;
             }
+            setCurrentShares((prev) =>
+                prev.filter((s) => s.user_id !== confirmRemoveId),
+            );
         } catch (err) {
-            console.error("Failed to remove share:", err);
-            setError(text.errorGeneric);
+            setError(`${text.errorGeneric} (${err.message})`);
         } finally {
             setConfirmRemoveId(null);
         }
@@ -125,14 +128,18 @@ export default function ShareListModal({
                 },
             );
             const data = await res.json();
-            if (res.ok) {
-                setShareToken(data.share_token);
-                await navigator.clipboard.writeText(
-                    `${window.location.origin}/lists/shared/${data.share_token}`,
+            if (!res.ok) {
+                setError(
+                    `${text.errorGeneric} (${res.status}${data?.error ? `: ${data.error}` : ""})`,
                 );
+                return;
             }
+            setShareToken(data.share_token);
+            await navigator.clipboard.writeText(
+                `${window.location.origin}/lists/shared/${data.share_token}`,
+            );
         } catch (err) {
-            console.error(err);
+            setError(`${text.errorGeneric} (${err.message})`);
         } finally {
             setGeneratingToken(false);
         }
@@ -158,12 +165,17 @@ export default function ShareListModal({
                     body: JSON.stringify({ revoke_share_token: true }),
                 },
             );
-            if (res.ok) {
-                setShareToken(null);
-                setConfirmRevoke(false);
+            if (!res.ok) {
+                const data = await res.json();
+                setError(
+                    `${text.errorGeneric} (${res.status}${data?.error ? `: ${data.error}` : ""})`,
+                );
+                return;
             }
+            setShareToken(null);
+            setConfirmRevoke(false);
         } catch (err) {
-            console.error(err);
+            setError(`${text.errorGeneric} (${err.message})`);
         }
     };
 
@@ -282,9 +294,6 @@ export default function ShareListModal({
                                     </button>
                                 )}
                             </>
-                        )}
-                        {error && (
-                            <p className="text-xs text-error-500">{error}</p>
                         )}
                     </div>
 
@@ -471,6 +480,12 @@ export default function ShareListModal({
                                 </button>
                             )}
                         </div>
+                    )}
+
+                    {error && (
+                        <p className="text-xs text-error-500 px-5 pb-3">
+                            {error}
+                        </p>
                     )}
 
                     {/* Footer */}

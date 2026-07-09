@@ -12,21 +12,29 @@ export default function ListsPage({ refreshTrigger }) {
     const { getAccessTokenSilently } = useAuth0();
     const [lists, setLists] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [createModalOpen, setCreateModalOpen] = useState(false);
 
     const { currentThemeId } = useTheme();
 
     const fetchLists = useCallback(async () => {
         setLoading(true);
+        setError(null);
         try {
             const token = await getAccessTokenSilently();
             const res = await fetch(`${import.meta.env.VITE_API_URL}/lists`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             const data = await res.json();
-            if (res.ok) setLists(data);
+            if (!res.ok) {
+                setError(
+                    `${text.errorGeneric} (${res.status}${data?.error ? `: ${data.error}` : ""})`,
+                );
+                return;
+            }
+            setLists(data);
         } catch (err) {
-            console.error("Failed to fetch lists:", err);
+            setError(`${text.errorGeneric} (${err.message})`);
         } finally {
             setLoading(false);
         }
@@ -76,8 +84,15 @@ export default function ListsPage({ refreshTrigger }) {
                 </AnimatePresence>
             )}
 
+            {/* Error */}
+            {!loading && error && (
+                <div className="bg-surface-50 rounded-2xl shadow-md p-6 text-center border border-surface-200">
+                    <p className="text-sm text-error-600">{error}</p>
+                </div>
+            )}
+
             {/* Empty state */}
-            {!loading && lists.length === 0 && (
+            {!loading && !error && lists.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-16 gap-4">
                     <List size={40} className="text-surface-300" />
                     <p className="text-sm text-text-light text-center">
@@ -87,7 +102,7 @@ export default function ListsPage({ refreshTrigger }) {
             )}
 
             {/* Lists grid */}
-            {!loading && lists.length > 0 && (
+            {!loading && !error && lists.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <AnimatePresence>
                         {lists.map((list) => (

@@ -30,6 +30,7 @@ import { text, enums } from "../resources";
 import { getOS, isDefaultAvatar } from "../utils";
 import { useBreakpoint } from "../hooks/useBreakpoint";
 import { useOtherUserProfile } from "../hooks/useOtherUserProfile";
+import { useTransientError } from "../hooks/useTransientError";
 import ConfirmModal from "../components/ui/ConfirmModal";
 import ReviewCard from "../components/reviews/ReviewCard";
 import { ReviewListProvider } from "../contexts/ReviewListContext";
@@ -44,6 +45,8 @@ export default function ProfilePage() {
     const [cropSrc, setCropSrc] = useState(null);
     const [confirmDelete, setConfirmDelete] = useState(false);
     const isDesktop = useBreakpoint("md");
+
+    const { error: inlineError, showError, clearError } = useTransientError();
 
     const {
         currentUserName,
@@ -83,6 +86,9 @@ export default function ProfilePage() {
         listsLoading,
         handleToggleLists,
         listCount,
+        userError,
+        reviewsError,
+        listsError,
     } = useOtherUserProfile(userId, isOwnProfile);
 
     const [friendsModalOpen, setFriendsModalOpen] = useState(false);
@@ -142,6 +148,7 @@ export default function ProfilePage() {
     };
 
     const handleUploadPicture = async (file) => {
+        clearError();
         setUploading(true);
         try {
             const token = await getAccessTokenSilently();
@@ -156,7 +163,12 @@ export default function ProfilePage() {
                 },
             );
             const data = await response.json();
-            if (!response.ok) throw new Error(data.error);
+            if (!response.ok) {
+                showError(
+                    `${text.errorFailedSave} (${response.status}${data?.error ? `: ${data.error}` : ""})`,
+                );
+                return;
+            }
             setCurrentUserPicture(data.picture);
             setReviewerPictureUpdate({
                 picture: data.picture,
@@ -164,13 +176,14 @@ export default function ProfilePage() {
             });
             await getAccessTokenSilently({ ignoreCache: true });
         } catch (err) {
-            console.error(err);
+            showError(`${text.errorFailedSave} (${err.message})`);
         } finally {
             setUploading(false);
         }
     };
 
     const handleDeletePicture = async () => {
+        clearError();
         setUploading(true);
         try {
             const token = await getAccessTokenSilently();
@@ -181,18 +194,25 @@ export default function ProfilePage() {
                     headers: { Authorization: `Bearer ${token}` },
                 },
             );
-            if (!response.ok) throw new Error("Failed to delete picture");
+            if (!response.ok) {
+                const data = await response.json();
+                showError(
+                    `${text.errorFailedSave} (${response.status}${data?.error ? `: ${data.error}` : ""})`,
+                );
+                return;
+            }
             setCurrentUserPicture(null);
             setReviewerPictureUpdate({ picture: null, userId: user.sub });
             await getAccessTokenSilently({ ignoreCache: true });
         } catch (err) {
-            console.error(err);
+            showError(`${text.errorFailedSave} (${err.message})`);
         } finally {
             setUploading(false);
         }
     };
 
     const handleSaveName = async (newName) => {
+        clearError();
         setSavingName(true);
         try {
             const token = await getAccessTokenSilently();
@@ -207,12 +227,18 @@ export default function ProfilePage() {
                     body: JSON.stringify({ name: newName }),
                 },
             );
-            if (!response.ok) throw new Error("Failed to update name");
+            const data = await response.json();
+            if (!response.ok) {
+                showError(
+                    `${text.errorFailedSave} (${response.status}${data?.error ? `: ${data.error}` : ""})`,
+                );
+                return;
+            }
             updateCurrentUserName(newName);
             setReviewerNameUpdate({ name: newName, userId: user.sub });
             await getAccessTokenSilently({ ignoreCache: true });
         } catch (err) {
-            console.error(err);
+            showError(`${text.errorFailedSave} (${err.message})`);
         } finally {
             setSavingName(false);
         }
@@ -234,6 +260,16 @@ export default function ProfilePage() {
         return (
             <div className="max-w-3xl mx-auto pt-4 pb-24 px-4 flex justify-center py-12">
                 <LoadingDots />
+            </div>
+        );
+    }
+
+    if (!isOwnProfile && userError) {
+        return (
+            <div className="max-w-3xl mx-auto pt-4 pb-24 px-4">
+                <p className="text-sm text-error-600 text-center py-8">
+                    {userError}
+                </p>
             </div>
         );
     }
@@ -326,23 +362,32 @@ export default function ProfilePage() {
                                 <LoadingDots />
                             </div>
                         )}
-                        {!reviewsLoading && userReviews?.length === 0 && (
-                            <p className="text-sm text-text-light text-center py-6">
-                                {text.noReviews}
+                        {!reviewsLoading && reviewsError && (
+                            <p className="text-sm text-error-600 text-center py-6">
+                                {reviewsError}
                             </p>
                         )}
-                        {!reviewsLoading && userReviews?.length > 0 && (
-                            <ReviewListProvider>
-                                {userReviews.map((review) => (
-                                    <ReviewCard
-                                        key={review.id}
-                                        review={review}
-                                        currentUserId={user?.sub}
-                                        onReviewUpdated={() => {}}
-                                    />
-                                ))}
-                            </ReviewListProvider>
-                        )}
+                        {!reviewsLoading &&
+                            !reviewsError &&
+                            userReviews?.length === 0 && (
+                                <p className="text-sm text-text-light text-center py-6">
+                                    {text.noReviews}
+                                </p>
+                            )}
+                        {!reviewsLoading &&
+                            !reviewsError &&
+                            userReviews?.length > 0 && (
+                                <ReviewListProvider>
+                                    {userReviews.map((review) => (
+                                        <ReviewCard
+                                            key={review.id}
+                                            review={review}
+                                            currentUserId={user?.sub}
+                                            onReviewUpdated={() => {}}
+                                        />
+                                    ))}
+                                </ReviewListProvider>
+                            )}
                     </div>
                 )}
 
@@ -353,12 +398,20 @@ export default function ProfilePage() {
                                 <LoadingDots />
                             </div>
                         )}
-                        {!listsLoading && userLists?.length === 0 && (
-                            <p className="text-sm text-text-light text-center py-6">
-                                {text.noLists}
+                        {!listsLoading && listsError && (
+                            <p className="text-sm text-error-600 text-center py-6">
+                                {listsError}
                             </p>
                         )}
                         {!listsLoading &&
+                            !listsError &&
+                            userLists?.length === 0 && (
+                                <p className="text-sm text-text-light text-center py-6">
+                                    {text.noLists}
+                                </p>
+                            )}
+                        {!listsLoading &&
+                            !listsError &&
                             userLists?.length > 0 &&
                             userLists.map((list) => (
                                 <a
@@ -439,6 +492,10 @@ export default function ProfilePage() {
                             {text.cancel}
                         </button>
                     </div>
+                )}
+
+                {inlineError && (
+                    <p className="text-xs text-error-600">{inlineError}</p>
                 )}
 
                 <InlineEdit

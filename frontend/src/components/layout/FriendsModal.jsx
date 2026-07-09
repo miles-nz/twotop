@@ -112,10 +112,7 @@ function FriendsModal({
                 prev.filter((r) => r.id !== requestId),
             );
         } catch (err) {
-            console.error(text.errorFailedCancelRequest, err);
-            setError(
-                `${text.errorFailedCancelRequest} ${text.errorPleaseTryAgain}`,
-            );
+            setError(`${text.errorFailedCancelRequest} (${err.message})`);
         } finally {
             setCancellingId(null);
         }
@@ -131,16 +128,18 @@ function FriendsModal({
                     headers: { Authorization: `Bearer ${token}` },
                 },
             );
-            if (!res.ok) throw new Error(text.errorFailedRemoveFriend);
-
+            if (!res.ok) {
+                const data = await res.json();
+                setError(
+                    `${text.errorFailedRemoveFriend} (${res.status}${data?.error ? `: ${data.error}` : ""})`,
+                );
+                return;
+            }
             const newUsers = users.filter((u) => u.user_id !== confirmRemoveId);
             setUsers(newUsers);
             onSharedWithChange(newUsers);
         } catch (err) {
-            console.error(text.errorFailedRemoveFriend, err);
-            setError(
-                `${text.errorFailedRemoveFriend} ${text.errorPleaseTryAgain}`,
-            );
+            setError(`${text.errorFailedRemoveFriend} (${err.message})`);
         } finally {
             setConfirmRemoveId(null);
         }
@@ -207,11 +206,6 @@ function FriendsModal({
                                 {loading ? text.sending : text.add}
                             </button>
                         </div>
-                        {error && (
-                            <p className="text-xs text-error-500 mt-2">
-                                {error}
-                            </p>
-                        )}
                         {success && (
                             <p className="text-xs text-secondary-500 mt-2">
                                 {success}
@@ -326,11 +320,12 @@ function FriendsModal({
                                                         {text.yes}
                                                     </button>
                                                     <button
-                                                        onClick={() =>
+                                                        onClick={() => {
                                                             setConfirmRemoveId(
                                                                 null,
-                                                            )
-                                                        }
+                                                            );
+                                                            setError(null);
+                                                        }}
                                                         className="text-xs text-text-light hover:underline"
                                                     >
                                                         {text.cancel}
@@ -338,11 +333,12 @@ function FriendsModal({
                                                 </div>
                                             ) : (
                                                 <button
-                                                    onClick={() =>
+                                                    onClick={() => {
                                                         setConfirmRemoveId(
                                                             u.user_id,
-                                                        )
-                                                    }
+                                                        );
+                                                        setError(null);
+                                                    }}
                                                     className="p-1.5 rounded-full text-text-light hover:text-error-500 hover:bg-error-100 transition-colors"
                                                     aria-label={text.removeLabel(
                                                         u.name,
@@ -357,6 +353,12 @@ function FriendsModal({
                             </>
                         )}
                     </div>
+
+                    {error && (
+                        <p className="text-xs text-error-500 px-5 pb-3">
+                            {error}
+                        </p>
+                    )}
 
                     {/* Footer */}
                     <div className="px-5 py-4 border-t border-surface-200 flex justify-end">

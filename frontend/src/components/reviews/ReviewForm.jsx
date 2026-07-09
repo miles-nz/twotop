@@ -175,7 +175,9 @@ function ReviewForm({ onReviewSubmitted, onCropOpenChange }) {
             );
             const data = await response.json();
             if (!response.ok) {
-                setError(data.errors || data.error || text.errorFailedSubmit);
+                setError(
+                    `${data.errors || data.error || text.errorFailedSubmit} (${response.status})`,
+                );
                 return;
             }
             clearDraft();

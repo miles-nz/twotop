@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
+import { text } from "../resources";
 
 export default function useNotifications({
     onFriendAccepted,
@@ -9,9 +10,11 @@ export default function useNotifications({
     const { getAccessTokenSilently } = useAuth0();
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     const fetchNotifications = useCallback(async () => {
         setLoading(true);
+        setError(null);
         try {
             const token = await getAccessTokenSilently();
             const res = await fetch(
@@ -21,12 +24,16 @@ export default function useNotifications({
                 },
             );
             const data = await res.json();
-            if (res.ok) {
-                setNotifications(data);
-                return data;
+            if (!res.ok) {
+                setError(
+                    `${text.errorGeneric} (${res.status}${data?.error ? `: ${data.error}` : ""})`,
+                );
+                return;
             }
+            setNotifications(data);
+            return data;
         } catch (err) {
-            console.error("Failed to fetch notifications:", err);
+            setError(`${text.errorGeneric} (${err.message})`);
         } finally {
             setLoading(false);
         }
@@ -166,6 +173,7 @@ export default function useNotifications({
     return {
         notifications,
         loading,
+        error,
         fetchNotifications,
         markAsRead,
         markNonActionableAsRead,

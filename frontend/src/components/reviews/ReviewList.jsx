@@ -86,12 +86,7 @@ function ReviewList({
                 onReviewsLoaded?.(data.length);
                 setLoading(false);
             } catch (err) {
-                if (
-                    err.name === "AbortError" ||
-                    err.message === "Load failed" ||
-                    err.message === "Failed to fetch"
-                )
-                    return;
+                if (err.name === "AbortError") return;
                 setError(`${text.errorGeneric} (${err.message})`);
                 setLoading(false);
             }

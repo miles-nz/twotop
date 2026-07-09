@@ -6,6 +6,7 @@ import InlineEdit from "../components/ui/InlineEdit";
 import PlacesSearch from "../components/ui/PlacesSearch";
 import SortableItem from "../components/lists/SortableItem";
 import useSortableList from "../hooks/useSortableList";
+import { useTransientError } from "../hooks/useTransientError";
 import ShareListModal from "../components/lists/ShareListModal";
 import LoadingOverlay from "../components/ui/LoadingOverlay";
 import { useTheme } from "../contexts/ThemeContext";
@@ -27,6 +28,9 @@ export default function ListDetailPage() {
     const [shareModalOpen, setShareModalOpen] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [confirmLeave, setConfirmLeave] = useState(false);
+    const [fetchError, setFetchError] = useState(null);
+
+    const { error: inlineError, showError, clearError } = useTransientError();
 
     const isOwner = list?.permission === "owner";
     const canEdit = isOwner || list?.permission === "edit";
@@ -48,6 +52,7 @@ export default function ListDetailPage() {
 
     const fetchList = useCallback(async () => {
         setLoading(true);
+        setFetchError(null);
         try {
             const token = await getAccessTokenSilently();
             const res = await fetch(
@@ -59,12 +64,16 @@ export default function ListDetailPage() {
                 return;
             }
             const data = await res.json();
-            if (res.ok) {
-                setList(data);
-                setRestaurants(data.restaurants ?? []);
+            if (!res.ok) {
+                setFetchError(
+                    `${text.errorGeneric} (${res.status}${data?.error ? `: ${data.error}` : ""})`,
+                );
+                return;
             }
+            setList(data);
+            setRestaurants(data.restaurants ?? []);
         } catch (err) {
-            console.error("Failed to fetch list:", err);
+            setFetchError(`${text.errorGeneric} (${err.message})`);
         } finally {
             setLoading(false);
         }
@@ -118,6 +127,7 @@ export default function ListDetailPage() {
     };
 
     const handleSaveName = async (newName) => {
+        clearError();
         try {
             const token = await getAccessTokenSilently();
             const res = await fetch(
@@ -132,13 +142,20 @@ export default function ListDetailPage() {
                 },
             );
             const data = await res.json();
-            if (res.ok) setList((prev) => ({ ...prev, name: data.name }));
+            if (!res.ok) {
+                showError(
+                    `${text.errorFailedSave} (${res.status}${data?.error ? `: ${data.error}` : ""})`,
+                );
+                return;
+            }
+            setList((prev) => ({ ...prev, name: data.name }));
         } catch (err) {
-            console.error("Failed to save name:", err);
+            showError(`${text.errorFailedSave} (${err.message})`);
         }
     };
 
     const handleSaveDescription = async (newDescription) => {
+        clearError();
         try {
             const token = await getAccessTokenSilently();
             const res = await fetch(
@@ -153,13 +170,15 @@ export default function ListDetailPage() {
                 },
             );
             const data = await res.json();
-            if (res.ok)
-                setList((prev) => ({
-                    ...prev,
-                    description: data.description,
-                }));
+            if (!res.ok) {
+                showError(
+                    `${text.errorFailedSave} (${res.status}${data?.error ? `: ${data.error}` : ""})`,
+                );
+                return;
+            }
+            setList((prev) => ({ ...prev, description: data.description }));
         } catch (err) {
-            console.error("Failed to save description:", err);
+            showError(`${text.errorFailedSave} (${err.message})`);
         }
     };
 
@@ -304,16 +323,26 @@ export default function ListDetailPage() {
         setList((prev) => ({ ...prev, is_checklist: newValue }));
         try {
             const token = await getAccessTokenSilently();
-            await fetch(`${import.meta.env.VITE_API_URL}/lists/${id}`, {
-                method: "PATCH",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
+            const res = await fetch(
+                `${import.meta.env.VITE_API_URL}/lists/${id}`,
+                {
+                    method: "PATCH",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ is_checklist: newValue }),
                 },
-                body: JSON.stringify({ is_checklist: newValue }),
-            });
+            );
+            if (!res.ok) {
+                const data = await res.json();
+                showError(
+                    `${text.errorGeneric} (${res.status}${data?.error ? `: ${data.error}` : ""})`,
+                );
+                setList((prev) => ({ ...prev, is_checklist: !newValue }));
+            }
         } catch (err) {
-            console.error("Failed to toggle checklist:", err);
+            showError(`${text.errorGeneric} (${err.message})`);
             setList((prev) => ({ ...prev, is_checklist: !newValue }));
         }
     };
@@ -335,15 +364,20 @@ export default function ListDetailPage() {
                 },
             );
             const data = await res.json();
-            if (res.ok) {
-                setList((prev) => ({
-                    ...prev,
-                    is_featured: data.is_featured,
-                    share_token: data.share_token,
-                }));
+            if (!res.ok) {
+                showError(
+                    `${text.errorGeneric} (${res.status}${data?.error ? `: ${data.error}` : ""})`,
+                );
+                setList((prev) => ({ ...prev, is_featured: !newValue }));
+                return;
             }
+            setList((prev) => ({
+                ...prev,
+                is_featured: data.is_featured,
+                share_token: data.share_token,
+            }));
         } catch (err) {
-            console.error("Failed to toggle featured:", err);
+            showError(`${text.errorGeneric} (${err.message})`);
             setList((prev) => ({ ...prev, is_featured: !newValue }));
         }
     };
@@ -365,14 +399,16 @@ export default function ListDetailPage() {
                 },
             );
             const data = await res.json();
-            if (res.ok) {
-                setList((prev) => ({
-                    ...prev,
-                    show_ratings: data.show_ratings,
-                }));
+            if (!res.ok) {
+                showError(
+                    `${text.errorGeneric} (${res.status}${data?.error ? `: ${data.error}` : ""})`,
+                );
+                setList((prev) => ({ ...prev, show_ratings: !newValue }));
+                return;
             }
+            setList((prev) => ({ ...prev, show_ratings: data.show_ratings }));
         } catch (err) {
-            console.error("Failed to toggle show ratings:", err);
+            showError(`${text.errorGeneric} (${err.message})`);
             setList((prev) => ({ ...prev, show_ratings: !newValue }));
         }
     };
@@ -431,6 +467,16 @@ export default function ListDetailPage() {
         );
     }
 
+    if (fetchError) {
+        return (
+            <div className="max-w-3xl mx-auto pt-4 pb-24 px-4">
+                <p className="text-sm text-error-600 text-center py-8">
+                    {fetchError}
+                </p>
+            </div>
+        );
+    }
+
     if (!list) return null;
 
     return (
@@ -438,6 +484,9 @@ export default function ListDetailPage() {
             <LoadingOverlay isVisible={saving} />
 
             <div className="flex flex-col gap-3 mb-6">
+                {inlineError && (
+                    <p className="text-xs text-error-600">{inlineError}</p>
+                )}
                 <ListDetailHeader
                     isOwner={isOwner}
                     canEdit={canEdit}

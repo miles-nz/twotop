@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Bell, List } from "lucide-react";
 import ReviewIcon from "../ui/ReviewIcon";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
-import Button from "../ui/Button";
 import AvatarDropdown from "./AvatarDropdown";
 import NotificationDropdown from "./NotificationDropdown";
 import { text, preferences } from "../../resources";
@@ -20,6 +19,7 @@ function BellButton({
     onBellClick,
     notifications,
     loading,
+    error,
     onResolve,
     onClose,
     onMarkAsRead,
@@ -49,6 +49,7 @@ function BellButton({
                     <NotificationDropdown
                         notifications={notifications}
                         loading={loading}
+                        error={error}
                         onMarkAsRead={onMarkAsRead}
                         onResolve={onResolve}
                         onClose={onClose}
@@ -85,6 +86,7 @@ function Navbar({ onListShareAccepted }) {
     const {
         notifications,
         loading,
+        error,
         fetchNotifications,
         markAsRead,
         markNonActionableAsRead,
@@ -176,6 +178,7 @@ function Navbar({ onListShareAccepted }) {
                             onMarkAsRead={markAsRead}
                             onResolve={resolveRequest}
                             onClose={handleCloseNotif}
+                            error={error}
                         />
                         {user ? (
                             <AvatarDropdown {...avatarDropdownProps} />
@@ -230,6 +233,7 @@ function Navbar({ onListShareAccepted }) {
                             onMarkAsRead={markAsRead}
                             onResolve={resolveRequest}
                             onClose={handleCloseNotif}
+                            error={error}
                         />
                         {!user && <LoginButton />}
                     </div>

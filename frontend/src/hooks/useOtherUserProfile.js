@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useUser } from "../contexts/UserContext";
+import { text } from "../resources";
 
 export function useOtherUserProfile(userId, isOwnProfile) {
     const { isAuthenticated, getAccessTokenSilently } = useAuth0();
@@ -21,6 +22,9 @@ export function useOtherUserProfile(userId, isOwnProfile) {
     const [listsOpen, setListsOpen] = useState(false);
     const [userLists, setUserLists] = useState(null);
     const [listsLoading, setListsLoading] = useState(false);
+    const [userError, setUserError] = useState(null);
+    const [reviewsError, setReviewsError] = useState(null);
+    const [listsError, setListsError] = useState(null);
 
     useEffect(() => {
         if (isOwnProfile || !userId) return;
@@ -49,9 +53,15 @@ export function useOtherUserProfile(userId, isOwnProfile) {
                     { headers },
                 );
                 const data = await res.json();
-                if (res.ok) setOtherUser(data);
-            } catch {
-                // ignore
+                if (!res.ok) {
+                    setUserError(
+                        `${text.errorGeneric} (${res.status}${data?.error ? `: ${data.error}` : ""})`,
+                    );
+                } else {
+                    setOtherUser(data);
+                }
+            } catch (err) {
+                setUserError(`${text.errorGeneric} (${err.message})`);
             } finally {
                 setOtherUserLoading(false);
             }
@@ -147,9 +157,16 @@ export function useOtherUserProfile(userId, isOwnProfile) {
                         { headers },
                     );
                     const data = await res.json();
-                    if (res.ok) setUserReviews(data);
-                    else setUserReviews([]);
-                } catch {
+                    if (!res.ok) {
+                        setReviewsError(
+                            `${text.errorGeneric} (${res.status}${data?.error ? `: ${data.error}` : ""})`,
+                        );
+                        setUserReviews([]);
+                    } else {
+                        setUserReviews(data);
+                    }
+                } catch (err) {
+                    setReviewsError(`${text.errorGeneric} (${err.message})`);
                     setUserReviews([]);
                 } finally {
                     setReviewsLoading(false);
@@ -171,9 +188,16 @@ export function useOtherUserProfile(userId, isOwnProfile) {
                         `${import.meta.env.VITE_API_URL}/lists/user/${encodeURIComponent(fullUserId)}`,
                     );
                     const data = await res.json();
-                    if (res.ok) setUserLists(data);
-                    else setUserLists([]);
-                } catch {
+                    if (!res.ok) {
+                        setListsError(
+                            `${text.errorGeneric} (${res.status}${data?.error ? `: ${data.error}` : ""})`,
+                        );
+                        setUserLists([]);
+                    } else {
+                        setUserLists(data);
+                    }
+                } catch (err) {
+                    setListsError(`${text.errorGeneric} (${err.message})`);
                     setUserLists([]);
                 } finally {
                     setListsLoading(false);
@@ -207,5 +231,8 @@ export function useOtherUserProfile(userId, isOwnProfile) {
         listsLoading,
         handleToggleLists,
         listCount,
+        userError,
+        reviewsError,
+        listsError,
     };
 }

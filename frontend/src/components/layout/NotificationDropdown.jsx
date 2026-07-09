@@ -7,6 +7,7 @@ import { text } from "../../resources";
 export default function NotificationDropdown({
     notifications,
     loading,
+    error,
     onMarkAsRead,
     onResolve,
     onClose,
@@ -48,12 +49,18 @@ export default function NotificationDropdown({
                         {text.loading}
                     </p>
                 )}
-                {!loading && notifications.length === 0 && (
+                {!loading && error && (
+                    <p className="text-sm text-error-600 text-center py-6">
+                        {error}
+                    </p>
+                )}
+                {!loading && !error && notifications.length === 0 && (
                     <p className="text-sm text-text-light text-center py-6">
                         {text.noNotifications}
                     </p>
                 )}
                 {!loading &&
+                    !error &&
                     notifications.map((n) => (
                         <NotificationItem
                             key={n.id}
