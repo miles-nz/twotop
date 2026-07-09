@@ -1,0 +1,15 @@
+export const textNotifications = {
+    notifications: "Notifications",
+    noNotifications: "No notifications",
+    sentYouAFriendRequest: " sent you a friend request.",
+    acceptedYourFriendRequest: " accepted your friend request.",
+    requestAccepted: "Request accepted!",
+    requestDeclined: "Request declined.",
+    sharedAListWithYou: " shared a list with you: ",
+    acceptedYourListShare: " accepted your invite to ",
+    updatedYourList: " made changes to ",
+    leftYourList: " left your list ",
+    viewList: "View list",
+    addedYouAsContributor: " added you as a contributor to a review of ",
+    viewReview: "View review",
+};
