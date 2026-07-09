@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Trash2, Clock } from "lucide-react";
+import { Link } from "react-router-dom";
 import { text } from "../../resources";
 import Avatar from "../ui/Avatar";
+import LinkedAvatar from "../ui/LinkedAvatar";
+import { makeProfileUrl } from "../../utils";
 
 function FriendsModal({
     sharedWith,
@@ -76,7 +79,6 @@ function FriendsModal({
                 return;
             }
 
-            // Re-fetch pending to get real name/picture
             const pendingRes = await fetch(
                 `${import.meta.env.VITE_API_URL}/friends/requests/pending`,
                 { headers: { Authorization: `Bearer ${token}` } },
@@ -234,21 +236,31 @@ function FriendsModal({
                                             key={r.id}
                                             className="flex items-center justify-between py-3"
                                         >
-                                            <div className="flex items-center gap-3">
-                                                <Avatar
-                                                    name={r.receiver_name}
-                                                    picture={r.receiver_picture}
-                                                />
+                                            <Link
+                                                to={makeProfileUrl(
+                                                    r.receiver_id,
+                                                )}
+                                                onClick={onClose}
+                                                className="flex items-center gap-3 group"
+                                            >
+                                                <div className="rounded-full ring-2 ring-surface-50 group-hover:ring-secondary-400 transition-all">
+                                                    <Avatar
+                                                        name={r.receiver_name}
+                                                        picture={
+                                                            r.receiver_picture
+                                                        }
+                                                    />
+                                                </div>
                                                 <div className="flex flex-col">
-                                                    <span className="text-sm text-text-dark">
+                                                    <span className="text-sm text-text-dark transition-colors duration-100">
                                                         {r.receiver_name}
                                                     </span>
-                                                    <span className="flex items-center gap-1 text-xs text-text-light">
+                                                    <span className="flex items-center gap-1 text-xs text-text-light group-hover:text-text-mid transition-colors duration-100">
                                                         <Clock size={10} />
                                                         {text.pending}
                                                     </span>
                                                 </div>
-                                            </div>
+                                            </Link>
                                             <button
                                                 onClick={() =>
                                                     handleCancelRequest(r.id)
@@ -291,14 +303,14 @@ function FriendsModal({
                                             key={u.user_id}
                                             className="flex items-center justify-between py-3"
                                         >
-                                            <div className="flex items-center gap-3">
-                                                <Avatar
+                                            <div onClick={onClose}>
+                                                <LinkedAvatar
                                                     name={u.name}
                                                     picture={u.picture}
+                                                    userId={u.user_id}
+                                                    showName={true}
+                                                    nameSide="right"
                                                 />
-                                                <span className="text-sm text-text-dark">
-                                                    {u.name}
-                                                </span>
                                             </div>
                                             {confirmRemoveId === u.user_id ? (
                                                 <div className="flex items-center gap-2">
