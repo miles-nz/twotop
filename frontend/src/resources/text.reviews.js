@@ -56,6 +56,7 @@ export const textReviews = {
     privateReview: "This review is private.",
     privateReviewLoginMessage: "Log in to view your friends' reviews.",
     forbiddenReviewMessage: "You don't have access to this review.",
+    reviewers: "Reviewers",
 
     // Review list
     noReviews: "No reviews yet.",
