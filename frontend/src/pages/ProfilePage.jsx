@@ -502,7 +502,7 @@ export default function ProfilePage() {
                     value={displayName || ""}
                     onSave={handleSaveName}
                     className="text-text-dark truncate text-center"
-                    inputClassName="text-sm text-text-dark text-center"
+                    inputClassName="text-text-dark text-center"
                     displayMode={enums.inlineEditDisplayMode.valueWithPencil}
                     valueName="name"
                     hoverEffects={true}

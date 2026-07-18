@@ -553,8 +553,9 @@ export default function ListDetailPage() {
                         onPlaceSelected={handleAddRestaurant}
                         onManualAdd={handleManualAdd}
                         resetOnSelect={true}
+                        placeholder={text.listAddRestaurantPlaceholder}
                         showTypingPlaceholder={false}
-                        className="w-full text-sm border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-dark"
+                        className="w-full border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-dark"
                     />
                 </div>
             )}

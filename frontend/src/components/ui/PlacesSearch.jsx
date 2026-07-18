@@ -9,6 +9,7 @@ const DEBOUNCE_MS = 300;
 function PlacesSearch({
     value: controlledValue,
     onChange: controlledOnChange,
+    placeholder: placeholderOverride,
     onClearPlace,
     selectedPlaceId,
     resetOnSelect = false,
@@ -162,7 +163,7 @@ function PlacesSearch({
                     placeholder={
                         showTypingPlaceholder
                             ? text.restaurantNamePlaceholder(placeholder)
-                            : text.searchRestaurant
+                            : (placeholderOverride ?? text.searchRestaurant)
                     }
                     autoComplete="off"
                 />

@@ -83,3 +83,9 @@ button {
 .dark {
     --logo-ring-opacity: 0.25;
 }
+
+input,
+textarea,
+select {
+    font-size: 16px;
+}

@@ -9,7 +9,7 @@ export default function SlideSetName({ name, setName, nameError, onSkip }) {
                 onChange={(e) => setName(e.target.value)}
                 maxLength={20}
                 placeholder={tutorial.setNameSlidePlaceholder}
-                className="w-full border border-surface-200 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-surface-300 text-sm"
+                className="w-full border border-surface-200 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-surface-300"
                 autoFocus
             />
             {nameError && <p className="text-error-600 text-sm">{nameError}</p>}

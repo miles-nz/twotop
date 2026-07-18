@@ -163,7 +163,7 @@ export default function CreateListModal({ onClose, onCreated }) {
                                 }}
                                 placeholder={text.listNamePlaceholder}
                                 maxLength={100}
-                                className="text-sm border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-dark placeholder-text-light"
+                                className="border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-dark placeholder-text-light"
                             />
                             {error && (
                                 <p className="text-xs text-error-500">
@@ -182,7 +182,7 @@ export default function CreateListModal({ onClose, onCreated }) {
                                 onChange={(e) => setDescription(e.target.value)}
                                 placeholder={text.listDescriptionPlaceholder}
                                 rows={1}
-                                className="text-sm border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-dark placeholder-text-light resize-none overflow-hidden"
+                                className="border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-dark placeholder-text-light resize-none overflow-hidden"
                             />
                         </div>
                         {/* Checklist mode */}
@@ -213,7 +213,7 @@ export default function CreateListModal({ onClose, onCreated }) {
                                 }
                                 resetOnSelect={true}
                                 showTypingPlaceholder={false}
-                                className="w-full text-sm border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-dark placeholder-text-light"
+                                className="w-full border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-dark placeholder-text-light"
                             />
                         </div>
                         {restaurants.length === 0 && (

@@ -64,7 +64,7 @@ function SpecificUserSelect({ allUsers, selectedUserIds, onChange }) {
                         onFocus={() => setFocused(true)}
                         onBlur={() => setFocused(false)}
                         placeholder="Search users..."
-                        className="w-full text-xs bg-transparent focus:outline-none text-text-dark placeholder-text-light"
+                        className="w-full bg-transparent focus:outline-none text-text-dark placeholder-text-light"
                     />
                 </div>
                 {showList && (
@@ -211,7 +211,7 @@ export default function ReviewSearch({
                         value={filters.search}
                         onChange={(e) => set("search", e.target.value)}
                         placeholder="Search reviews..."
-                        className="w-full pl-8 pr-8 py-2 text-sm border border-surface-300 rounded-xl bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-dark placeholder-text-light"
+                        className="w-full pl-8 pr-8 py-2 border border-surface-300 rounded-xl bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-dark placeholder-text-light"
                     />
                     {filters.search && (
                         <button
@@ -418,7 +418,7 @@ export default function ReviewSearch({
                                                                 null,
                                                         )
                                                     }
-                                                    className="flex-1 text-sm border border-surface-300 rounded-lg px-2 py-1.5 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-dark"
+                                                    className="flex-1 border border-surface-300 rounded-lg px-2 py-1.5 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-dark"
                                                 />
                                                 <span className="text-xs text-text-light">
                                                     {text.to}
@@ -433,7 +433,7 @@ export default function ReviewSearch({
                                                                 null,
                                                         )
                                                     }
-                                                    className="flex-1 text-sm border border-surface-300 rounded-lg px-2 py-1.5 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-dark"
+                                                    className="flex-1 border border-surface-300 rounded-lg px-2 py-1.5 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-dark"
                                                 />
                                             </div>
                                         </div>

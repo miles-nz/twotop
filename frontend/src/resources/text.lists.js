@@ -5,6 +5,7 @@ export const textLists = {
     listDescriptionLabel: "Description (optional)",
     listDescriptionPlaceholder: "e.g. My favourite cafés in Auckland",
     listAddRestaurantsLabel: "Add restaurants",
+    listAddRestaurantPlaceholder: "Add a restaurant...",
     restaurantCount: (count) =>
         `${count} ${count === 1 ? "restaurant" : "restaurants"}`,
     sharedWithCount: (count) => `${count} ${count === 1 ? "person" : "people"}`,

@@ -40,7 +40,7 @@ export default function DescriptionEdit({ value, onSave }) {
                     onChange={(e) => setInputValue(e.target.value)}
                     placeholder={text.listDescriptionPlaceholder}
                     rows={1}
-                    className="text-sm border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-light placeholder-text-light resize-none overflow-hidden w-full"
+                    className="border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-light placeholder-text-light resize-none overflow-hidden w-full"
                     onKeyDown={(e) => {
                         if (e.key === "Escape") handleCancel();
                     }}

@@ -196,7 +196,7 @@ function FriendsModal({
                                     e.key === "Enter" && handleSendRequest()
                                 }
                                 placeholder={text.addFriendInputPlaceholder}
-                                className="flex-1 text-sm border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-dark placeholder-text-light"
+                                className="flex-1 border border-surface-300 rounded-lg px-3 py-2 bg-surface-50 focus:outline-none focus:ring-2 focus:ring-secondary-400 text-text-dark placeholder-text-light"
                             />
                             <button
                                 onClick={handleSendRequest}

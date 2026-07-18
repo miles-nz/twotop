@@ -191,7 +191,7 @@ export default function RestaurantRow({
                                         setEditingAddress(false);
                                 }}
                                 placeholder={text.addressPlaceholder}
-                                className="text-xs border border-surface-300 rounded px-2 py-1 bg-surface-50 focus:outline-none focus:ring-1 focus:ring-secondary-400 text-text-dark w-40 sm:w-56"
+                                className="border border-surface-300 rounded px-2 py-1 bg-surface-50 focus:outline-none focus:ring-1 focus:ring-secondary-400 text-text-dark w-40 sm:w-56"
                             />
                             <button
                                 onClick={handleSaveAddress}
