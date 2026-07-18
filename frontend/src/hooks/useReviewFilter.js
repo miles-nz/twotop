@@ -1,6 +1,12 @@
 import { useMemo } from "react";
 import { preferences } from "../resources";
 
+const normalize = (str) =>
+    str
+        ?.normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase() ?? "";
+
 const getFieldAverage = (review, field) => {
     const values = [
         review[field],
@@ -122,13 +128,13 @@ export function useReviewFilter(reviews, filters, currentUserId) {
             filters.search &&
             filters.search.length >= preferences.minSearchCharacters
         ) {
-            const query = filters.search.toLowerCase();
+            const query = normalize(filters.search);
             result = result.filter(
                 (r) =>
-                    r.restaurant_name?.toLowerCase().includes(query) ||
-                    r.review_text?.toLowerCase().includes(query) ||
+                    normalize(r.restaurant_name).includes(query) ||
+                    normalize(r.review_text).includes(query) ||
                     (r.contributions || []).some((c) =>
-                        c.review_text?.toLowerCase().includes(query),
+                        normalize(c.review_text).includes(query),
                     ),
             );
         }
