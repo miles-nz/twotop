@@ -223,10 +223,10 @@ export default function ReviewSearch({
                     )}
                 </div>
 
-                <div className="relative" ref={sortRef}>
+                <div className="relative flex" ref={sortRef}>
                     <button
                         onClick={() => setSortOpen((v) => !v)}
-                        className={`flex items-center px-3 py-2 rounded-2xl border text-sm transition-colors ${
+                        className={`flex items-center self-stretch px-3 rounded-2xl border text-sm transition-colors ${
                             filters.sort !== "date_desc"
                                 ? "bg-secondary-500 text-white border-secondary-500"
                                 : "bg-surface-50 text-text-mid border-surface-300 hover:bg-surface-100"
@@ -278,7 +278,7 @@ export default function ReviewSearch({
 
                 <button
                     onClick={() => setFiltersOpen((v) => !v)}
-                    className={`relative flex items-center gap-1.5 pl-2 pr-1 py-2 rounded-2xl border text-sm font-medium transition-colors ${
+                    className={`relative flex items-center self-stretch gap-1.5 pl-2 pr-1 rounded-2xl border text-sm font-medium transition-colors ${
                         filtersOpen || activeFilterCount > 0
                             ? "bg-secondary-500 text-white border-secondary-500"
                             : "bg-surface-50 text-text-mid border-surface-300 hover:bg-surface-100"
