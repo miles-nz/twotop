@@ -291,15 +291,10 @@ router.patch("/name", checkJwt, async (req, res) => {
 
 router.patch("/preferences", checkJwt, async (req, res) => {
     const user_id = req.auth.payload.sub;
-    const { theme_id, shared_with, has_seen_tutorial, has_seen_name_prompt } =
-        req.body;
+    const { theme_id, has_seen_tutorial, has_seen_name_prompt } = req.body;
 
     if (theme_id !== undefined && typeof theme_id !== "string") {
         return res.status(400).json({ error: "Invalid theme_id" });
-    }
-
-    if (shared_with !== undefined && !Array.isArray(shared_with)) {
-        return res.status(400).json({ error: "Invalid shared_with" });
     }
 
     if (
@@ -318,7 +313,6 @@ router.patch("/preferences", checkJwt, async (req, res) => {
 
     const updates = { updated_at: new Date().toISOString() };
     if (theme_id !== undefined) updates.theme_id = theme_id;
-    if (shared_with !== undefined) updates.shared_with = shared_with;
     if (has_seen_tutorial !== undefined)
         updates.has_seen_tutorial = has_seen_tutorial;
     if (has_seen_name_prompt !== undefined)
@@ -344,7 +338,6 @@ router.patch("/preferences", checkJwt, async (req, res) => {
 
         res.status(200).json({
             ...(theme_id !== undefined && { theme_id }),
-            ...(shared_with !== undefined && { shared_with }),
             ...(has_seen_tutorial !== undefined && { has_seen_tutorial }),
             ...(has_seen_name_prompt !== undefined && {
                 has_seen_name_prompt,
