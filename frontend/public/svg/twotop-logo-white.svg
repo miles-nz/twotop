@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+  width="500" height="500" viewBox="0 0 500 500">
+
+  <!-- To change colour, update this one value -->
+  <defs>
+    <style>
+      :root { --logo-colour: #ffffff; }
+    </style>
+
+    <!-- Cuts a 9px gap into the top circle where it overlaps the bottom circle -->
+    <mask id="circle-separator" maskUnits="userSpaceOnUse" x="0" y="0" width="500" height="500">
+      <rect x="0" y="0" width="500" height="500" fill="#ffffff" />
+      <circle cx="255" cy="300" r="108" fill="#000000" />
+    </mask>
+  </defs>
+
+  <g transform="translate(-55, -45) scale(1.2)" style="isolation: isolate">
+
+    <!-- FORK -->
+    <g transform="translate(50, 55) scale(1.2, 0.8)"
+      fill="var(--logo-colour)" stroke="var(--logo-colour)" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round">
+      <path
+        d="M51,211 Q47,211 51,300 Q60,405 50,410 Q45,415 40,410 Q30,405 39,300 Q43,211 39,211 L51,211 Z" />
+      <path d="M27,175 Q28,200 33,204 T39,211 L51,211 Q52,208 57,204 Q62,200 63,175 Z" />
+      <path
+        d="M27,175 L29,70 Q30,70 31,70 L33,160 Q35,163 37,160 L39,70 Q40,70 41,70 L43,160 Q45,163 47,160 L49,70 Q50,70 51,70 L53,160 Q55,163 57,160 L59,70 Q60,70 61,70 L63,175" />
+    </g>
+
+    <!-- KNIFE -->
+    <g transform="translate(350, 58) scale(1.2, 0.8)"
+      fill="var(--logo-colour)" stroke="var(--logo-colour)" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round">
+      <path
+        d="M51,235 Q50,235 51,300 Q61,405 50,410 Q45,415 40,410 Q29,405 39,300 Q40,235 39,235 L51,235" />
+      <path
+        d="M52,235 L53,230 L53,110 L53,60 Q52,50 46,50 Q38,50 33,130 Q30,200 35,232.5 L39,235 L52,235 Z" />
+    </g>
+
+    <!-- Top circle -->
+    <g mask="url(#circle-separator)">
+      <circle cx="255" cy="180" r="100" fill="var(--logo-colour)" />
+      <circle cx="255" cy="180" r="86" fill="var(--logo-colour)" />
+    </g>
+
+    <!-- Bottom circle -->
+    <circle cx="255" cy="300" r="100" fill="var(--logo-colour)" />
+    <circle cx="255" cy="300" r="86" fill="var(--logo-colour)" />
+
+  </g>
+</svg>

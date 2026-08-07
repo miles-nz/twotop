@@ -9,6 +9,8 @@ function Logo({
     colonOverlap = false,
     middleColon = true,
     disableAnimation = false,
+    monoColour = false,
+    colour = "currentColor",
 }) {
     const fontSizeClass =
         {
@@ -22,6 +24,17 @@ function Logo({
             "8xl": "text-8xl",
             "9xl": "text-9xl",
         }[fontSize] ?? "text-4xl";
+
+    const cutleryFill = monoColour ? colour : "var(--color-logo-cutlery)";
+    const primaryFill = monoColour ? colour : "var(--color-logo-primary)";
+    const primaryDarkFill = monoColour
+        ? colour
+        : "var(--color-logo-primary-dark, #1a1538)";
+    const secondaryFill = monoColour ? colour : "var(--color-logo-secondary)";
+    const secondaryDarkFill = monoColour
+        ? colour
+        : "var(--color-logo-secondary-dark, #6b0100)";
+
     return (
         <div className="flex items-center gap-2 select-none">
             {showIcon && (
@@ -46,9 +59,9 @@ function Logo({
                         >
                             {/* FORK */}
                             <g
-                                transform="translate(32, 10) scale(1.5, 1)"
-                                fill="var(--color-logo-cutlery)"
-                                stroke="var(--color-logo-cutlery)"
+                                transform="translate(50, 55) scale(1.2, 0.8)"
+                                fill={cutleryFill}
+                                stroke={cutleryFill}
                                 strokeWidth="2"
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
@@ -60,9 +73,9 @@ function Logo({
 
                             {/* KNIFE */}
                             <g
-                                transform="translate(330, 15) scale(1.5, 1)"
-                                fill="var(--color-logo-cutlery)"
-                                stroke="var(--color-logo-cutlery)"
+                                transform="translate(350, 58) scale(1.2, 0.8)"
+                                fill={cutleryFill}
+                                stroke={cutleryFill}
                                 strokeWidth="2"
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
@@ -74,7 +87,7 @@ function Logo({
                             {/* Top circle: primary colour */}
                             <g style={{ isolation: "isolate" }}>
                                 <circle
-                                    cx="250"
+                                    cx="255"
                                     cy="180"
                                     r="110"
                                     fill="white"
@@ -85,18 +98,17 @@ function Logo({
                                                 : "0",
                                     }}
                                 />
-
                                 <circle
-                                    cx="250"
+                                    cx="255"
                                     cy="180"
                                     r="100"
-                                    fill="var(--color-logo-primary-dark, #1a1538)"
+                                    fill={primaryDarkFill}
                                 />
                                 <circle
-                                    cx="250"
+                                    cx="255"
                                     cy="180"
                                     r="86"
-                                    fill="var(--color-logo-primary)"
+                                    fill={primaryFill}
                                 />
                             </g>
 
@@ -104,11 +116,13 @@ function Logo({
                             <g
                                 style={{
                                     isolation: "isolate",
-                                    mixBlendMode: "soft-light",
+                                    mixBlendMode: monoColour
+                                        ? "normal"
+                                        : "soft-light",
                                 }}
                             >
                                 <circle
-                                    cx="250"
+                                    cx="255"
                                     cy="300"
                                     r="110"
                                     fill="white"
@@ -119,18 +133,17 @@ function Logo({
                                                 : "0",
                                     }}
                                 />
-
                                 <circle
-                                    cx="250"
+                                    cx="255"
                                     cy="300"
                                     r="100"
-                                    fill="var(--color-logo-secondary-dark, #6b0100)"
+                                    fill={secondaryDarkFill}
                                 />
                                 <circle
-                                    cx="250"
+                                    cx="255"
                                     cy="300"
                                     r="86"
-                                    fill="var(--color-logo-secondary)"
+                                    fill={secondaryFill}
                                 />
                             </g>
                         </g>
