@@ -11,13 +11,13 @@ A personal food review app/blog. Users can write and browse reviews of restauran
 | Database         | Supabase (Postgres)                            |
 | Storage          | Supabase Storage                               |
 | Auth             | Auth0                                          |
-| Frontend hosting | Vercel                                         |
+| Frontend hosting | Cloudflare Pages                               |
 | Backend hosting  | Railway                                        |
 
 ### Project Structure
 
 twotop/
-frontend/ # React app (Vercel)
+frontend/ # React app (Cloudflare Pages)
 backend/ # Express app (Railway)
 
 ## Running the Project Locally
