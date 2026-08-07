@@ -55,23 +55,8 @@ export function useUserPreferences() {
         }
     };
 
-    const handleSharedWithChange = async (newSharedWith) => {
-        const previousSharedWith = sharedWith;
+    const handleSharedWithChange = (newSharedWith) => {
         setSharedWith(newSharedWith);
-        try {
-            const token = await getAccessTokenSilently();
-            await fetch(`${import.meta.env.VITE_API_URL}/user/preferences`, {
-                method: "PATCH",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ shared_with: newSharedWith }),
-            });
-        } catch (err) {
-            setSharedWith(previousSharedWith);
-            console.error("Failed to update shared_with:", err);
-        }
     };
 
     const markTutorialSeen = async () => {
