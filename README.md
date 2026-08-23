@@ -42,7 +42,7 @@ npm install
 
 ```
 
-3. Create a `.env` file in the backend directory with your environment variables (see `.env.example` if available).
+3. Create a `.env` file in the backend directory with your environment variables (see `.env.example`).
 4. Start the backend server:
 
 ```
@@ -79,7 +79,8 @@ npm install
 
 ```
 
-3. Start the development server:
+3. Create a `.env` file in the frontend directory with your environment variables (see `.env.example`).
+4. Start the development server:
 
 ```
 
@@ -87,4 +88,4 @@ npm run dev
 
 ```
 
-4. The frontend will run at [http://localhost:5173](http://localhost:5173)
+5. The frontend will run at [http://localhost:5173](http://localhost:5173)
