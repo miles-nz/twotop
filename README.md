@@ -1,4 +1,6 @@
-# TWO:TOP
+![two:top](frontend/public/social-preview.png)
+
+# two:top
 
 A personal food review app/blog. Users can write and browse reviews of restaurants and cafés, with star ratings, photos, and per-user colour theming.
 
