@@ -29,6 +29,12 @@ export const getLocalDate = () => {
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 };
 
+let leavingApp = false;
+export const markLeavingApp = () => {
+    leavingApp = true;
+};
+export const isLeavingApp = () => leavingApp;
+
 export const isDefaultAvatar = (url) =>
     !url ||
     url.includes("gravatar.com") ||

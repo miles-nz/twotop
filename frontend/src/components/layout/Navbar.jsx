@@ -11,6 +11,7 @@ import Logo from "../ui/Logo";
 import useNotifications from "../../hooks/useNotifications";
 import { useUser } from "../../contexts/UserContext";
 import LoginButton from "../ui/LoginButton";
+import { markLeavingApp } from "../../utils";
 
 function BellButton({
     user,
@@ -119,8 +120,10 @@ function Navbar({ onListShareAccepted }) {
     const avatarDropdownProps = useMemo(
         () => ({
             user,
-            onLogout: () =>
-                logout({ logoutParams: { returnTo: window.location.origin } }),
+            onLogout: () => {
+                markLeavingApp();
+                logout({ logoutParams: { returnTo: window.location.origin } });
+            },
             showName: true,
         }),
         [user, logout],

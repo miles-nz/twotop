@@ -2,6 +2,7 @@ import Button from "./Button";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useLocation } from "react-router-dom";
 import { text } from "../../resources";
+import { markLeavingApp } from "../../utils";
 
 function LoginButton({ className }) {
     const { loginWithRedirect } = useAuth0();
@@ -10,9 +11,10 @@ function LoginButton({ className }) {
     return (
         <Button
             variant="surface"
-            onClick={() =>
-                loginWithRedirect({ appState: { returnTo: pathname } })
-            }
+            onClick={() => {
+                markLeavingApp();
+                loginWithRedirect({ appState: { returnTo: pathname } });
+            }}
             className={className}
         >
             {text.logIn}

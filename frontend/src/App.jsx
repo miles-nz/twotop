@@ -9,6 +9,7 @@ import ListsPage from "./pages/ListsPage";
 import ProfilePage from "./pages/ProfilePage";
 import WelcomeTutorial from "./components/tutorial/WelcomeTutorial";
 import ReviewList from "./components/reviews/ReviewList";
+import LoadingDots from "./components/ui/LoadingDots";
 import { applyThemeToCss } from "./utils";
 import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
 import { UserProvider, useUser } from "./contexts/UserContext";
@@ -19,7 +20,8 @@ import ReviewDetailPage from "./pages/ReviewDetailPage";
 import SharedListPage from "./pages/SharedListPage";
 
 function AppContent() {
-    const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
+    const { isAuthenticated, isLoading, user, getAccessTokenSilently } =
+        useAuth0();
     const { currentThemeId, isDarkMode } = useTheme();
     const {
         fetchCurrentUser,
@@ -64,6 +66,14 @@ function AppContent() {
             });
         }
     }, [currentThemeId]);
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen w-full bg-surface-100 flex items-center justify-center">
+                <LoadingDots />
+            </div>
+        );
+    }
 
     if (!isAuthenticated) {
         return (

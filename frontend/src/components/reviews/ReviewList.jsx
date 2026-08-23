@@ -9,6 +9,7 @@ import { useReviewFilter, defaultFilters } from "../../hooks/useReviewFilter";
 import { text } from "../../resources";
 import { useTheme } from "../../contexts/ThemeContext";
 import { useUser } from "../../contexts/UserContext";
+import { isLeavingApp } from "../../utils";
 
 const statusCardClass =
     "bg-surface-50 rounded-2xl shadow-md p-6 text-center border border-surface-200";
@@ -76,6 +77,7 @@ function ReviewList({
                 }
                 const data = await response.json();
                 if (!response.ok) {
+                    if (isLeavingApp()) return;
                     setError(
                         `${text.errorFailedFetch} (${response.status}${data?.error ? `: ${data.error}` : ""})`,
                     );
@@ -86,7 +88,7 @@ function ReviewList({
                 onReviewsLoaded?.(data.length);
                 setLoading(false);
             } catch (err) {
-                if (err.name === "AbortError") return;
+                if (err.name === "AbortError" || isLeavingApp()) return;
                 setError(`${text.errorGeneric} (${err.message})`);
                 setLoading(false);
             }
