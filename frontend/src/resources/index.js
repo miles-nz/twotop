@@ -13,6 +13,7 @@ import { textReviews } from "./text.reviews";
 import { textLists } from "./text.lists";
 import { textProfile } from "./text.profile";
 import { textNotifications } from "./text.notifications";
+import { textFeedback } from "./text.feedback";
 
 // Merge all text domains into a single `text` object,
 // maintaining the existing import shape: import { text } from "../resources"
@@ -22,4 +23,5 @@ export const text = {
     ...textLists,
     ...textProfile,
     ...textNotifications,
+    ...textFeedback,
 };

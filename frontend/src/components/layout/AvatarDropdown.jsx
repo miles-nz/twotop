@@ -6,6 +6,7 @@ import Avatar from "../ui/Avatar";
 import { text } from "../../resources";
 import { isDefaultAvatar } from "../../utils";
 import FriendsModal from "./FriendsModal";
+import BugReportModal from "./BugReportModal";
 import ThemeModal from "../themes/ThemeModal";
 import DarkModeToggle from "./DarkModeToggle";
 import { useTheme } from "../../contexts/ThemeContext";
@@ -49,6 +50,7 @@ export default function AvatarDropdown({
     const [savingName, setSavingName] = useState(false);
     const [themeModalOpen, setThemeModalOpen] = useState(false);
     const [friendsModalOpen, setFriendsModalOpen] = useState(false);
+    const [bugReportModalOpen, setBugReportModalOpen] = useState(false);
     const dropdownRef = useRef(null);
 
     const picture = isDefaultAvatar(currentUserPicture)
@@ -243,6 +245,15 @@ export default function AvatarDropdown({
                         >
                             {text.logOut}
                         </button>
+                        <button
+                            onClick={() => {
+                                setBugReportModalOpen(true);
+                                setOpen(false);
+                            }}
+                            className={`text-text-dark border-t border-surface-200 ${menuItemClasses}`}
+                        >
+                            {text.reportBug}
+                        </button>
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -266,6 +277,14 @@ export default function AvatarDropdown({
                     }}
                     onThemePreview={handleThemePreview}
                     onClose={() => setThemeModalOpen(false)}
+                />
+            )}
+
+            {bugReportModalOpen && (
+                <BugReportModal
+                    user={user}
+                    getAccessTokenSilently={getAccessTokenSilently}
+                    onClose={() => setBugReportModalOpen(false)}
                 />
             )}
         </div>

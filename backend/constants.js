@@ -25,6 +25,7 @@ const MAX_REVIEW_TEXT_LENGTH = 2000;
 const RATING_MIN = 0.5;
 const RATING_MAX = 5;
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const MAX_BUG_REPORT_LENGTH = 1000;
 
 const ERRORS = {
     reviewNotFound: "Review not found",
@@ -53,6 +54,9 @@ const ERRORS = {
     friendRequestNotFound: "Friend request not found.",
     notificationNotFound: "Notification not found.",
     invalidUserRequest: "A valid email or user ID is required",
+    bugDescriptionRequired: "Please describe the bug.",
+    bugDescriptionTooLong: `Description must be ${MAX_BUG_REPORT_LENGTH} characters or less.`,
+    bugReportFailed: "Failed to send bug report.",
 };
 
 module.exports = {
@@ -69,5 +73,6 @@ module.exports = {
     RATING_MIN,
     RATING_MAX,
     EMAIL_REGEX,
+    MAX_BUG_REPORT_LENGTH,
     ERRORS,
 };

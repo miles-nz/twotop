@@ -38,6 +38,15 @@ const friendRequestRateLimit = rateLimit({
     validate: { xForwardedForHeader: false },
 });
 
+const bugReportRateLimit = rateLimit({
+    windowMs: 10 * 60 * 1000,
+    max: 5,
+    message: { error: "Too many bug reports, please try again shortly." },
+    standardHeaders: true,
+    legacyHeaders: false,
+    validate: { xForwardedForHeader: false },
+});
+
 const generalRateLimit = rateLimit({
     windowMs: 60 * 1000,
     max: 300,
@@ -52,5 +61,6 @@ module.exports = {
     upload,
     placesRateLimit,
     friendRequestRateLimit,
+    bugReportRateLimit,
     generalRateLimit,
 };

@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import Avatar from "../components/ui/Avatar";
 import FriendsModal from "../components/layout/FriendsModal";
+import BugReportModal from "../components/layout/BugReportModal";
 import ThemeModal from "../components/themes/ThemeModal";
 import DarkModeToggle from "../components/layout/DarkModeToggle";
 import LoadingDots from "../components/ui/LoadingDots";
@@ -96,6 +97,7 @@ export default function ProfilePage() {
     const [uploading, setUploading] = useState(false);
     const [savingName, setSavingName] = useState(false);
     const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+    const [bugReportModalOpen, setBugReportModalOpen] = useState(false);
 
     const picture = isDefaultAvatar(currentUserPicture)
         ? null
@@ -669,6 +671,12 @@ export default function ProfilePage() {
                             </span>
                         </button>
                     </div>
+                    <button
+                        onClick={() => setBugReportModalOpen(true)}
+                        className="text-xs text-text-light hover:text-text-dark text-center py-2"
+                    >
+                        {text.reportBug}
+                    </button>
                 </>
             )}
 
@@ -726,6 +734,13 @@ export default function ProfilePage() {
                     onCancel={() => setLogoutModalOpen(false)}
                     message={text.logOutConfirm}
                     confirmLabel={text.logOut}
+                />
+            )}
+            {bugReportModalOpen && (
+                <BugReportModal
+                    user={user}
+                    getAccessTokenSilently={getAccessTokenSilently}
+                    onClose={() => setBugReportModalOpen(false)}
                 />
             )}
             <LoadingOverlay isVisible={uploading || savingName} />

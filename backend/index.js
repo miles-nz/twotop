@@ -11,6 +11,7 @@ const userRouter = require("./routes/user");
 const friendsRouter = require("./routes/friends");
 const notificationsRouter = require("./routes/notifications");
 const placesRouter = require("./routes/places");
+const feedbackRouter = require("./routes/feedback");
 
 const app = express();
 app.set("trust proxy", 1);
@@ -35,5 +36,6 @@ app.use("/user", userRouter);
 app.use("/friends", friendsRouter);
 app.use("/notifications", notificationsRouter);
 app.use("/places", placesRouter);
+app.use("/feedback", feedbackRouter);
 
 app.listen(3000, () => console.log("Server running"));
