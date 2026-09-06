@@ -619,7 +619,7 @@ export default function ProfilePage() {
                     <div className="grid grid-cols-2 gap-3">
                         <button
                             onClick={() => setFriendsModalOpen(true)}
-                            className="bg-surface-50 border border-surface-200 rounded-2xl p-4 flex flex-col items-start gap-2 text-left hover:bg-surface-200 transition-colors"
+                            className="bg-surface-50 border border-surface-200 rounded-2xl p-5 flex flex-row items-center gap-3 hover:bg-surface-200 transition-colors"
                         >
                             <Users size={20} className="text-text-light" />
                             <span className="text-sm font-medium text-text-dark">
@@ -628,7 +628,7 @@ export default function ProfilePage() {
                         </button>
                         <button
                             onClick={() => setThemeModalOpen(true)}
-                            className="bg-surface-50 border border-surface-200 rounded-2xl p-4 flex flex-col items-start gap-2 text-left hover:bg-surface-200 transition-colors"
+                            className="bg-surface-50 border border-surface-200 rounded-2xl p-5 flex flex-row items-center gap-3 hover:bg-surface-200 transition-colors"
                         >
                             <Palette size={20} className="text-text-light" />
                             <span className="text-sm font-medium text-text-dark">
@@ -654,7 +654,7 @@ export default function ProfilePage() {
                     <div className="grid grid-cols-2 gap-3">
                         <button
                             onClick={() => setShowTutorial(true)}
-                            className="bg-surface-50 border border-surface-200 rounded-2xl p-4 flex flex-col items-start gap-2 text-left hover:bg-surface-200 transition-colors"
+                            className="bg-surface-50 border border-surface-200 rounded-2xl p-5 flex flex-row items-center gap-3 hover:bg-surface-200 transition-colors"
                         >
                             <BookOpen size={20} className="text-text-light" />
                             <span className="text-sm font-medium text-text-dark">
@@ -663,7 +663,7 @@ export default function ProfilePage() {
                         </button>
                         <button
                             onClick={() => setLogoutModalOpen(true)}
-                            className="bg-surface-50 border border-surface-200 rounded-2xl p-4 flex flex-col items-start gap-2 text-left hover:bg-surface-200 transition-colors"
+                            className="bg-surface-50 border border-surface-200 rounded-2xl p-5 flex flex-row items-center gap-3 hover:bg-surface-200 transition-colors"
                         >
                             <LogOut size={20} className="text-error-600" />
                             <span className="text-sm font-medium text-error-600">
@@ -673,7 +673,7 @@ export default function ProfilePage() {
                     </div>
                     <button
                         onClick={() => setBugReportModalOpen(true)}
-                        className="text-xs text-text-light hover:text-text-dark text-center py-2"
+                        className="text-xs text-text-light hover:text-text-dark text-center py-1"
                     >
                         {text.reportBug}
                     </button>
