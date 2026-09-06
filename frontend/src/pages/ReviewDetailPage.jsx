@@ -24,6 +24,11 @@ export default function ReviewDetailPage() {
 
     useEffect(() => {
         const fetchReview = async () => {
+            setLoading(true);
+            setReview(null);
+            setIsPrivate(false);
+            setIsForbidden(false);
+            setNotFound(false);
             try {
                 const headers = {};
                 if (isAuthenticated) {
@@ -118,14 +123,25 @@ export default function ReviewDetailPage() {
                         review={review}
                         currentUserId={user?.sub}
                         onReviewUpdated={(updatedId) => {
-                            if (updatedId) {
-                                fetch(
-                                    `${import.meta.env.VITE_API_URL}/reviews/${id}`,
-                                )
-                                    .then((r) => r.json())
-                                    .then(setReview)
-                                    .catch(() => {});
-                            }
+                            if (!updatedId) return;
+                            (async () => {
+                                try {
+                                    const headers = {};
+                                    if (isAuthenticated) {
+                                        const token =
+                                            await getAccessTokenSilently();
+                                        headers.Authorization = `Bearer ${token}`;
+                                    }
+                                    const res = await fetch(
+                                        `${import.meta.env.VITE_API_URL}/reviews/${id}`,
+                                        { headers },
+                                    );
+                                    const data = await res.json();
+                                    if (res.ok) setReview(data);
+                                } catch {
+                                    // keep showing the previous review data
+                                }
+                            })();
                         }}
                         isDetailPage
                     />
