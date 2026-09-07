@@ -90,6 +90,7 @@ function ReviewForm({ onReviewSubmitted, onCropOpenChange }) {
         drinkRating,
         ambienceRating,
         isPublic,
+        selectedContributors,
         setRestaurantName,
         setRestaurantAddress,
         setSelectedPlaceId,
@@ -99,6 +100,7 @@ function ReviewForm({ onReviewSubmitted, onCropOpenChange }) {
         setDrinkRating,
         setAmbienceRating,
         setIsPublic,
+        setSelectedContributors,
     });
 
     useEffect(() => {

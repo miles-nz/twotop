@@ -21,6 +21,8 @@ export function useReviewDraft({
     setDrinkRating,
     setAmbienceRating,
     setIsPublic,
+    selectedContributors,
+    setSelectedContributors,
 }) {
     const isMounted = useRef(false);
 
@@ -41,6 +43,8 @@ export function useReviewDraft({
             if (draft.drinkRating) setDrinkRating?.(draft.drinkRating);
             if (draft.ambienceRating) setAmbienceRating?.(draft.ambienceRating);
             if (draft.isPublic !== undefined) setIsPublic?.(draft.isPublic);
+            if (draft.selectedContributors)
+                setSelectedContributors?.(draft.selectedContributors);
         } catch {
             localStorage.removeItem(draftKey);
         }
@@ -71,6 +75,7 @@ export function useReviewDraft({
                 drinkRating,
                 ambienceRating,
                 isPublic,
+                selectedContributors,
             };
             localStorage.setItem(draftKey, JSON.stringify(draft));
         } catch {
@@ -87,6 +92,7 @@ export function useReviewDraft({
         drinkRating,
         ambienceRating,
         isPublic,
+        selectedContributors,
     ]);
 
     const clearDraft = () => localStorage.removeItem(draftKey);
