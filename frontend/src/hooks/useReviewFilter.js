@@ -16,10 +16,23 @@ const getFieldAverage = (review, field) => {
     return values.reduce((a, b) => a + b, 0) / values.length;
 };
 
-const getAverageRating = (review) => {
+const getOwnFieldRating = (review, field, currentUserId) => {
+    if (review.user_id === currentUserId) return review[field] ?? null;
+    const contribution = (review.contributions || []).find(
+        (c) => c.user_id === currentUserId,
+    );
+    return contribution ? (contribution[field] ?? null) : null;
+};
+
+const getFieldRating = (review, field, currentUserId, useOwnRating) =>
+    useOwnRating
+        ? getOwnFieldRating(review, field, currentUserId)
+        : getFieldAverage(review, field);
+
+const getAverageRating = (review, currentUserId, useOwnRating) => {
     const fields = ["food_rating", "drink_rating", "ambience_rating"];
     const values = fields
-        .map((f) => getFieldAverage(review, f))
+        .map((f) => getFieldRating(review, f, currentUserId, useOwnRating))
         .filter((v) => v !== null);
     if (values.length === 0) return null;
     return values.reduce((a, b) => a + b, 0) / values.length;
@@ -33,7 +46,7 @@ const passesRatingFilter = (reviewRating, min, max) => {
     return true;
 };
 
-const passesRatingFilters = (review, filters) => {
+const passesRatingFilters = (review, filters, currentUserId) => {
     const {
         minFoodRating,
         maxFoodRating,
@@ -50,33 +63,51 @@ const passesRatingFilters = (review, filters) => {
 
     if (!foodActive && !drinkActive && !ambienceActive) return true;
 
-    const avgFood = getFieldAverage(review, "food_rating");
-    const avgDrink = getFieldAverage(review, "drink_rating");
-    const avgAmbience = getFieldAverage(review, "ambience_rating");
+    const useOwnRating = filters.userFilter?.type === "mine";
+    const foodRating = getFieldRating(
+        review,
+        "food_rating",
+        currentUserId,
+        useOwnRating,
+    );
+    const drinkRating = getFieldRating(
+        review,
+        "drink_rating",
+        currentUserId,
+        useOwnRating,
+    );
+    const ambienceRating = getFieldRating(
+        review,
+        "ambience_rating",
+        currentUserId,
+        useOwnRating,
+    );
 
     let atLeastOnePass = false;
 
     if (foodActive) {
-        if (avgFood !== null) {
-            if (!passesRatingFilter(avgFood, minFoodRating, maxFoodRating))
+        if (foodRating !== null) {
+            if (!passesRatingFilter(foodRating, minFoodRating, maxFoodRating))
                 return false;
             atLeastOnePass = true;
         }
     }
 
     if (drinkActive) {
-        if (avgDrink !== null) {
-            if (!passesRatingFilter(avgDrink, minDrinkRating, maxDrinkRating))
+        if (drinkRating !== null) {
+            if (
+                !passesRatingFilter(drinkRating, minDrinkRating, maxDrinkRating)
+            )
                 return false;
             atLeastOnePass = true;
         }
     }
 
     if (ambienceActive) {
-        if (avgAmbience !== null) {
+        if (ambienceRating !== null) {
             if (
                 !passesRatingFilter(
-                    avgAmbience,
+                    ambienceRating,
                     minAmbienceRating,
                     maxAmbienceRating,
                 )
@@ -140,7 +171,9 @@ export function useReviewFilter(reviews, filters, currentUserId) {
         }
 
         // Rating filters
-        result = result.filter((r) => passesRatingFilters(r, filters));
+        result = result.filter((r) =>
+            passesRatingFilters(r, filters, currentUserId),
+        );
 
         // Date range
         if (filters.dateFrom) {
@@ -171,19 +204,36 @@ export function useReviewFilter(reviews, filters, currentUserId) {
         }
 
         // Sort
+        const useOwnRatingForSort = filters.userFilter?.type === "mine";
         result.sort((a, b) => {
             switch (filters.sort) {
                 case "date_asc":
                     return a.visit_date.localeCompare(b.visit_date);
                 case "rating_desc":
                     return (
-                        (getAverageRating(b) ?? -1) -
-                        (getAverageRating(a) ?? -1)
+                        (getAverageRating(
+                            b,
+                            currentUserId,
+                            useOwnRatingForSort,
+                        ) ?? -1) -
+                        (getAverageRating(
+                            a,
+                            currentUserId,
+                            useOwnRatingForSort,
+                        ) ?? -1)
                     );
                 case "rating_asc":
                     return (
-                        (getAverageRating(a) ?? -1) -
-                        (getAverageRating(b) ?? -1)
+                        (getAverageRating(
+                            a,
+                            currentUserId,
+                            useOwnRatingForSort,
+                        ) ?? -1) -
+                        (getAverageRating(
+                            b,
+                            currentUserId,
+                            useOwnRatingForSort,
+                        ) ?? -1)
                     );
                 case "date_desc":
                 default:
