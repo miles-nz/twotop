@@ -146,23 +146,27 @@ export default function SegmentedControl({
                 return (
                     <div
                         key={option.value}
-                        ref={(el) => (buttonRefs.current[index] = el)}
                         role="radio"
                         aria-checked={value === option.value}
                         aria-label={option.label ?? option.text}
                         style={
                             segmentWidth ? { width: segmentWidth } : undefined
                         }
-                        className={`relative z-20 flex items-center justify-center gap-1 px-2 py-1.5 rounded-full pointer-events-none transition-colors duration-200 ${
+                        className={`relative z-20 flex items-center justify-center rounded-full pointer-events-none transition-colors duration-200 ${
                             isActive ? "text-text-dark" : "text-text-light"
                         }`}
                     >
-                        {showIcon && option.icon}
-                        {showText && option.text && (
-                            <span className="text-xs font-medium whitespace-nowrap">
-                                {option.text}
-                            </span>
-                        )}
+                        <span
+                            ref={(el) => (buttonRefs.current[index] = el)}
+                            className="flex items-center gap-1 px-2 py-1.5"
+                        >
+                            {showIcon && option.icon}
+                            {showText && option.text && (
+                                <span className="text-xs font-medium whitespace-nowrap">
+                                    {option.text}
+                                </span>
+                            )}
+                        </span>
                     </div>
                 );
             })}
