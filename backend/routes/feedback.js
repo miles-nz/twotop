@@ -15,7 +15,21 @@ router.post(
     },
     async (req, res) => {
         const user_id = req.auth.payload.sub;
-        const { description, page_url, name, email } = req.body;
+        const {
+            description,
+            name,
+            email,
+            user_agent,
+            viewport,
+            theme_id,
+            color_mode,
+        } = req.body;
+        let pageHistory = [];
+        try {
+            pageHistory = JSON.parse(req.body.page_history || "[]");
+        } catch {
+            pageHistory = [];
+        }
         if (
             !description ||
             typeof description !== "string" ||
@@ -47,9 +61,16 @@ router.post(
                                     inline: true,
                                 },
                                 {
-                                    name: "Page",
-                                    value: page_url || "Unknown",
-                                    inline: true,
+                                    name: "Recent pages",
+                                    value: pageHistory.length
+                                        ? pageHistory.join(" → ")
+                                        : "Unknown",
+                                    inline: false,
+                                },
+                                {
+                                    name: "Environment",
+                                    value: `Browser: ${user_agent || "Unknown"}\nViewport: ${viewport || "Unknown"}\nTheme: ${theme_id || "Unknown"} (${color_mode || "Unknown"})`,
+                                    inline: false,
                                 },
                             ],
                             image: req.file

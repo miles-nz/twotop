@@ -2,6 +2,8 @@ import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ImagePlus } from "lucide-react";
 import { text } from "../../resources";
+import { useUser } from "../../contexts/UserContext";
+import { useTheme } from "../../contexts/ThemeContext";
 
 const MAX_LENGTH = 1000;
 
@@ -10,6 +12,9 @@ export default function BugReportModal({
     getAccessTokenSilently,
     onClose,
 }) {
+    const { pageHistory } = useUser();
+    const { currentThemeId, colorMode } = useTheme();
+
     const [description, setDescription] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -29,9 +34,16 @@ export default function BugReportModal({
             const token = await getAccessTokenSilently();
             const formData = new FormData();
             formData.append("description", description);
-            formData.append("page_url", window.location.href);
+            formData.append("page_history", JSON.stringify(pageHistory));
             formData.append("name", user?.name || "");
             formData.append("email", user?.email || "");
+            formData.append("user_agent", navigator.userAgent);
+            formData.append(
+                "viewport",
+                `${window.innerWidth}x${window.innerHeight}`,
+            );
+            formData.append("theme_id", currentThemeId);
+            formData.append("color_mode", colorMode);
             if (screenshot) formData.append("screenshot", screenshot);
 
             const res = await fetch(

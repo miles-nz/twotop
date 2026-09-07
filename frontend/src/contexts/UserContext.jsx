@@ -2,6 +2,7 @@ import { useState } from "react";
 import { createContext, useContext } from "react";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { useUserPreferences } from "../hooks/useUserPreferences";
+import { usePageHistory } from "../hooks/usePageHistory";
 
 const UserContext = createContext(null);
 
@@ -24,6 +25,8 @@ export function UserProvider({ children }) {
         hasSeenNamePrompt,
         markNamePromptSeen,
     } = useUserPreferences();
+
+    const pageHistory = usePageHistory();
 
     const [reviewerPictureUpdate, setReviewerPictureUpdate] = useState(null);
     const [reviewerNameUpdate, setReviewerNameUpdate] = useState(null);
@@ -54,6 +57,7 @@ export function UserProvider({ children }) {
                 showTutorial,
                 setShowTutorial,
                 preferencesLoaded,
+                pageHistory,
             }}
         >
             {children}
